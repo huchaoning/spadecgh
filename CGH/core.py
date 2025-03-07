@@ -8,11 +8,9 @@ from scipy.interpolate import interp1d
 
 from os import path
 from PIL import Image
-from dataclasses import dataclass
 
 
-
-__all__ = ['SLM', 'LASER', 'HG', 'LG', 'AdvHG', 'CGH']
+__all__ = ['SLM', 'HG', 'LG', 'AdvHG', 'CGH']
 
 
 class SLM:
@@ -24,27 +22,16 @@ class SLM:
     x, y = np.meshgrid(
            np.arange(-resolution[0]/2, resolution[0]/2) * pixel_size,
           -np.arange(-resolution[1]/2, resolution[1]/2) * pixel_size)
+    
+    rho = x**2 + y**2
 
-
-
-@dataclass
-class LASER:
-    wavelength: int | float
-    beam_waist: int | float
-
-    def __post_init__(self):
-        self.wave_number = 2 * pi / self.wavelength
-        self.rayleigh_range = (pi * self.beam_waist**2) / self.wavelength
-
-    @classmethod
-    def check(self, inputs):
-        if not isinstance(inputs, LASER):
-            raise ValueError('beam must be a instance of LASER')
+    norm_x = x / (resolution[0] * pixel_size)
+    norm_y = y / (resolution[1] * pixel_size)
 
 
 
 class _Mode:
-    def __init__(self, n: int, m: int):
+    def __init__(self, n, m):
         valid = all(isinstance(x, int) and x >= 0 for x in (n, m))
         if valid:
             self.n = n
@@ -60,14 +47,11 @@ class _Mode:
 
 
 class HG(_Mode):
-    def complex_amplitude(self, beam: LASER, x=SLM.x, y=SLM.y):
-        rho = x**2 + y**2
-        w0 = beam.beam_waist
+    def complex_amplitude(self, w0):
         n, m = self.n, self.m
-
         norm = np.sqrt(2**(1-n-m) / (pi * factorial(m) * factorial(n))) / w0
-        hx, hy= hermite(n)(2**.5 * x / w0), hermite(m)(2**.5 * y / w0)
-        amplitude = norm * hx * hy * np.exp(-rho/(w0**2))
+        hx, hy= hermite(n)(2**.5 * SLM.x / w0), hermite(m)(2**.5 * SLM.y / w0)
+        amplitude = norm * hx * hy * np.exp(-SLM.rho/(w0**2))
 
         return amplitude * np.exp(0j)
     
@@ -86,25 +70,26 @@ class AdvHG:
         else:
             raise ValueError('pm must be -1 or 1, 1 stands for + mode, -1 stands for - mode')
 
-    def complex_amplitude(self, beam: LASER, x=SLM.x, y=SLM.y):
-        LASER.check(beam)
-        hg00 = HG(0, 0).complex_amplitude(beam, x, y)
-        hg01 = HG(0, 1).complex_amplitude(beam, x, y)
+    def complex_amplitude(self, w0):
+        hg00 = HG(0, 0).complex_amplitude(w0)
+        hg01 = HG(0, 1).complex_amplitude(w0)
         return (hg00 + self.pm * hg01) / 2**.5
 
 
 
 class CGH:
-    def __init__(self, beam: LASER, *modes: _Mode, x=SLM.x, y=SLM.y, nx=500, ny=0, split=50):
-        LASER.check(beam)
+    def __init__(self, sigma, *modes, nx=500, ny=50):
+
         [_Mode.check(mode) for mode in modes]
 
+        w0 = 2*sigma
+
         if len(modes) == 1:
-            ca = modes[0].complex_amplitude(beam, x, y)
+            ca = modes[0].complex_amplitude(w0)
 
         elif len(modes) == 2:
-            ca0, ca1 = [m.complex_amplitude(beam, x, y) for m in modes]
-            ca = ca0*np.exp(2j*pi*y/(2*y.max()) * split) + ca1*np.exp(-2j*pi*y/(2*y.max()) * split)
+            ca0, ca1 = [m.complex_amplitude(w0) for m in modes]
+            ca = ca0*np.exp(2j*pi*SLM.norm_y*ny) + ca1*np.exp(-2j*pi*SLM.norm_y*ny)
 
         else:
             raise ValueError('invalid modes parameter, possibly due to ' +
@@ -114,10 +99,11 @@ class CGH:
         a = np.abs(ca) / np.abs(ca).max()
         phi = np.angle(ca)
 
-        cgh = fx2(a) * np.sin(phi + 2*pi*(x/(2*x.max())*nx + y/(2*y.max())*ny))
-        cgh = ((cgh - cgh.min()) / (cgh.max() - cgh.min())) * 255
+        _temp = fx2(a) * np.sin(phi + 2*pi*SLM.norm_x*nx)
+        
+        _temp = ((_temp - _temp.min()) / (_temp.max() - _temp.min())) * 255
 
-        self.cgh = cgh.astype(np.uint8)
+        self.cgh = _temp.astype(np.uint8)
         self.img = Image.fromarray(self.cgh)
 
     def result(self):
