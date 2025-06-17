@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: hduq
+Version: 0.0.1
+Summary: HDUQ CLI tool
+Author: Chao-Ning Hu
+Requires-Python: >=3.9
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: Pillow
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
