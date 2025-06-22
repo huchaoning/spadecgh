@@ -33,8 +33,8 @@ class SLM:
 
 
 class _Mode:
-    @classmethod
-    def check(self, inputs):
+    @staticmethod
+    def check(inputs):
         if not isinstance(inputs, (HG, LG, PM)):
             raise ValueError('invalid mode')
         return inputs
@@ -46,43 +46,42 @@ class _Mode:
         return PM(self, other, '-')
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.n}, {self.m})'
+        return f'{self.__class__.__name__}({self.order1}, {self.order2})'
 
 
 
 class PM:
-    def __init__(self, mode1, mode2, op):
+    def __init__(self, mode1, mode2, pm):
         self.mode1 = _Mode.check(mode1)
         self.mode2 = _Mode.check(mode2)
-        self.op = op
+        self.pm = pm
 
     def wave_function(self, w0):
         wf1 = self.mode1.wave_function(w0)
         wf2 = self.mode2.wave_function(w0)
-        if self.op == '+':
+        if self.pm == '+':
             return (wf1 + wf2) / np.sqrt(2)
-        elif self.op == '-':
+        elif self.pm == '-':
             return (wf1 - wf2) / np.sqrt(2)
         else:
-            raise ValueError('invalid operation')
+            raise ValueError("invalid 'pm' option")
 
     def __repr__(self):
-        return f'{self.mode1} {self.op} {self.mode2}'
+        return f'{self.mode1} {self.pm} {self.mode2}'
 
 
 
 class HG(_Mode):
     def __init__(self, n, m):
-        valid = all(isinstance(x, int) and x >= 0 for x in (n, m))
-        if valid:
-            self.n = n
-            self.m = m
+        if all(isinstance(x, int) and x >= 0 for x in (n, m)):
+            self.order1 = n
+            self.order2 = m
         else:
             raise ValueError('orders must be positive integers')
 
 
     def wave_function(self, w0):
-        n, m = self.n, self.m
+        n, m = self.order1, self.order2
 
         norm = np.sqrt(2**(1-n-m) / (pi * factorial(m) * factorial(n))) / w0
         hx, hy= hermite(n)(2**.5 * SLM.x / w0), hermite(m)(2**.5 * SLM.y / w0)
