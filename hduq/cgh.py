@@ -50,19 +50,20 @@ class _Mode:
 
 
 
-class PM:
+class PM(_Mode):
     def __init__(self, mode1, mode2, pm):
         self.mode1 = _Mode.check(mode1)
         self.mode2 = _Mode.check(mode2)
         self.pm = pm
+        self.norm = self.mode1.norm + self.mode2.norm
 
-    def wave_function(self, w0):
-        wf1 = self.mode1.wave_function(w0)
-        wf2 = self.mode2.wave_function(w0)
+    def wave_function(self, sigma):
+        wf1 = self.mode1.wave_function(sigma)
+        wf2 = self.mode2.wave_function(sigma)
         if self.pm == '+':
-            return (wf1 + wf2) / np.sqrt(2)
+            return (wf1 + wf2) / np.sqrt(self.norm)
         elif self.pm == '-':
-            return (wf1 - wf2) / np.sqrt(2)
+            return (wf1 - wf2) / np.sqrt(self.norm)
         else:
             raise ValueError("invalid 'pm' option")
 
@@ -76,16 +77,18 @@ class HG(_Mode):
         if all(isinstance(x, int) and x >= 0 for x in (n, m)):
             self.order1 = n
             self.order2 = m
+            self.norm = 1
         else:
             raise ValueError('orders must be positive integers')
 
 
-    def wave_function(self, w0):
+    def wave_function(self, sigma):
+        w0 = 2*sigma
         n, m = self.order1, self.order2
 
-        norm = np.sqrt(2**(1-n-m) / (pi * factorial(m) * factorial(n))) / w0
+        N = np.sqrt(2**(1-n-m) / (pi * factorial(m) * factorial(n))) / w0
         hx, hy= hermite(n)(2**.5 * SLM.x / w0), hermite(m)(2**.5 * SLM.y / w0)
-        ca = norm * hx * hy * np.exp(-SLM.rho/(w0**2))
+        ca = N * hx * hy * np.exp(-SLM.rho/(w0**2))
         a, phi = np.abs(ca), np.angle(ca)
 
         return a * np.exp(1j * phi)
@@ -101,7 +104,6 @@ class LG(_Mode):
 class CGH:
     def __init__(self, sigma):
         self.sigma = sigma
-        self.w0 = 2*sigma
         self.mode_list, self.nx_list, self.ny_list = [], [], []
         self.cgh = None
 
@@ -140,7 +142,7 @@ class CGH:
     def cal(self):
         V = 0
         for i, mode in enumerate(self.mode_list):
-            V = V + (mode.wave_function(self.w0) * np.exp(2j*pi * (SLM.norm_x*self.nx_list[i] + SLM.norm_y*self.ny_list[i])))
+            V = V + (mode.wave_function(self.sigma) * np.exp(2j*pi * (SLM.norm_x*self.nx_list[i] + SLM.norm_y*self.ny_list[i])))
 
         a = np.abs(V) / np.abs(V).max()
         phi = np.angle(V)
