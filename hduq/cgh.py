@@ -1,3 +1,41 @@
+'''
+计算全息图 (CGH) 生成工具模块
+================================
+
+该模块提供用于生成计算全息图 (Computer-Generated Hologram, CGH) 的面向对象工具集.
+
+模块结构
+--------
+核心类:
+    - `CGH`      : CGH 生成器, 管理模式叠加与全息图计算. 
+    - `HG`       : Hermite-Gaussian 模式表示类. 
+    - `PM`       : 两个模式的线性组合 (加/减). 
+    - `SLM`      : 空间光调制器 (Spatial Light Modulator, SLM) 参数与坐标网格定义. 
+    - `CGHutils` : 常用模式分布与批量生成工具函数. 
+
+尚未实现:
+    - `LG`       : Laguerre-Gaussian 模式 (占位符, 暂不支持). 
+
+基本使用流程
+------------
+1. 创建 CGH 实例, 指定光束腰参数：
+       >>> cgh = CGH(sigma=100)
+2. 添加一个或多个模式及其空间频率：
+       >>> cgh.add_modes(HG(0, 1), nx_list=500, ny_list=0)
+3. 计算并生成 CGH 图像：
+       >>> cgh.cal()
+4. 获取或保存结果：
+       >>> img_array = cgh.result()
+       >>> cgh.save('my_cgh.png')
+
+依赖
+----
+- numpy
+- scipy
+- pillow (PIL)
+
+'''
+
 import numpy as np
 from numpy import pi
 
@@ -117,12 +155,12 @@ class CGH:
 
 
     def add_modes(self, mode_list, nx_list, ny_list):
-        for mode in mode_list:
-            _Mode.check(mode)
-
         mode_list = np.atleast_1d(mode_list)
         nx_list = np.atleast_1d(nx_list)
         ny_list = np.atleast_1d(ny_list)
+
+        for mode in mode_list:
+            _Mode.check(mode)
 
         if not (len(mode_list) == len(nx_list) == len(ny_list)):
             raise ValueError("mode_list, nx_list, and ny_list must have the same length")
