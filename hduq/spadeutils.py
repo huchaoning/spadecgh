@@ -1,6 +1,7 @@
 import numpy as np
-from scipy.special import hermite, factorial, j1
+from scipy.special import hermite, factorial, j1, erf
 from scipy.integrate import quad
+from scipy.optimize import minimize
 
 
 
@@ -65,7 +66,29 @@ class JincPSF(_PSF):
 class GausPSF(_PSF):
     def psf(self, x, s=0):
         return (2*np.pi*self.sigma**2)**-0.25 * np.exp(-((x-s)**2) / (4*self.sigma**2))
+    
+    @staticmethod
+    def fit(data, smooth=1e-10, scale=1, **kwargs):
+        if data.ndim != 1:
+            raise ValueError
+        data = data / np.sum(data)
+        k = np.arange(len(data))
 
+        def target_func(loc):
+            z1 = (k - loc + 0.5) / (scale * (2**0.5))
+            z2 = (k - loc - 0.5) / (scale * (2**0.5))
+            uk = erf(z1)/2 - erf(z2)/2  + smooth
+            nll = -np.sum(data * np.log(uk) - uk - (data * np.log(data) - data))
+            grad = -(scale*(2*np.pi)**0.5) * np.sum((-np.exp(-z1**2) + np.exp(-z2**2)) * (data/uk - 1))
+            return nll, grad
+        
+        result = minimize(target_func, **kwargs)
+        if result.success:
+            msg = result.message
+        else:
+            raise RuntimeError(f'not converged: {msg}')
+        
+        return result.x
 
 
 
