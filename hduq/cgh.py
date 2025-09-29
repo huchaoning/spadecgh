@@ -42,12 +42,15 @@ from numpy import pi
 from math import factorial
 
 from scipy.special import hermite, laguerre
-from scipy.interpolate import interp1d
 
 from os import path
 from PIL import Image
 
+from scipy.interpolate import interp1d
 import importlib.resources as resources
+with resources.files('hduq.assets').joinpath('fx2.npy').open('rb') as f:
+    _fx2 = interp1d(np.linspace(0, 1, 801), np.load(f))
+
 
 __all__ = ['SLM', 'HG', 'LG', 'PM', 'CGH', 'CGHutils']
 
@@ -167,7 +170,7 @@ class CGH:
             _Mode.check(mode)
 
         if not (len(mode_list) == len(nx_list) == len(ny_list)):
-            raise ValueError("mode_list, nx_list, and ny_list must have the same length")
+            raise ValueError('mode_list, nx_list, and ny_list must have the same length')
         
         self.mode_list.extend(mode_list)
         self.nx_list.extend(nx_list)
@@ -182,8 +185,6 @@ class CGH:
 
     @staticmethod
     def fx2(x):
-        with resources.files('hduq.assets').joinpath('fx2.npy').open('rb') as f:
-            _fx2 = interp1d(np.linspace(0, 1, 801), np.load(f))
         return _fx2(x)
 
 
