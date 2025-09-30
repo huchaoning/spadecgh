@@ -14,8 +14,7 @@ __all__ = [
     'code',
     'finder',
     'load',
-    'save',
-    'gifshow'
+    'save'
 ]
 
 
