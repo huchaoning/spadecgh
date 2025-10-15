@@ -3,28 +3,30 @@ from scipy.special import hermite, factorial, j1, erf
 from scipy.integrate import quad
 from scipy.optimize import minimize
 
-from functools import wraps
-import inspect
 
-__all__ = []
+__all__ = [
+    'jinc',
+    'ThinLens',
+    'SincPSF',
+    'JincPSF',
+    'GausPSF',
+    'HermitGaussain1D',
+    'PlusMinus1D',
+    'Born',
+    'FisherInfo',
+    'Measure',
+]
+
+
+all_list = []
 
 def export(obj):
-    __all__.append(obj.__name__)
+    all_list.append(obj.__name__)
+    return obj
     
-    if inspect.isfunction(obj):
-        @wraps(obj)
-        def wrapper(*args, **kwargs):
-            return obj(*args, **kwargs)
-        return wrapper
-    elif inspect.isclass(obj):
-        return obj
-    else:
-        return obj
 
 
-
-
-@export
+# @export
 def jinc(x):
     is_scalar = np.isscalar(x)
     x = np.asarray(x, dtype=np.float64)
@@ -38,7 +40,7 @@ def jinc(x):
 
 
 
-@export
+# @export
 def ThinLens(U_input):
     Ny, Nx = U_input.shape
     N = max(Nx, Ny)
@@ -89,21 +91,21 @@ class _PSF:
 
 
 
-@export
+# @export
 class SincPSF(_PSF):
     def psf(self, x, s=0):
         return (self.sigma*np.pi)**-0.5 * np.sinc((x-s) / (self.sigma*np.pi))
 
 
 
-@export
+# @export
 class JincPSF(_PSF):
     def psf(self, x, s=0):
         return ((3*np.pi) / (32*self.sigma))**0.5 * jinc((x-s) / self.sigma)
 
 
 
-@export
+# @export
 class GausPSF(_PSF):
     def psf(self, x, s=0):
         return (2*np.pi*self.sigma**2)**-0.25 * np.exp(-((x-s)**2) / (4*self.sigma**2))
@@ -150,7 +152,7 @@ class _Modes:
 
 
 
-@export
+# @export
 class HermitGaussain1D(_Modes):
     def __init__(self, q, sigma=1):
         if q % 1 != 0 or q < 0:
@@ -173,7 +175,7 @@ class HermitGaussain1D(_Modes):
 
 
 
-@export
+# @export
 class PlusMinus1D(_Modes):
     def __init__(self, q, sigma=1):
         if q not in (-1, 1):
@@ -187,7 +189,7 @@ class PlusMinus1D(_Modes):
 
 
 
-@export
+# @export
 def Born(s, basis, psf: _PSF):
     s = np.atleast_1d(s)
     basis = np.atleast_1d(basis)
@@ -219,7 +221,7 @@ def Born(s, basis, psf: _PSF):
     return p
 
 
-@export
+# @export
 def FisherInfo(s, basis, psf: _PSF, ds=1e-8):
     def fi_e(mode):
         p1 = Born(s+ds, mode, psf)
@@ -235,8 +237,16 @@ def FisherInfo(s, basis, psf: _PSF, ds=1e-8):
     return fi
 
 
-@export
+# @export
 def Measure(s, basis, psf: _PSF, photons=1):
     p = Born(s, basis, psf)
     outcomes = np.random.choice(len(p), photons, p=p/p.sum())
     return np.histogram(outcomes, bins=len(p), range=(0, len(p)))[0]
+
+
+
+if __name__ == '__main__':
+    print('__all__ = [')
+    for name in all_list:
+        print(f"    '{name}',")
+    print(']')
