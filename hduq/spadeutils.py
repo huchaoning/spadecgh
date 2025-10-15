@@ -3,17 +3,24 @@ from scipy.special import hermite, factorial, j1, erf
 from scipy.integrate import quad
 from scipy.optimize import minimize
 
-
 from functools import wraps
+import inspect
 
 __all__ = []
 
-def export(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        return func(*args, **kwargs)
-    __all__.append(func.__name__)
-    return wrapper
+def export(obj):
+    __all__.append(obj.__name__)
+    
+    if inspect.isfunction(obj):
+        @wraps(obj)
+        def wrapper(*args, **kwargs):
+            return obj(*args, **kwargs)
+        return wrapper
+    elif inspect.isclass(obj):
+        return obj
+    else:
+        return obj
+
 
 
 
@@ -78,7 +85,7 @@ class _PSF:
 
 
     def fit(self, data):
-        raise(NotImplementedError)
+        raise NotImplementedError
 
 
 
@@ -134,13 +141,20 @@ class _Modes:
         self._c_term = (2*np.pi*self.sigma**2)**-0.25
         self._exp_term = lambda x: np.exp(-x**2 / (4*self.sigma**2))
 
+    @classmethod
+    def batch(cls, q, sigma):
+        return np.array([cls(_q, sigma) for _q in np.atleast_1d(q)])
+    
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({self.q})'
+
 
 
 @export
-class HG(_Modes):
+class HermitGaussain1D(_Modes):
     def __init__(self, q, sigma=1):
         if q % 1 != 0 or q < 0:
-            raise ValueError('For HG modes, q must be a natural number.')
+            raise ValueError('For Hermit-Gaussain modes, q must be a natural number.')
         super().__init__(q, sigma)
 
         if self.q == 0:
@@ -160,10 +174,10 @@ class HG(_Modes):
 
 
 @export
-class PM(_Modes):
+class PlusMinus1D(_Modes):
     def __init__(self, q, sigma=1):
         if q not in (-1, 1):
-            raise ValueError('For PM modes, q must -1 or 1.')
+            raise ValueError('For Plus-Minus modes, q must -1 or 1.')
         super().__init__(q, sigma)
 
 
@@ -174,19 +188,55 @@ class PM(_Modes):
 
 
 @export
-def Born(s, modes: _Modes, psf: _PSF):
-    result = []
-    for _s in np.atleast_1d(s):
-        fun = lambda x: modes.wave_function(x) * psf.psf(x, _s) 
-        result.append(np.abs(quad(fun, -np.inf, np.inf)[0])**2)
-    return np.array(result)
+def Born(s, basis, psf: _PSF):
+    s = np.atleast_1d(s)
+    basis = np.atleast_1d(basis)
 
+    s_is_vec = s.ndim > 1 or s.size > 1
+    basis_is_vec = basis.ndim > 1 or basis.size > 1
+
+    if (s_is_vec and not basis_is_vec):
+        p = []
+        for _s in s:
+            fun = lambda x: basis[0].wave_function(x) * psf.psf(x, _s) 
+            p.append(np.abs(quad(fun, -np.inf, np.inf)[0])**2)
+        p = np.array(p)
+    
+    elif (not s_is_vec and basis_is_vec):
+        p = []
+        for _basis in basis:
+            fun = lambda x: _basis.wave_function(x) * psf.psf(x, s) 
+            p.append(np.abs(quad(fun, -np.inf, np.inf)[0])**2)
+        p = np.array(p)
+
+    elif (not s_is_vec and not basis_is_vec):
+        fun = lambda x: basis[0].wave_function(x) * psf.psf(x, s[0]) 
+        p = (np.abs(quad(fun, -np.inf, np.inf)[0])**2).item()
+    
+    else:
+        raise ValueError("Invalid input shapes: only one of 's' or 'q' can be a vector, or both must be scalars.")
+
+    return p
 
 
 @export
-def FisherInfo(s, modes: _Modes, psf: _PSF, ds=1e-8):
-    p1 = Born(s+ds, modes, psf)
-    p2 = Born(s-ds, modes, psf)
-    dp = p1 - p2
-    dv = dp/(2*ds)
-    return dv**2 / p1
+def FisherInfo(s, basis, psf: _PSF, ds=1e-8):
+    def fi_e(mode):
+        p1 = Born(s+ds, mode, psf)
+        p2 = Born(s-ds, mode, psf)
+        dp = p1 - p2
+        dv = dp/(2*ds)
+        return dv**2 / p1
+    
+    fi = np.zeros(np.atleast_1d(s).shape)
+    for mode in np.atleast_1d(basis):
+        fi += fi_e(mode)
+
+    return fi
+
+
+@export
+def Measure(s, basis, psf: _PSF, photons=1):
+    p = Born(s, basis, psf)
+    outcomes = np.random.choice(len(p), photons, p=p/p.sum())
+    return np.histogram(outcomes, bins=len(p), range=(0, len(p)))[0]
