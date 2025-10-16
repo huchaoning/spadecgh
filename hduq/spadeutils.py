@@ -6,15 +6,15 @@ from scipy.optimize import minimize
 
 __all__ = [
     'jinc',
-    'ThinLens',
+    'thin_lens',
     'SincPSF',
     'JincPSF',
     'GausPSF',
     'HermitGaussain1D',
     'PlusMinus1D',
-    'Born',
-    'FisherInfo',
-    'Measure',
+    'born',
+    'fisher_info',
+    'measure',
 ]
 
 
