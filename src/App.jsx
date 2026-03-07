@@ -20,7 +20,9 @@ export default function CGHTool() {
   const removeMode = (id) => setModes(modes.filter(m => m.id !== id));
 
   const updateMode = (id, field, value) => {
-    setModes(modes.map(m => m.id === id ? { ...m, [field]: parseInt(value) || 0 } : m));
+    setModes(modes.map(m =>
+      m.id === id ? { ...m, [field]: (field === 'type' || field === 'op') ? value : (parseInt(value) || 0) } : m
+    ));
   };
 
   return (
@@ -149,6 +151,7 @@ export default function CGHTool() {
                 </div>
 
                 {/* 模式叠加列表 */}
+                {/* 模式叠加列表 */}
                 <section>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-primary font-bold">
@@ -159,34 +162,87 @@ export default function CGHTool() {
 
                   <div className="space-y-3">
                     {modes.map((mode, index) => (
-                      <div key={mode.id} className="collapse collapse-arrow bg-base-200 border border-base-300 rounded-xl overflow-visible">
+                      <div key={mode.id} className="collapse collapse-arrow bg-base-200 border border-base-300 rounded-xl overflow-visible shadow-sm">
                         <input type="checkbox" defaultChecked />
                         <div className="collapse-title flex items-center gap-3 pr-12">
                           <span className="badge badge-sm badge-ghost">{index + 1}</span>
-                          <span className="font-mono text-xs font-bold">HG({mode.n}, {mode.m})</span>
-                          <span className="text-[10px] opacity-50">freq: {mode.nx}, {mode.ny}</span>
+                          <span className="font-mono text-xs font-bold uppercase text-primary">
+                            {mode.type === 'PM' ? `PM(${mode.op || '+'})` : `${mode.type}(${mode.n || 0}, ${mode.m || 0})`}
+                          </span>
+                          <span className="text-[10px] opacity-50 truncate">f: {mode.nx}, {mode.ny}</span>
                         </div>
+
                         <div className="collapse-content space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="form-control">
-                              <label className="label-text text-[10px] mb-1">阶数 N (Order N)</label>
-                              <input type="number" value={mode.n} onChange={(e) => updateMode(mode.id, 'n', e.target.value)} className="input input-bordered input-xs" />
-                            </div>
-                            <div className="form-control">
-                              <label className="label-text text-[10px] mb-1">阶数 M (Order M)</label>
-                              <input type="number" value={mode.m} onChange={(e) => updateMode(mode.id, 'm', e.target.value)} className="input input-bordered input-xs" />
+                          {/* 模式类型切换 */}
+                          <div className="form-control w-full">
+                            <div className="join w-full">
+                              {['HG', 'LG', 'PM'].map((t) => (
+                                <button
+                                  key={t}
+                                  className={`join-item btn btn-xs flex-1 ${mode.type === t ? 'btn-primary' : 'btn-ghost bg-base-300'}`}
+                                  onClick={() => updateMode(mode.id, 'type', t)}
+                                >
+                                  {t}
+                                </button>
+                              ))}
                             </div>
                           </div>
+
+                          <div className="divider my-0 h-0 opacity-50"></div>
+
+                          {/* 条件渲染参数区 */}
+                          {mode.type === 'PM' ? (
+                            /* PM 模式特有 UI */
+                            <div className="space-y-3 p-2 bg-base-300/50 rounded-lg">
+                              <div className="form-control">
+                                <label className="label-text text-[10px] mb-1">叠加操作 (Operator)</label>
+                                <select
+                                  className="select select-bordered select-xs w-full font-mono"
+                                  value={mode.op || '+'}
+                                  onChange={(e) => updateMode(mode.id, 'op', e.target.value)}
+                                >
+                                  <option value="+">Addition (+)</option>
+                                  <option value="-">Subtraction (-)</option>
+                                </select>
+                              </div>
+                              <p className="text-[9px] opacity-60 leading-tight">
+                                * 注意：在当前版本中，PM 将默认对前两个定义的 HG 模式进行操作。
+                              </p>
+                            </div>
+                          ) : (
+                            /* HG 和 LG 共用 N/M 参数区 */
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="form-control">
+                                <label className="label-text text-[10px] mb-1">
+                                  {mode.type === 'LG' ? '径向阶数 P' : '阶数 N'}
+                                </label>
+                                <input type="number" value={mode.n} onChange={(e) => updateMode(mode.id, 'n', e.target.value)} className="input input-bordered input-xs font-mono" />
+                              </div>
+                              <div className="form-control">
+                                <label className="label-text text-[10px] mb-1">
+                                  {mode.type === 'LG' ? '角向阶数 L' : '阶数 M'}
+                                </label>
+                                <input type="number" value={mode.m} onChange={(e) => updateMode(mode.id, 'm', e.target.value)} className="input input-bordered input-xs font-mono" />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 空间频率区 (所有模式共有) */}
                           <div className="grid grid-cols-2 gap-4 border-t border-base-300 pt-3">
                             <div className="form-control">
-                              <label className="label-text text-[10px] mb-1">频率 Nx</label>
-                              <input type="number" value={mode.nx} onChange={(e) => updateMode(mode.id, 'nx', e.target.value)} className="input input-bordered input-xs" />
+                              <label className="label-text text-[10px] mb-1 flex items-center gap-1">
+                                频率 Nx <span className="opacity-40">(Carrier)</span>
+                              </label>
+                              <input type="number" value={mode.nx} onChange={(e) => updateMode(mode.id, 'nx', e.target.value)} className="input input-bordered input-xs font-mono" />
                             </div>
                             <div className="form-control">
-                              <label className="label-text text-[10px] mb-1">频率 Ny</label>
-                              <input type="number" value={mode.ny} onChange={(e) => updateMode(mode.id, 'ny', e.target.value)} className="input input-bordered input-xs" />
+                              <label className="label-text text-[10px] mb-1 flex items-center gap-1">
+                                频率 Ny <span className="opacity-40">(Carrier)</span>
+                              </label>
+                              <input type="number" value={mode.ny} onChange={(e) => updateMode(mode.id, 'ny', e.target.value)} className="input input-bordered input-xs font-mono" />
                             </div>
                           </div>
+
                           <button onClick={() => removeMode(mode.id)} className="btn btn-error btn-outline btn-xs btn-block mt-2">
                             <Trash2 size={12} /> 删除该模式
                           </button>
