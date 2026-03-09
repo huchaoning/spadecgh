@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import createModule from '../public/wasm/cgh_wasm.js';
 import {
@@ -29,6 +29,45 @@ export default function CGHTool() {
     { id: 1, type: 'HG', n: 0, m: 1, nx: 500, ny: 0 }
   ]);
 
+  const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
+  const containerRef = useRef(null);
+  const isDragging = useRef(false);
+  const lastPos = useRef({ x: 0, y: 0 });
+
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    setTransform(prev => ({
+      ...prev,
+      scale: Math.max(0.1, Math.min(prev.scale * delta, 20))
+    }));
+  };
+
+  const handleMouseDown = (e) => {
+    if (e.button !== 0) return;
+    isDragging.current = true;
+    lastPos.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging.current) return;
+    const dx = e.clientX - lastPos.current.x;
+    const dy = e.clientY - lastPos.current.y;
+
+    setTransform(prev => ({
+      ...prev,
+      x: prev.x + dx / prev.scale,
+      y: prev.y + dy / prev.scale
+    }));
+    lastPos.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+  };
+
+
+
   /* --- 核心业务逻辑 (待对接 WASM) --- */
 
   // 生成可导出给 WASM 的 JSON 数据
@@ -55,12 +94,39 @@ export default function CGHTool() {
     };
   };
 
+  const canvasRef = useRef(null);
+
   const handleRunSimulation = () => {
+    if (!wasmInstance || !canvasRef.current) return;
+
     const data = exportCGHData();
-    console.log("准备传递给 WASM 的数据:", data);
-    const jsonString = JSON.stringify(data);
-    // TODO: 在此处调用 WASM 模块的计算函数
-    wasmInstance.updateConfig(jsonString);
+    const width = data.global.resolution[0];
+    const height = data.global.resolution[1];
+
+    // 1. 调用 WASM 获取像素数据 (Uint8Array)
+    const pixels = wasmInstance.generateCGH(JSON.stringify(data));
+
+    if (pixels) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+
+      // 2. 创建 ImageData 对象
+      // 注意：Canvas 的 ImageData 始终是 RGBA 格式（每像素 4 字节）
+      const imgData = ctx.createImageData(width, height);
+
+      // 3. 将 C++ 的单通道灰度值映射到 RGBA
+      for (let i = 0; i < pixels.length; i++) {
+        const gray = pixels[i];
+        const r_idx = i * 4;
+        imgData.data[r_idx] = gray; // R
+        imgData.data[r_idx + 1] = gray; // G
+        imgData.data[r_idx + 2] = gray; // B
+        imgData.data[r_idx + 3] = 255;  // Alpha (不透明)
+      }
+
+      // 4. 将数据绘制到画布
+      ctx.putImageData(imgData, 0, 0);
+    }
   };
 
   const handleSaveConfig = () => {
@@ -306,17 +372,35 @@ export default function CGHTool() {
 
         {/* --- 主内容显示区 --- */}
         <main className="flex-1 bg-base-300 relative p-8 flex flex-col gap-6">
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-            style={{ backgroundImage: 'radial-gradient(circle, #000 2px, transparent 2px)', backgroundSize: '32px 32px' }}></div>
-          <div className="flex-1 flex flex-col bg-neutral rounded-2xl shadow-2xl border border-white/5 overflow-hidden relative group">
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <Box size={60} className="mx-auto mb-4 opacity-10 text-white animate-pulse" />
-                <p className="text-white/20 font-mono text-[10px] uppercase tracking-[0.2em]">全息图计算中...</p>
-              </div>
-            </div>
+          <div
+            className="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style={{ backgroundImage: 'radial-gradient(circle, #000 2px, transparent 2px)', backgroundSize: '32px 32px' }}
+          ></div>
+
+          <div
+            ref={containerRef}
+            onDoubleClick={() => setTransform({ scale: 1, x: 0, y: 0 })}
+            className="flex-1 flex flex-col bg-neutral rounded-2xl shadow-2xl border border-white/5 overflow-hidden relative group items-center justify-center p-4 cursor-grab active:cursor-grabbing select-none"
+            onWheel={handleWheel}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          >
+            <canvas
+              ref={canvasRef}
+              width={resX}
+              height={resY}
+              className="max-w-full max-h-full object-contain pointer-events-none"
+              style={{
+                imageRendering: 'pixelated',
+                transform: `scale(${transform.scale}) translate(${transform.x}px, ${transform.y}px)`,
+                transition: isDragging.current ? 'none' : 'transform 0.1s ease-out'
+              }}
+            />
           </div>
         </main>
+
       </div>
 
       {/* --- 弹窗与对话框 --- */}
