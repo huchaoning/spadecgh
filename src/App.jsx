@@ -1,11 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import createModule from '../public/wasm/cgh_wasm.js';
 import {
   Box, Play, AlertTriangle, Info, Save, Plus,
   Trash2, Settings2, Sliders, Menu, InfoIcon
 } from 'lucide-react';
 
 export default function CGHTool() {
+  /* --- WASM 实例状态 --- */
+  const [wasmInstance, setWasmInstance] = useState(null);
+
+  // 初始化 WASM
+  useEffect(() => {
+    createModule().then((instance) => {
+      setWasmInstance(instance);
+      console.log("WASM Ready");
+    });
+  }, []);
+
+
   /* --- 状态管理 --- */
   const [showSidebar, setShowSidebar] = useState(true);
   const [sigma, setSigma] = useState(100);
@@ -45,7 +58,9 @@ export default function CGHTool() {
   const handleRunSimulation = () => {
     const data = exportCGHData();
     console.log("准备传递给 WASM 的数据:", data);
+    const jsonString = JSON.stringify(data);
     // TODO: 在此处调用 WASM 模块的计算函数
+    wasmInstance.updateConfig(jsonString);
   };
 
   const handleSaveConfig = () => {
