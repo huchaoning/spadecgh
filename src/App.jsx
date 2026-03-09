@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Play, AlertTriangle, Info, Save, Plus, Trash2, Settings2, Sliders, Menu } from 'lucide-react';
+import { Box, Play, AlertTriangle, Info, Save, Plus, Trash2, Settings2, Sliders, Menu, InfoIcon } from 'lucide-react';
 
 export default function CGHTool() {
   const [showSidebar, setShowSidebar] = useState(true);
@@ -69,7 +69,9 @@ export default function CGHTool() {
           <span className="text-lg font-black tracking-tight uppercase">CGH Generator <span className="text-[10px] font-normal opacity-50 ml-1">v1.0</span></span>
         </div>
         <div className="flex-1 flex justify-end">
-          <button className="btn btn-ghost btn-sm btn-square text-base-content/40 hover:text-primary transition-colors"><Info size={20} /></button>
+          <button className="btn btn-ghost btn-sm btn-square text-base-content/40 hover:text-primary transition-colors" onClick={() => document.getElementById("info_modal").showModal()}>
+            <Info size={20} />
+          </button>
         </div>
       </header>
 
@@ -193,7 +195,9 @@ export default function CGHTool() {
                                 <input type="number" value={mode.ny} onChange={(e) => updateMode(mode.id, 'ny', e.target.value)} className="input input-bordered input-xs font-mono" />
                               </div>
                             </div>
-                            <button onClick={() => removeMode(mode.id)} className="btn btn-error btn-outline btn-xs btn-block hover:shadow-md"><Trash2 size={12} /> 删除该模式</button>
+                            <button onClick={() => removeMode(mode.id)} className="btn btn-error btn-outline btn-xs btn-block hover:shadow-md">
+                              <Trash2 size={12} /> 删除该模式
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -237,12 +241,31 @@ export default function CGHTool() {
           <p className="py-4 text-sm text-base-content/60">此操作将清空所有已配置的模式。该操作不可撤销。</p>
           <div className="modal-action">
             <form method="dialog" className="flex gap-2 w-full justify-end">
-              <button className="btn btn-ghost btn-sm">取消</button>
+              <button className="btn btn-ghost btn-sm px-6">取消</button>
               <button className="btn btn-error btn-sm px-6" onClick={() => setModes([])}>确认</button>
             </form>
           </div>
         </div>
       </dialog>
+
+      {/* Info Modal */}
+      <dialog id="info_modal" className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg text-primary flex items-center gap-2"><InfoIcon size={20} />关于</h3>
+          <p className="py-4 text-sm text-base-content/60">
+            这是一个个人项目, 正在开发中.
+            本项目旨在将 Arrizon 2 计算全息图算法 GUI 化, 方便用户使用. 
+            如果该项目对你有帮助, 请引用他们的文章.
+          </p>
+          <div className="modal-action">
+            <form method="dialog" className="flex gap-2 w-full justify-end">
+              <button className="btn btn-ghost btn-sm px-6">GitHub</button>
+              <button className="btn btn-primary btn-sm px-6">OK</button>
+            </form>
+          </div>
+        </div>
+      </dialog>
     </div>
+
   );
 }
