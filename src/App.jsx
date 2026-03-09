@@ -26,7 +26,7 @@ export default function CGHTool() {
   const [resX, setResX] = useState(1920);
   const [resY, setResY] = useState(1080);
   const [modes, setModes] = useState([
-    { id: 1, type: 'HG', n: 0, m: 1, nx: 500, ny: 0 }
+    { id: 1, type: 'HG', n: 0, m: 0, nx: 500, ny: 0 }
   ]);
 
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
@@ -208,7 +208,13 @@ export default function CGHTool() {
       <div className="flex flex-1 overflow-hidden">
 
         {/* --- 左侧侧边栏 --- */}
-        <aside className={`bg-base-200/50 border-r border-base-300 flex flex-col transition-all duration-300 ease-in-out ${showSidebar ? 'w-96' : 'w-0'} overflow-hidden`}>
+        <aside onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleRunSimulation();
+            if (document.activeElement) document.activeElement.blur();
+          }
+        }}
+          className={`bg-base-200/50 border-r border-base-300 flex flex-col transition-all duration-300 ease-in-out ${showSidebar ? 'w-96' : 'w-0'} overflow-hidden`}>
           <div className="w-96 flex flex-col h-full shrink-0">
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
 
