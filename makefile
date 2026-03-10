@@ -15,6 +15,7 @@ CFLAGS = -O3 \
 all: $(OUTPUT)
 
 $(OUTPUT): $(SRC)
+    mkdir -p $(OUTPUT_DIR)
 	$(CC) $(SRC) $(CFLAGS) -o $(OUTPUT)
 
 clean:
