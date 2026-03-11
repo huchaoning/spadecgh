@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Jimp } from "jimp";
 import createModule from '../public/wasm/cgh_wasm.js';
 import {
   Box, Play, AlertTriangle, Info, Save, Plus,
   Trash2, Settings2, Sliders, Menu, InfoIcon
 } from 'lucide-react';
+
 
 export default function CGHTool() {
   /* --- WASM 实例状态 --- */
@@ -28,6 +30,9 @@ export default function CGHTool() {
   const [modes, setModes] = useState([
     { id: 1, type: 'HG', n: 0, m: 0, nx: 500, ny: 0 }
   ]);
+
+  const lastPixelsRef = useRef(null);
+  const canvasRef = useRef(null);
 
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
   const containerRef = useRef(null);
@@ -68,10 +73,8 @@ export default function CGHTool() {
 
 
 
-  /* --- 核心业务逻辑 (待对接 WASM) --- */
-
   // 生成可导出给 WASM 的 JSON 数据
-  const exportCGHData = () => {
+  const loadConfig = () => {
     return {
       global: {
         sigma: parseFloat(sigma),
@@ -94,46 +97,69 @@ export default function CGHTool() {
     };
   };
 
-  const canvasRef = useRef(null);
 
-  const handleRunSimulation = () => {
+  const handleRun = () => {
     if (!wasmInstance || !canvasRef.current) return;
 
-    const data = exportCGHData();
-    const width = data.global.resolution[0];
-    const height = data.global.resolution[1];
+    const config = loadConfig();
+    const width = config.global.resolution[0];
+    const height = config.global.resolution[1];
 
-    // 1. 调用 WASM 获取像素数据 (Uint8Array)
-    const pixels = wasmInstance.generateCGH(JSON.stringify(data));
+    const pixels = wasmInstance.generateCGH(JSON.stringify(config));
+    lastPixelsRef.current = pixels;
 
-    if (pixels) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
 
-      // 2. 创建 ImageData 对象
-      // 注意：Canvas 的 ImageData 始终是 RGBA 格式（每像素 4 字节）
-      const imgData = ctx.createImageData(width, height);
+    const image = ctx.createImageData(width, height);
 
-      // 3. 将 C++ 的单通道灰度值映射到 RGBA
-      for (let i = 0; i < pixels.length; i++) {
-        const gray = pixels[i];
-        const r_idx = i * 4;
-        imgData.data[r_idx] = gray; // R
-        imgData.data[r_idx + 1] = gray; // G
-        imgData.data[r_idx + 2] = gray; // B
-        imgData.data[r_idx + 3] = 255;  // Alpha (不透明)
-      }
+    for (let i = 0; i < pixels.length; i++) {
+      const g = pixels[i];
+      const offset = i * 4;
 
-      // 4. 将数据绘制到画布
-      ctx.putImageData(imgData, 0, 0);
+      image.data[offset] = g;
+      image.data[offset + 1] = g;
+      image.data[offset + 2] = g;
+      image.data[offset + 3] = 255;
     }
+
+    ctx.putImageData(image, 0, 0);
   };
 
-  const handleSaveConfig = () => {
-    const data = exportCGHData();
-    console.log("保存配置:", JSON.stringify(data));
-    // TODO: 实现本地存储或文件下载逻辑
+
+
+  const handleSave = async () => {
+    const pixels = lastPixelsRef.current;
+
+    const w = parseInt(resX);
+    const h = parseInt(resY);
+
+    const image = new Jimp({ width: w, height: h });
+
+    for (let i = 0; i < pixels.length; i++) {
+      const g = pixels[i];
+      const offset = i * 4;
+
+      image.bitmap.data[offset] = g;
+      image.bitmap.data[offset + 1] = g;
+      image.bitmap.data[offset + 2] = g;
+      image.bitmap.data[offset + 3] = 255;
+    }
+
+    const buffer = await image.getBuffer("image/bmp");
+    const blob = new Blob([buffer], { type: "image/bmp" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "untitled.bmp";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
+
+
 
   /* --- 模式列表操作函数 --- */
   const addMode = () => {
@@ -210,7 +236,7 @@ export default function CGHTool() {
         {/* --- 左侧侧边栏 --- */}
         <aside onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            handleRunSimulation();
+            handleRun();
             if (document.activeElement) document.activeElement.blur();
           }
         }}
@@ -361,14 +387,14 @@ export default function CGHTool() {
 
             {/* 侧边栏底部操作区 */}
             <div className="p-4 border-t border-base-300 bg-base-100 space-y-3">
-              <button onClick={handleRunSimulation} className="btn btn-primary btn-block shadow-lg shadow-primary/20 active:scale-95 transition-all">
+              <button onClick={handleRun} className="btn btn-primary btn-block shadow-lg shadow-primary/20 active:scale-95 transition-all">
                 <Play size={16} fill="currentColor" /> RUN !
               </button>
               <div className="grid grid-cols-2 gap-3">
                 <button className="btn btn-outline btn-error btn-sm" onClick={() => document.getElementById('clear_modal').showModal()}>
                   <Trash2 size={14} /> 清空列表
                 </button>
-                <button className="btn btn-outline btn-sm" onClick={handleSaveConfig}>
+                <button className="btn btn-outline btn-sm" onClick={handleSave}>
                   <Save size={14} /> 保存结果
                 </button>
               </div>
@@ -399,9 +425,8 @@ export default function CGHTool() {
               height={resY}
               className="max-w-full max-h-full object-contain pointer-events-none"
               style={{
-                imageRendering: 'pixelated',
                 transform: `scale(${transform.scale}) translate(${transform.x}px, ${transform.y}px)`,
-                transition: isDragging.current ? 'none' : 'transform 0.1s ease-out'
+                transition: isDragging.current ? 'none' : 'transform 0.1s ease-out',
               }}
             />
           </div>
@@ -417,8 +442,8 @@ export default function CGHTool() {
           <p className="py-4 text-sm text-base-content/60">此操作将清空所有已配置的模式。该操作不可撤销。</p>
           <div className="modal-action">
             <form method="dialog" className="flex gap-2 w-full justify-end">
-              <button className="btn btn-ghost btn-sm px-6">取消</button>
-              <button className="btn btn-error btn-sm px-6" onClick={() => setModes([])}>确认</button>
+              <button className="btn btn-ghost btn-sm w-20">取消</button>
+              <button className="btn btn-error btn-sm w-20" onClick={() => setModes([])}>确认</button>
             </form>
           </div>
         </div>
@@ -430,11 +455,12 @@ export default function CGHTool() {
           <h3 className="font-bold text-lg text-primary flex items-center gap-2"><InfoIcon size={20} /> 关于 CGH Tool</h3>
           <p className="py-4 text-sm text-base-content/60 leading-relaxed">
             基于 Arrizon 2 算法的全息图生成工具。
+            实时预览的图片仅供参考，生成的 CGH 以保存下来的为准。
           </p>
           <div className="modal-action">
             <form method="dialog" className="flex gap-2 w-full justify-end">
-              <button className="btn btn-ghost btn-sm px-6">GitHub</button>
-              <button className="btn btn-primary btn-sm px-6">确定</button>
+              <a className="btn btn-ghost btn-sm w-20" target="_blank" rel="noopener noreferrer" href="https://gitee.com/vxyi/cgh-app">Gitee</a>
+              <button className="btn btn-primary btn-sm w-20">确定</button>
             </form>
           </div>
         </div>
