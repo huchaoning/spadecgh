@@ -6,7 +6,6 @@
 #include <cmath>
 #include <complex>
 #include <algorithm>
-#include <numbers>
 
 #include "../../third_party/boost_math/boost/math/special_functions/hermite.hpp"
 #include "../../third_party/boost_math/boost/math/special_functions/factorials.hpp"
@@ -17,13 +16,14 @@ using json = nlohmann::json;
 using namespace emscripten;
 
 typedef std::complex<double> Complex;
-const double PI = std::numbers::pi;
-const double HALF_PI = std::numbers::pi / 2.0;
+const double PI = 3.14159265358979323846;
 
+// --- 静态全局缓冲区，避免函数内申请大内存导致崩溃 ---
 std::vector<uint8_t> resultBuffer;
 std::vector<Complex> V_buffer;
 std::vector<double> temp_map;
 
+// Arrizon 2 查找表插值
 double fx2(double x)
 {
   double pos = x * 800.0;
@@ -36,24 +36,27 @@ double fx2(double x)
   return fx2_data[i] * (1.0 - t) + fx2_data[i + 1] * t;
 }
 
-double cal_hg_norm(int n, int m, double w0, int N_modes)
+// 单点 HG 计算
+Complex calculate_hg(int n, int m, double x, double y, double sigma)
 {
-  double fac_n = boost::math::factorial<double>(n);
-  double fac_m = boost::math::factorial<double>(m);
-
-  return std::sqrt(std::pow(2.0, 1.0 - n - m) / (PI * fac_n * fac_m)) / w0 / std::sqrt(N_modes);
-}
-
-double cal_hg(int n, int m, double x, double y, double w0, double norm)
-{
+  double w0 = 2.0 * sigma;
   double rho_sq = x * x + y * y;
   double w0_sq = w0 * w0;
 
-  double sqrt2_over_w0 = HALF_PI / w0;
+  double fac_n = boost::math::factorial<double>(n);
+  double fac_m = boost::math::factorial<double>(m);
+
+  // 归一化常数
+  double N = std::sqrt(std::pow(2.0, 1.0 - n - m) / (PI * fac_n * fac_m)) / w0;
+
+  double sqrt2_over_w0 = 1.414213562373095 / w0;
   double hx = boost::math::hermite(n, x * sqrt2_over_w0);
   double hy = boost::math::hermite(m, y * sqrt2_over_w0);
 
-  return norm * hx * hy * std::exp(-rho_sq / w0_sq);
+  double ca = N * hx * hy * std::exp(-rho_sq / w0_sq);
+
+  // 返回复数：幅度 + 相位(取决于符号)
+  return std::polar(std::abs(ca), (ca < 0) ? PI : 0.0);
 }
 
 val generateCGH(std::string json_str)
@@ -64,8 +67,6 @@ val generateCGH(std::string json_str)
 
     // 1. 获取参数
     double sigma = j["global"]["sigma"];
-    double w0 = 2.0 * sigma;
-
     double pixelSize = j["global"]["pixelSize"];
     int resX = j["global"]["resolution"][0];
     int resY = j["global"]["resolution"][1];
