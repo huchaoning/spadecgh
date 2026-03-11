@@ -6,6 +6,7 @@
 #include <cmath>
 #include <complex>
 #include <algorithm>
+#include <numbers>
 
 #include "../../third_party/boost_math/boost/math/special_functions/hermite.hpp"
 #include "../../third_party/boost_math/boost/math/special_functions/factorials.hpp"
@@ -15,15 +16,10 @@
 using json = nlohmann::json;
 using namespace emscripten;
 
-typedef std::complex<double> Complex;
-const double PI = 3.14159265358979323846;
+const double PI = std::numbers::pi;
+const double SQRT_2 = std::sqrt(2);
+const double TAU = 2.0 * std::numbers::pi;
 
-// --- 静态全局缓冲区，避免函数内申请大内存导致崩溃 ---
-std::vector<uint8_t> resultBuffer;
-std::vector<Complex> V_buffer;
-std::vector<double> temp_map;
-
-// Arrizon 2 查找表插值
 double fx2(double x)
 {
   double pos = x * 800.0;
@@ -36,27 +32,26 @@ double fx2(double x)
   return fx2_data[i] * (1.0 - t) + fx2_data[i + 1] * t;
 }
 
-// 单点 HG 计算
-Complex calculate_hg(int n, int m, double x, double y, double sigma)
+double cal_hg_norm(int n, int m, double w0, int N_modes)
 {
-  double w0 = 2.0 * sigma;
-  double rho_sq = x * x + y * y;
-  double w0_sq = w0 * w0;
-
   double fac_n = boost::math::factorial<double>(n);
   double fac_m = boost::math::factorial<double>(m);
 
-  // 归一化常数
-  double N = std::sqrt(std::pow(2.0, 1.0 - n - m) / (PI * fac_n * fac_m)) / w0;
+  return std::sqrt(std::pow(2.0, 1.0 - n - m) / (PI * fac_n * fac_m)) / w0 / std::sqrt(N_modes);
+}
 
-  double sqrt2_over_w0 = 1.414213562373095 / w0;
+std::complex<double> cal_hg(int n, int m, double x, double y, double w0, double norm)
+{
+  double rho_sq = x * x + y * y;
+  double w0_sq = w0 * w0;
+
+  double sqrt2_over_w0 = SQRT_2 / w0;
   double hx = boost::math::hermite(n, x * sqrt2_over_w0);
   double hy = boost::math::hermite(m, y * sqrt2_over_w0);
 
-  double ca = N * hx * hy * std::exp(-rho_sq / w0_sq);
+  double wf = norm * hx * hy * std::exp(-rho_sq / w0_sq);
 
-  // 返回复数：幅度 + 相位(取决于符号)
-  return std::polar(std::abs(ca), (ca < 0) ? PI : 0.0);
+  return std::polar(std::abs(wf), (wf < 0) ? PI : 0.0);
 }
 
 val generateCGH(std::string json_str)
@@ -65,25 +60,16 @@ val generateCGH(std::string json_str)
   {
     auto j = json::parse(json_str);
 
-    // 1. 获取参数
     double sigma = j["global"]["sigma"];
+    double w0 = 2.0 * sigma;
+
     double pixelSize = j["global"]["pixelSize"];
     int resX = j["global"]["resolution"][0];
     int resY = j["global"]["resolution"][1];
-    uint32_t totalPixels = resX * resY;
+    size_t totalPixels = resX * resY;
 
-    // 2. 确保所有缓冲区大小正确
-    if (resultBuffer.size() != totalPixels)
-      resultBuffer.resize(totalPixels);
-    if (V_buffer.size() != totalPixels)
-      V_buffer.resize(totalPixels);
-    if (temp_map.size() != totalPixels)
-      temp_map.resize(totalPixels);
+    std::vector<std::complex<double>> V(totalPixels);
 
-    // 重置复数场
-    std::fill(V_buffer.begin(), V_buffer.end(), Complex(0, 0));
-
-    // 3. 物理场叠加
     for (auto &mode : j["modeList"])
     {
       if (mode["type"] == "HG")
@@ -92,69 +78,64 @@ val generateCGH(std::string json_str)
         int m = mode["m"];
         double nx = mode["nx"];
         double ny = mode["ny"];
+        double norm = cal_hg_norm(n, m, w0, 1);
 
         for (int y = 0; y < resY; ++y)
         {
           for (int x = 0; x < resX; ++x)
           {
-            // 物理坐标映射 (中心对称)
             double px = (x - resX / 2.0) * pixelSize;
             double py = -(y - resY / 2.0) * pixelSize;
 
-            // 归一化坐标计算载波
             double norm_x = px / (resX * pixelSize);
             double norm_y = py / (resY * pixelSize);
 
-            Complex wf = calculate_hg(n, m, px, py, sigma);
-            double carrier_phi = 2.0 * PI * (norm_x * nx + norm_y * ny);
-
-            V_buffer[y * resX + x] += wf * std::polar(1.0, carrier_phi);
+            std::complex<double> wf = cal_hg(n, m, px, py, w0, norm);
+            V[y * resX + x] += wf * std::polar(1.0, TAU * (norm_x * nx + norm_y * ny));
           }
         }
       }
     }
 
-    // 4. 振幅归一化
-    double maxA = 0.0;
-    for (uint32_t i = 0; i < totalPixels; ++i)
-    {
-      maxA = std::max(maxA, std::abs(V_buffer[i]));
-    }
+    std::vector<double> A(totalPixels);
+    std::vector<double> Phi(totalPixels);
+    std::transform(V.begin(), V.end(), A.begin(), [](const auto &v)
+                   { return std::abs(v); });
+    std::transform(V.begin(), V.end(), Phi.begin(), [](const auto &v)
+                   { return std::arg(v); });
+    double maxA = *std::max_element(A.begin(), A.end());
     if (maxA < 1e-15)
       maxA = 1.0;
+    std::for_each(A.begin(), A.end(), [maxA](double &a)
+                  { a /= maxA; });
 
-    // 5. Arrizon 2 渲染 (计算中间值并找 min/max)
-    double min_v = 1e15, max_v = -1e15;
-    for (uint32_t i = 0; i < totalPixels; ++i)
+    std::vector<double> cgh_val(totalPixels);
+    double min_val = 1e15, max_val = -1e15;
+    for (size_t i = 0; i < totalPixels; i++)
     {
-      double a = std::abs(V_buffer[i]) / maxA;
-      double phi = std::arg(V_buffer[i]);
+      cgh_val[i] = fx2(A[i]) * std::sin(Phi[i]);
 
-      double val_tmp = fx2(a) * std::sin(phi);
-      temp_map[i] = val_tmp;
-
-      if (val_tmp < min_v)
-        min_v = val_tmp;
-      if (val_tmp > max_v)
-        max_v = val_tmp;
+      if (cgh_val[i] < min_val)
+        min_val = cgh_val[i];
+      if (cgh_val[i] > max_val)
+        max_val = cgh_val[i];
     }
 
-    // 6. 最终线性映射到 resultBuffer
-    double range = max_v - min_v;
+    double range = max_val - min_val;
     if (range < 1e-15)
       range = 1.0;
 
-    for (uint32_t i = 0; i < totalPixels; ++i)
+    for (size_t i = 0; i < totalPixels; i++)
     {
-      resultBuffer[i] = static_cast<uint8_t>(((temp_map[i] - min_v) / range) * 255.0);
+      cgh_val[i] = static_cast<uint8_t>(((cgh_val[i] - min_val) / range) * 255.0);
     }
 
-    // 7. 返回零拷贝内存视图
-    return val(typed_memory_view(resultBuffer.size(), resultBuffer.data()));
+    return val(typed_memory_view(cgh_val.size(), cgh_val.data()));
   }
+
   catch (const std::exception &e)
   {
-    std::cerr << "C++ Error: " << e.what() << std::endl;
+    std::cerr << "Error: " << e.what() << std::endl;
     return val::null();
   }
 }
