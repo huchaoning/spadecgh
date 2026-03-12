@@ -82,16 +82,16 @@ export default function CGHTool() {
         resolution: [parseInt(resX), parseInt(resY)]
       },
       // 将 React 内部状态转化为扁平化的模式数组
-      modeList: modes.map(m => ({
-        type: m.type,
-        n: m.n,
-        m: m.m,
-        nx: m.nx,
-        ny: m.ny,
+      modeList: modes.map(mode => ({
+        type: mode.type,
+        n: mode.n,
+        m: mode.m,
+        nx: mode.nx,
+        ny: mode.ny,
         // 如果是 PM (叠加模式)，递归或扁平化子模式
-        subModes: m.type === 'PM' ? {
-          plus: m.plusModes || [],
-          minus: m.minusModes || []
+        subModes: mode.type === 'PM' ? {
+          plus: mode.plusModes || [],
+          minus: mode.minusModes || []
         } : null
       }))
     };
@@ -99,7 +99,7 @@ export default function CGHTool() {
 
 
   const handleRun = () => {
-    if (!wasmInstance || !canvasRef.current) return;
+    if (modes.length === 0 || !wasmInstance || !canvasRef.current) return;
 
     const config = loadConfig();
     const width = config.global.resolution[0];
@@ -128,7 +128,7 @@ export default function CGHTool() {
 
       ctx.putImageData(image, 0, 0);
     } catch {
-      alert("错误输入");
+      document.getElementById("error_modal").showModal();
     }
   };
 
@@ -171,26 +171,26 @@ export default function CGHTool() {
 
   /* --- 模式列表操作函数 --- */
   const addMode = () => {
-    const newId = modes.length > 0 ? Math.max(...modes.map(m => m.id)) + 1 : 1;
+    const newId = modes.length > 0 ? Math.max(...modes.map(mode => mode.id)) + 1 : 1;
     setModes([...modes, { id: newId, type: 'HG', n: 0, m: 0, nx: 500, ny: 0 }]);
   };
 
-  const removeMode = (id) => setModes(modes.filter(m => m.id !== id));
+  const removeMode = (id) => setModes(modes.filter(mode => mode.id !== id));
 
   const updateMode = (id, field, value) => {
-    setModes(modes.map(m => {
-      if (m.id === id) {
+    setModes(modes.map(mode => {
+      if (mode.id === id) {
         if (field === 'type' && value === 'PM') {
-          return { ...m, type: value, plusModes: [], minusModes: [] };
+          return { ...mode, type: value, plusModes: [], minusModes: [] };
         }
         const val = (field === 'type')
           ? value
           : (value === '-' || value === '')
             ? value
             : (parseFloat(value) || 0);
-        return { ...m, [field]: val };
+        return { ...mode, [field]: val };
       }
-      return m;
+      return mode;
     }));
   };
 
@@ -453,9 +453,9 @@ export default function CGHTool() {
           <h3 className="font-bold text-lg text-error flex items-center gap-2"><AlertTriangle size={20} /> 确认清除？</h3>
           <p className="py-4 text-sm text-base-content/60">此操作将清空所有已配置的模式。该操作不可撤销。</p>
           <div className="modal-action">
-            <form method="dialog" className="flex gap-2 w-full justify-end">
-              <button className="btn btn-ghost btn-sm w-20">取消</button>
+            <form method="dialog" className="flex gap-2 w-full flex-row-reverse">
               <button className="btn btn-error btn-sm w-20" onClick={() => setModes([])}>确认</button>
+              <button className="btn btn-ghost btn-sm w-20">取消</button>
             </form>
           </div>
         </div>
@@ -467,12 +467,26 @@ export default function CGHTool() {
           <h3 className="font-bold text-lg text-primary flex items-center gap-2"><InfoIcon size={20} /> 关于 CGH Generator</h3>
           <p className="py-4 text-sm text-base-content/60 leading-relaxed">
             基于 Arrizon 2 算法的全息图生成工具。
-            实时预览的图片仅供参考，生成的 CGH 以保存下来的为准。
+            实时预览的 CGH 仅供参考，以保存的为准。
           </p>
           <div className="modal-action">
-            <form method="dialog" className="flex gap-2 w-full justify-end">
-              <a className="btn btn-ghost btn-sm w-20" target="_blank" rel="noopener noreferrer" href="https://gitee.com/vxyi/cgh-app">Gitee</a>
+            <form method="dialog" className="flex gap-2 w-full flex-row-reverse">
               <button className="btn btn-primary btn-sm w-20">确定</button>
+              <a className="btn btn-ghost btn-sm w-20" target="_blank" rel="noopener noreferrer" href="https://gitee.com/vxyi/cgh-app">Gitee</a>
+            </form>
+          </div>
+        </div>
+      </dialog>
+
+      {/* 错误提示 */}
+      <dialog id="error_modal" className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg text-error flex items-center gap-2"><AlertTriangle size={20} /> 输入错误</h3>
+          <p className="py-4 text-sm text-base-content/60">非法的输入参数，请检查输入是否有误。如果确认无误但错误继续存在，请报告问题。</p>
+          <div className="modal-action">
+            <form method="dialog" className="flex gap-2 w-full flex-row-reverse">
+              <button className="btn btn-primary btn-sm w-20">关闭</button>
+              <a className="btn btn-ghost btn-sm w-20" target="_blank" rel="noopener noreferrer" href="https://gitee.com/vxyi/cgh-app/issues">Issues</a>
             </form>
           </div>
         </div>

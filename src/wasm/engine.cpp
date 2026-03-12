@@ -39,7 +39,6 @@ class HG
 private:
   int m_, n_;
   double w0_;
-  int N_modes_;
 
   double w0_sq_;
   double sqrt2_over_w0_;
@@ -48,13 +47,13 @@ private:
   {
     double fac_n = boost::math::factorial<double>(n_);
     double fac_m = boost::math::factorial<double>(m_);
-    return std::sqrt(std::pow(2.0, 1.0 - n_ - m_) / (PI * fac_n * fac_m)) / w0_ / std::sqrt(N_modes_);
+    return std::sqrt(std::pow(2.0, 1.0 - n_ - m_) / (PI * fac_n * fac_m)) / w0_;
   }
 
 public:
   double norm;
 
-  HG(int m, int n, double w0, int N_modes) : m_(m), n_(n), w0_(w0), N_modes_(N_modes)
+  HG(int m, int n, double w0) : m_(m), n_(n), w0_(w0)
   {
     norm = calNorm();
     w0_sq_ = w0 * w0;
@@ -78,6 +77,31 @@ public:
   }
 };
 
+void applyHG(complex_vector &V, HG &hg, double weight, double nx, double ny, int resX, int resY, double pixelSize)
+{
+  complex_vector wf_x(resX);
+  for (int x = 0; x < resX; ++x)
+  {
+    double px = (x - resX / 2.0) * pixelSize;
+    wf_x[x] = hg.calHGx(px) * std::polar(1.0, TAU * (px / (resX * pixelSize)) * nx);
+  }
+
+  complex_vector wf_y(resY);
+  for (int y = 0; y < resY; ++y)
+  {
+    double py = -(y - resY / 2.0) * pixelSize;
+    wf_y[y] = hg.calHGy(py) * std::polar(1.0, TAU * (py / (resY * pixelSize)) * ny);
+  }
+
+  for (int y = 0; y < resY; ++y)
+  {
+    for (int x = 0; x < resX; ++x)
+    {
+      V[y * resX + x] += hg.norm * weight * wf_x[x] * wf_y[y];
+    }
+  }
+}
+
 val generateCGH(std::string json_str)
 {
   try
@@ -92,35 +116,38 @@ val generateCGH(std::string json_str)
     int resY = j["global"]["resolution"][1];
     size_t totalPixels = resX * resY;
 
-    std::vector<std::complex<double>> V(totalPixels);
+    complex_vector V(totalPixels);
 
     for (auto &mode : j["modeList"])
     {
       if (mode["type"] == "HG")
       {
-        auto hg = HG{mode["m"], mode["n"], w0, 1};
-        double nx = mode["nx"];
-        double ny = mode["ny"];
+        auto stdHG = HG{mode["m"], mode["n"], w0};
+        applyHG(V, stdHG, 1.0, mode["nx"], mode["ny"], resX, resY, pixelSize);
+      }
+      else if (mode["type"] == "PM")
+      {
+        auto subModes = mode["subModes"];
+        int N_modes = subModes["plus"].size() + subModes["minus"].size();
+        if (N_modes == 0)
+          continue;
 
-        std::vector<complex> wf_x(resX);
-        for (int x = 0; x < resX; ++x)
+        double weight = 1.0 / std::sqrt((double)N_modes);
+        for (auto &plusModes : subModes["plus"])
         {
-          double px = (x - resX / 2.0) * pixelSize;
-          wf_x[x] = hg.calHGx(px) * std::polar(1.0, TAU * (px / (resX * pixelSize)) * nx);
-        }
-
-        std::vector<complex> wf_y(resY);
-        for (int y = 0; y < resY; ++y)
-        {
-          double py = -(y - resY / 2.0) * pixelSize;
-          wf_y[y] = hg.calHGy(py) * std::polar(1.0, TAU * (py / (resY * pixelSize)) * ny);
-        }
-
-        for (int y = 0; y < resY; ++y)
-        {
-          for (int x = 0; x < resX; ++x)
+          if (plusModes["type"] == "HG")
           {
-            V[y * resX + x] += hg.norm * wf_x[x] * wf_y[y];
+            auto plusHG = HG{plusModes["m"], plusModes["n"], w0};
+            applyHG(V, plusHG, weight, mode["nx"], mode["ny"], resX, resY, pixelSize);
+          }
+        }
+
+        for (auto &minusModes : subModes["minus"])
+        {
+          if (minusModes["type"] == "HG")
+          {
+            auto minusHG = HG{minusModes["m"], minusModes["n"], w0};
+            applyHG(V, minusHG, -weight, mode["nx"], mode["ny"], resX, resY, pixelSize);
           }
         }
       }
@@ -140,7 +167,7 @@ val generateCGH(std::string json_str)
 
     std::vector<double> cgh_val(totalPixels);
     double min_val = 1e15, max_val = -1e15;
-    for (size_t i = 0; i < totalPixels; i++)
+    for (size_t i = 0; i < totalPixels; ++i)
     {
       cgh_val[i] = fx2(A[i]) * std::sin(Phi[i]);
 
@@ -154,7 +181,7 @@ val generateCGH(std::string json_str)
     if (range < 1e-15)
       range = 1.0;
 
-    for (size_t i = 0; i < totalPixels; i++)
+    for (size_t i = 0; i < totalPixels; ++i)
     {
       cgh_val[i] = static_cast<uint8_t>(((cgh_val[i] - min_val) / range) * 255.0);
     }
@@ -165,7 +192,7 @@ val generateCGH(std::string json_str)
   catch (const std::exception &e)
   {
     std::cerr << "Error: " << e.what() << std::endl;
-    return val("ERROR");
+    return val::null();
   }
 }
 
