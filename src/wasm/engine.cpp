@@ -15,9 +15,11 @@
 
 using json = nlohmann::json;
 using namespace emscripten;
+using complex = std::complex<double>;
+using complex_vector = std::vector<complex>;
 
 const double PI = std::numbers::pi;
-const double SQRT_2 = std::sqrt(2);
+const double SQRT2 = std::numbers::sqrt2;
 const double TAU = 2.0 * std::numbers::pi;
 
 double fx2(double x)
@@ -32,27 +34,49 @@ double fx2(double x)
   return fx2_data[i] * (1.0 - t) + fx2_data[i + 1] * t;
 }
 
-double cal_hg_norm(int n, int m, double w0, int N_modes)
+class HG
 {
-  double fac_n = boost::math::factorial<double>(n);
-  double fac_m = boost::math::factorial<double>(m);
+private:
+  int m_, n_;
+  double w0_;
+  int N_modes_;
 
-  return std::sqrt(std::pow(2.0, 1.0 - n - m) / (PI * fac_n * fac_m)) / w0 / std::sqrt(N_modes);
-}
+  double w0_sq_;
+  double sqrt2_over_w0_;
 
-std::complex<double> cal_hg(int n, int m, double x, double y, double w0, double norm)
-{
-  double rho_sq = x * x + y * y;
-  double w0_sq = w0 * w0;
+  double calNorm()
+  {
+    double fac_n = boost::math::factorial<double>(n_);
+    double fac_m = boost::math::factorial<double>(m_);
+    return std::sqrt(std::pow(2.0, 1.0 - n_ - m_) / (PI * fac_n * fac_m)) / w0_ / std::sqrt(N_modes_);
+  }
 
-  double sqrt2_over_w0 = SQRT_2 / w0;
-  double hx = boost::math::hermite(n, x * sqrt2_over_w0);
-  double hy = boost::math::hermite(m, y * sqrt2_over_w0);
+public:
+  double norm;
 
-  double wf = norm * hx * hy * std::exp(-rho_sq / w0_sq);
+  HG(int m, int n, double w0, int N_modes) : m_(m), n_(n), w0_(w0), N_modes_(N_modes)
+  {
+    norm = calNorm();
+    w0_sq_ = w0 * w0;
+    sqrt2_over_w0_ = SQRT2 / w0;
+  }
 
-  return std::polar(std::abs(wf), (wf < 0) ? PI : 0.0);
-}
+  complex calHGx(double x)
+  {
+    double hx = boost::math::hermite(n_, x * sqrt2_over_w0_);
+    double wf = hx * std::exp(-(x * x) / w0_sq_);
+
+    return std::polar(std::abs(wf), (wf < 0) ? PI : 0.0);
+  }
+
+  complex calHGy(double y)
+  {
+    double hy = boost::math::hermite(m_, y * sqrt2_over_w0_);
+    double wf = hy * std::exp(-(y * y) / w0_sq_);
+
+    return std::polar(std::abs(wf), (wf < 0) ? PI : 0.0);
+  }
+};
 
 val generateCGH(std::string json_str)
 {
@@ -74,24 +98,29 @@ val generateCGH(std::string json_str)
     {
       if (mode["type"] == "HG")
       {
-        int n = mode["n"];
-        int m = mode["m"];
+        auto hg = HG{mode["m"], mode["n"], w0, 1};
         double nx = mode["nx"];
         double ny = mode["ny"];
-        double norm = cal_hg_norm(n, m, w0, 1);
+
+        std::vector<complex> wf_x(resX);
+        for (int x = 0; x < resX; ++x)
+        {
+          double px = (x - resX / 2.0) * pixelSize;
+          wf_x[x] = hg.calHGx(px) * std::polar(1.0, TAU * (px / (resX * pixelSize)) * nx);
+        }
+
+        std::vector<complex> wf_y(resY);
+        for (int y = 0; y < resY; ++y)
+        {
+          double py = -(y - resY / 2.0) * pixelSize;
+          wf_y[y] = hg.calHGy(py) * std::polar(1.0, TAU * (py / (resY * pixelSize)) * ny);
+        }
 
         for (int y = 0; y < resY; ++y)
         {
           for (int x = 0; x < resX; ++x)
           {
-            double px = (x - resX / 2.0) * pixelSize;
-            double py = -(y - resY / 2.0) * pixelSize;
-
-            double norm_x = px / (resX * pixelSize);
-            double norm_y = py / (resY * pixelSize);
-
-            std::complex<double> wf = cal_hg(n, m, px, py, w0, norm);
-            V[y * resX + x] += wf * std::polar(1.0, TAU * (norm_x * nx + norm_y * ny));
+            V[y * resX + x] += hg.norm * wf_x[x] * wf_y[y];
           }
         }
       }

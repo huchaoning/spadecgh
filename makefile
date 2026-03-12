@@ -7,7 +7,7 @@ INC = -I./third_party/json.hpp -I./third_party/boost_math -I./src/wasm
 
 CFLAGS = -O3 \
          $(INC) \
-         -std=c++20 \
+         -std=c++23 \
          -s MODULARIZE=1 \
          -s EXPORT_ES6=1 \
          -s ALLOW_MEMORY_GROWTH=1 \
