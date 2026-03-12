@@ -165,7 +165,7 @@ val generateCGH(std::string json_str)
   catch (const std::exception &e)
   {
     std::cerr << "Error: " << e.what() << std::endl;
-    return val::null();
+    return val("ERROR");
   }
 }
 

@@ -105,25 +105,31 @@ export default function CGHTool() {
     const width = config.global.resolution[0];
     const height = config.global.resolution[1];
 
-    const pixels = wasmInstance.generateCGH(JSON.stringify(config));
-    lastPixelsRef.current = pixels;
+    try {
+      const res = wasmInstance.generateCGH(JSON.stringify(config));
 
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+      const pixels = res;
+      lastPixelsRef.current = pixels;
 
-    const image = ctx.createImageData(width, height);
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
 
-    for (let i = 0; i < pixels.length; i++) {
-      const g = pixels[i];
-      const offset = i * 4;
+      const image = ctx.createImageData(width, height);
 
-      image.data[offset] = g;
-      image.data[offset + 1] = g;
-      image.data[offset + 2] = g;
-      image.data[offset + 3] = 255;
+      for (let i = 0; i < pixels.length; i++) {
+        const g = pixels[i];
+        const offset = i * 4;
+
+        image.data[offset] = g;
+        image.data[offset + 1] = g;
+        image.data[offset + 2] = g;
+        image.data[offset + 3] = 255;
+      }
+
+      ctx.putImageData(image, 0, 0);
+    } catch {
+      alert("错误输入");
     }
-
-    ctx.putImageData(image, 0, 0);
   };
 
 
@@ -225,8 +231,8 @@ export default function CGHTool() {
         </div>
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
           <div className="bg-primary p-1 rounded-lg"><Box size={18} className="text-primary-content" /></div>
-          <span className="text-lg font-black tracking-tight uppercase">
-            CGH Generator <span className="text-[10px] font-normal opacity-50 ml-1">v1.0</span>
+          <span className="text-lg font-black">
+            CGH Generator
           </span>
         </div>
         <div className="flex-1 flex justify-end">
@@ -458,7 +464,7 @@ export default function CGHTool() {
       {/* 关于项目信息 */}
       <dialog id="info_modal" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box">
-          <h3 className="font-bold text-lg text-primary flex items-center gap-2"><InfoIcon size={20} /> 关于 CGH Tool</h3>
+          <h3 className="font-bold text-lg text-primary flex items-center gap-2"><InfoIcon size={20} /> 关于 CGH Generator</h3>
           <p className="py-4 text-sm text-base-content/60 leading-relaxed">
             基于 Arrizon 2 算法的全息图生成工具。
             实时预览的图片仅供参考，生成的 CGH 以保存下来的为准。
