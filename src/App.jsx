@@ -28,7 +28,7 @@ export default function CGHTool() {
   const [resX, setResX] = useState(1920);
   const [resY, setResY] = useState(1080);
   const [modes, setModes] = useState([
-    { id: 1, type: "HG", n: 0, m: 0, nx: 500, ny: 0 }
+    { id: 1, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0 }
   ]);
 
   const lastPixelsRef = useRef(null);
@@ -84,8 +84,8 @@ export default function CGHTool() {
       // 将 React 内部状态转化为扁平化的模式数组
       modeList: modes.map(mode => ({
         type: mode.type,
-        n: mode.n,
-        m: mode.m,
+        o1: mode.o1,
+        o2: mode.o2,
         nx: mode.nx,
         ny: mode.ny,
         // 如果是 PM (叠加模式)，递归或扁平化子模式
@@ -173,7 +173,7 @@ export default function CGHTool() {
   /* --- 模式列表操作函数 --- */
   const addMode = () => {
     const newId = modes.length > 0 ? Math.max(...modes.map(mode => mode.id)) + 1 : 1;
-    setModes([...modes, { id: newId, type: "HG", n: 0, m: 0, nx: 500, ny: 0 }]);
+    setModes([...modes, { id: newId, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0 }]);
   };
 
   const removeMode = (id) => setModes(modes.filter(mode => mode.id !== id));
@@ -199,7 +199,7 @@ export default function CGHTool() {
     setModes(modes.map(mode => {
       if (mode.id === parentId) {
         const subId = Date.now() + Math.random();
-        return { ...mode, [groupKey]: [...(mode[groupKey] || []), { id: subId, type, n: 0, m: 0 }] };
+        return { ...mode, [groupKey]: [...(mode[groupKey] || []), { id: subId, type, o1: 0, o2: 0 }] };
       }
       return mode;
     }));
@@ -322,7 +322,7 @@ export default function CGHTool() {
                           <div className="collapse-title flex items-center gap-3 pr-12 min-h-0">
                             <span className="badge badge-sm badge-ghost font-mono shrink-0">{index + 1}</span>
                             <span className="font-mono text-xs font-bold uppercase text-primary truncate">
-                              {mode.type === "PM" ? `PM (${(mode.plusModes?.length || 0) + (mode.minusModes?.length || 0)})` : `${mode.type}(${mode.n},${mode.m})`}
+                              {mode.type === "PM" ? `PM (${(mode.plusModes?.length || 0) + (mode.minusModes?.length || 0)})` : `${mode.type}(${mode.o1},${mode.o2})`}
                             </span>
                           </div>
 
@@ -357,8 +357,8 @@ export default function CGHTool() {
                                             <motion.div key={sub.id} layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.8 }}
                                               className="flex items-center gap-2 bg-base-200/50 p-2 rounded-lg border border-base-300">
                                               <span className="text-[9px] font-black opacity-40 w-5 shrink-0">{sub.type}</span>
-                                              <input type="text" className="input input-bordered input-xs w-12 font-mono" value={sub.n} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "n", e.target.value)} />
-                                              <input type="text" className="input input-bordered input-xs w-12 font-mono" value={sub.m} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "m", e.target.value)} />
+                                              <input type="text" className="input input-bordered input-xs w-12 font-mono" value={sub.o1} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o1", e.target.value)} />
+                                              <input type="text" className="input input-bordered input-xs w-12 font-mono" value={sub.o2} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o2", e.target.value)} />
                                               <button className="btn btn-ghost btn-xs btn-square text-error/40" onClick={() => removeSubMode(mode.id, group.key, sub.id)}><Trash2 size={12} /></button>
                                             </motion.div>
                                           ))}
@@ -370,12 +370,12 @@ export default function CGHTool() {
                               ) : (
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="form-control">
-                                    <label className="label-text text-[10px] mb-1">{mode.type === "LG" ? "角向阶数 L" : "水平阶数 M"}</label>
-                                    <input type="text" value={mode.n} onChange={(e) => updateMode(mode.id, "n", e.target.value)} className="input input-bordered input-xs font-mono" />
+                                    <label className="label-text text-[10px] mb-1">{mode.type === "LG" ? "角向阶数 L" : "水平阶数 N"}</label>
+                                    <input type="text" value={mode.o1} onChange={(e) => updateMode(mode.id, "o1", e.target.value)} className="input input-bordered input-xs font-mono" />
                                   </div>
                                   <div className="form-control">
-                                    <label className="label-text text-[10px] mb-1">{mode.type === "LG" ? "径向阶数 P" : "垂直阶数 N"}</label>
-                                    <input type="text" value={mode.m} onChange={(e) => updateMode(mode.id, "m", e.target.value)} className="input input-bordered input-xs font-mono" />
+                                    <label className="label-text text-[10px] mb-1">{mode.type === "LG" ? "径向阶数 P" : "垂直阶数 M"}</label>
+                                    <input type="text" value={mode.o2} onChange={(e) => updateMode(mode.id, "o2", e.target.value)} className="input input-bordered input-xs font-mono" />
                                   </div>
                                 </div>
                               )}
@@ -407,7 +407,7 @@ export default function CGHTool() {
             {/* 侧边栏底部操作区 */}
             <div className="p-4 border-t border-base-300 bg-base-100 space-y-3">
               <button onClick={handleRun} className="btn btn-primary btn-block shadow-lg shadow-primary/20 active:scale-95 transition-all">
-                <Play size={16} fill="currentColor" /> RUN !
+                <Play size={16} fill="currentColor" /> 走你！！
               </button>
               <div className="grid grid-cols-2 gap-3">
                 <button className="btn btn-outline btn-error btn-sm" onClick={() => document.getElementById("clear_modal").showModal()}>

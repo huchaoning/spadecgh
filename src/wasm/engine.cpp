@@ -53,7 +53,7 @@ private:
 public:
   double norm;
 
-  HG(int m, int n, double w0) : m_(m), n_(n), w0_(w0)
+  HG(int n, int m, double w0) : n_(n), m_(m), w0_(w0)
   {
     norm = calNorm();
     w0_sq_ = w0 * w0;
@@ -122,7 +122,7 @@ val generateCGH(std::string json_str)
     {
       if (mode["type"] == "HG")
       {
-        auto stdHG = HG{mode["m"], mode["n"], w0};
+        auto stdHG = HG{mode["o1"], mode["o2"], w0};
         applyHG(V, stdHG, 1.0, mode["nx"], mode["ny"], resX, resY, pixelSize);
       }
       else if (mode["type"] == "PM")
@@ -137,7 +137,7 @@ val generateCGH(std::string json_str)
         {
           if (plusModes["type"] == "HG")
           {
-            auto plusHG = HG{plusModes["m"], plusModes["n"], w0};
+            auto plusHG = HG{plusModes["o1"], plusModes["o2"], w0};
             applyHG(V, plusHG, weight, mode["nx"], mode["ny"], resX, resY, pixelSize);
           }
         }
@@ -146,7 +146,7 @@ val generateCGH(std::string json_str)
         {
           if (minusModes["type"] == "HG")
           {
-            auto minusHG = HG{minusModes["m"], minusModes["n"], w0};
+            auto minusHG = HG{minusModes["o1"], minusModes["o2"], w0};
             applyHG(V, minusHG, -weight, mode["nx"], mode["ny"], resX, resY, pixelSize);
           }
         }
