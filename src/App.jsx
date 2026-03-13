@@ -25,6 +25,7 @@ export default function CGHTool() {
     pixelSize: 8,
     resX: 1920,
     resY: 1080,
+    fileName: "untitled",
     modes: [{ id: 1, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0 }]
   };
 
@@ -38,6 +39,7 @@ export default function CGHTool() {
     { id: 1, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0 }
   ]);
   const [showRestoreToast, setShowRestoreToast] = useState(false);
+  const [fileName, setFileName] = useState("untitled");
 
   const lastPixelsRef = useRef(null);
   const canvasRef = useRef(null);
@@ -58,6 +60,8 @@ export default function CGHTool() {
       if (config.resX) setResX(config.resX);
       if (config.resY) setResY(config.resY);
       if (config.modes) setModes(config.modes);
+      if (config.fileName) setFileName(config.fileName);
+
       setShowRestoreToast(true);
       const timer = setTimeout(() => setShowRestoreToast(false), 5000);
       return () => clearTimeout(timer);
@@ -72,10 +76,11 @@ export default function CGHTool() {
         pixelSize != DEFAULT_CONFIG.pixelSize ||
         resX != DEFAULT_CONFIG.resX ||
         resY != DEFAULT_CONFIG.resY ||
+        fileName != DEFAULT_CONFIG.fileName ||
         JSON.stringify(modes) !== JSON.stringify(DEFAULT_CONFIG.modes);
 
       if (hasChanged) {
-        const configToSave = { sigma, pixelSize, resX, resY, modes };
+        const configToSave = { sigma, pixelSize, resX, resY, modes, fileName };
         localStorage.setItem("cgh_last_config", JSON.stringify(configToSave));
       } else {
         localStorage.removeItem("cgh_last_config");
@@ -83,7 +88,7 @@ export default function CGHTool() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [sigma, pixelSize, resX, resY, modes]);
+  }, [sigma, pixelSize, resX, resY, modes, fileName]);
 
 
   const resetToDefault = () => {
@@ -94,6 +99,7 @@ export default function CGHTool() {
     setResX(DEFAULT_CONFIG.resX);
     setResY(DEFAULT_CONFIG.resY);
     setModes(DEFAULT_CONFIG.modes);
+    setFileName(DEFAULT_CONFIG.fileName);
 
     localStorage.removeItem("cgh_last_config");
     setShowRestoreToast(false);
@@ -136,7 +142,7 @@ export default function CGHTool() {
   };
 
 
-  // 导出参数为 JSON, 准备传给 WASM
+  /* --- 导出参数为 JSON, 准备传给 WASM --- */
   const loadConfig = () => {
     return {
       global: {
@@ -160,7 +166,7 @@ export default function CGHTool() {
   };
 
 
-  // 运行函数
+  /* --- RUN --- */
   const handleRun = () => {
     if (modes.length === 0 || !wasmInstance || !canvasRef.current) return;
 
@@ -197,7 +203,7 @@ export default function CGHTool() {
   };
 
 
-  // 保存函数
+  /* --- 保存功能 --- */
   const handleSave = async () => {
     const pixels = lastPixelsRef.current;
 
@@ -221,7 +227,7 @@ export default function CGHTool() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "untitled.bmp";
+    link.download = (fileName.trim() || "untitled") + ".bmp";
 
     document.body.appendChild(link);
     link.click();
@@ -230,7 +236,6 @@ export default function CGHTool() {
       URL.revokeObjectURL(url);
     }, 60);
   };
-
 
 
   /* --- 模式列表操作函数 --- */
@@ -352,6 +357,26 @@ export default function CGHTool() {
                     <div className="form-control w-full">
                       <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">像素尺寸 (Pixel Size, μm)</span></label>
                       <input type="text" value={pixelSize} onChange={(e) => setPixelSize(formatInputValue(e.target.value))} className="input input-sm input-bordered font-mono" />
+                    </div>
+
+                    <div className="divider my-1 opacity-50"></div>
+                    <div className="form-control w-full">
+                      <label className="label py-1 px-0">
+                        <span className="label-text-alt text-[10px]">保存文件名 (.bmp)</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={fileName}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[\\/:*?"<>|]/g, "");
+                            setFileName(val);
+                          }
+                          }
+                          className="input input-sm input-bordered focus:input-primary w-full font-mono pr-12"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] opacity-30 font-mono pointer-events-none">.bmp</span>
+                      </div>
                     </div>
                   </div>
                 </div>
