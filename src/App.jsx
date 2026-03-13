@@ -31,13 +31,11 @@ export default function CGHTool() {
 
   /* --- 状态管理 --- */
   const [showSidebar, setShowSidebar] = useState(true);
-  const [sigma, setSigma] = useState(100);
-  const [pixelSize, setPixelSize] = useState(8);
-  const [resX, setResX] = useState(1920);
-  const [resY, setResY] = useState(1080);
-  const [modes, setModes] = useState([
-    { id: 1, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0 }
-  ]);
+  const [sigma, setSigma] = useState(DEFAULT_CONFIG.sigma);
+  const [pixelSize, setPixelSize] = useState(DEFAULT_CONFIG.pixelSize);
+  const [resX, setResX] = useState(DEFAULT_CONFIG.resX);
+  const [resY, setResY] = useState(DEFAULT_CONFIG.resY);
+  const [modes, setModes] = useState(DEFAULT_CONFIG.modes);
   const [showRestoreToast, setShowRestoreToast] = useState(false);
   const [fileName, setFileName] = useState("untitled");
 
@@ -245,7 +243,7 @@ export default function CGHTool() {
 
   const addMode = () => {
     const newId = modes.length > 0 ? Math.max(...modes.map(mode => mode.id)) + 1 : 1;
-    setModes([...modes, { id: newId, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0 }]);
+    setModes([...modes, { ...DEFAULT_CONFIG.modes[0], id: newId }]);
   };
 
   const removeMode = (id) => setModes(modes.filter(mode => mode.id !== id));
@@ -361,9 +359,7 @@ export default function CGHTool() {
 
                     <div className="divider my-1 opacity-50"></div>
                     <div className="form-control w-full">
-                      <label className="label py-1 px-0">
-                        <span className="label-text-alt text-[10px]">保存文件名 (.bmp)</span>
-                      </label>
+                      <label className="label py-1 px-0"><span className="label-text font-medium text-xs">保存文件名 (.bmp)</span></label>
                       <div className="relative">
                         <input
                           type="text"
