@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-22.04 
+    runs-on: windows-2022
     
     steps:
       - uses: actions/checkout@v4
@@ -34,10 +34,21 @@ jobs:
       
       - run: npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Check Dist
+        run: if (!(Test-Path "dist/index.html")) { throw "dist/index.html not found!" }
+
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: './dist'
 
-      - name: Deploy
+      - name: Deploy to Pages
         uses: actions/deploy-pages@v4
+
+      - name: Package Windows
+        run: npx electron-forge make
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: App-Windows-Portable
+          path: out/make/zip/win32/x64/*.zip
+          if-no-files-found: error
