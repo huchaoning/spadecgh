@@ -136,6 +136,7 @@ export default function CGHTool() {
   };
 
 
+  // 导出参数为 JSON, 准备传给 WASM
   const loadConfig = () => {
     return {
       global: {
@@ -159,6 +160,7 @@ export default function CGHTool() {
   };
 
 
+  // 运行函数
   const handleRun = () => {
     if (modes.length === 0 || !wasmInstance || !canvasRef.current) return;
 
@@ -195,7 +197,7 @@ export default function CGHTool() {
   };
 
 
-
+  // 保存函数
   const handleSave = async () => {
     const pixels = lastPixelsRef.current;
 
@@ -232,6 +234,10 @@ export default function CGHTool() {
 
 
   /* --- 模式列表操作函数 --- */
+  const formatInputValue = (value) => {
+    return (value === "-" || value === "") ? value : (parseFloat(value) || 0);
+  };
+
   const addMode = () => {
     const newId = modes.length > 0 ? Math.max(...modes.map(mode => mode.id)) + 1 : 1;
     setModes([...modes, { id: newId, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0 }]);
@@ -245,11 +251,7 @@ export default function CGHTool() {
         if (field === "type" && value === "PM") {
           return { ...mode, type: value, plusModes: [], minusModes: [] };
         }
-        const val = (field === "type")
-          ? value
-          : (value === "-" || value === "")
-            ? value
-            : (parseFloat(value) || 0);
+        const val = (field === "type") ? value : formatInputValue(value);
         return { ...mode, [field]: val };
       }
       return mode;
@@ -276,7 +278,7 @@ export default function CGHTool() {
       if (mode.id === parentId) {
         const newList = mode[groupKey].map(s => {
           if (s.id === subId) {
-            const val = (value === "-" || value === "") ? value : (parseFloat(value) || 0);
+            const val = (field === "type") ? value : formatInputValue(value);
             return { ...s, [field]: val };
           }
           return s;
@@ -332,7 +334,7 @@ export default function CGHTool() {
                 <div className="bg-base-100 border border-base-300 shadow-sm p-4 rounded-xl space-y-4">
                   <div className="form-control w-full">
                     <label className="label py-1 px-0"><span className="label-text font-medium text-xs">特征宽度 (σ, μm)</span></label>
-                    <input type="text" value={sigma} onChange={(e) => setSigma(e.target.value)} className="input input-sm input-bordered focus:input-primary w-full font-mono" />
+                    <input type="text" value={sigma} onChange={(e) => setSigma(formatInputValue(e.target.value))} className="input input-sm input-bordered focus:input-primary w-full font-mono" />
                   </div>
                   <div className="divider my-1 opacity-50"></div>
                   <div className="space-y-3">
@@ -340,16 +342,16 @@ export default function CGHTool() {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="form-control">
                         <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">分辨率 X (px)</span></label>
-                        <input type="text" value={resX} onChange={(e) => setResX(e.target.value)} className="input input-sm input-bordered font-mono" />
+                        <input type="text" value={resX} onChange={(e) => setResX(formatInputValue(e.target.value))} className="input input-sm input-bordered font-mono" />
                       </div>
                       <div className="form-control">
                         <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">分辨率 Y (px)</span></label>
-                        <input type="text" value={resY} onChange={(e) => setResY(e.target.value)} className="input input-sm input-bordered font-mono" />
+                        <input type="text" value={resY} onChange={(e) => setResY(formatInputValue(e.target.value))} className="input input-sm input-bordered font-mono" />
                       </div>
                     </div>
                     <div className="form-control w-full">
                       <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">像素尺寸 (Pixel Size, μm)</span></label>
-                      <input type="text" value={pixelSize} onChange={(e) => setPixelSize(e.target.value)} className="input input-sm input-bordered font-mono" />
+                      <input type="text" value={pixelSize} onChange={(e) => setPixelSize(formatInputValue(e.target.value))} className="input input-sm input-bordered font-mono" />
                     </div>
                   </div>
                 </div>
