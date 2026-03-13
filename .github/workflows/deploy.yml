@@ -2,12 +2,13 @@ name: Deploy
 on:
   push:
     branches: [main]
+    tags: ['v*']
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -37,18 +38,31 @@ jobs:
       - name: Check Dist
         run: if (!(Test-Path "dist/index.html")) { throw "dist/index.html not found!" }
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Update Web
+        uses: actions/upload-pages-artifact@v3
         with:
           path: './dist'
 
       - name: Deploy to Pages
         uses: actions/deploy-pages@v4
 
-      - name: Package Windows
+      - name: Package Windows App
+        if: startsWith(github.ref, 'refs/tags/')
         run: npx electron-forge make
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Artifact
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
         with:
           name: App-Windows-Portable
           path: out/make/zip/win32/x64/*.zip
-          if-no-files-found: error
+          compression-level: 0 
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/make/zip/win32/x64/*.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false
