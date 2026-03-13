@@ -4,7 +4,7 @@ import { Jimp } from "jimp";
 import createModule from "../public/wasm/cgh_wasm.js";
 import {
   Box, Play, AlertTriangle, Info, Save, Plus,
-  Trash2, Settings2, Sliders, Menu, InfoIcon
+  Trash2, Settings2, Sliders, Menu, InfoIcon, X
 } from "lucide-react";
 
 
@@ -20,6 +20,13 @@ export default function CGHTool() {
     });
   }, []);
 
+  const DEFAULT_CONFIG = {
+    sigma: 100,
+    pixelSize: 8,
+    resX: 1920,
+    resY: 1080,
+    modes: [{ id: 1, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0 }]
+  };
 
   /* --- 状态管理 --- */
   const [showSidebar, setShowSidebar] = useState(true);
@@ -30,6 +37,7 @@ export default function CGHTool() {
   const [modes, setModes] = useState([
     { id: 1, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0 }
   ]);
+  const [showRestoreToast, setShowRestoreToast] = useState(false);
 
   const lastPixelsRef = useRef(null);
   const canvasRef = useRef(null);
@@ -39,6 +47,62 @@ export default function CGHTool() {
   const isDragging = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
 
+  /* --- 状态持久化与恢复逻辑 --- */
+  const isResetting = useRef(false);
+  useEffect(() => {
+    const savedConfig = localStorage.getItem("cgh_last_config");
+    if (savedConfig) {
+      const config = JSON.parse(savedConfig);
+      if (config.sigma) setSigma(config.sigma);
+      if (config.pixelSize) setPixelSize(config.pixelSize);
+      if (config.resX) setResX(config.resX);
+      if (config.resY) setResY(config.resY);
+      if (config.modes) setModes(config.modes);
+      setShowRestoreToast(true);
+      const timer = setTimeout(() => setShowRestoreToast(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isResetting.current) return;
+    const timer = setTimeout(() => {
+      const hasChanged =
+        sigma != DEFAULT_CONFIG.sigma ||
+        pixelSize != DEFAULT_CONFIG.pixelSize ||
+        resX != DEFAULT_CONFIG.resX ||
+        resY != DEFAULT_CONFIG.resY ||
+        JSON.stringify(modes) !== JSON.stringify(DEFAULT_CONFIG.modes);
+
+      if (hasChanged) {
+        const configToSave = { sigma, pixelSize, resX, resY, modes };
+        localStorage.setItem("cgh_last_config", JSON.stringify(configToSave));
+      } else {
+        localStorage.removeItem("cgh_last_config");
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [sigma, pixelSize, resX, resY, modes]);
+
+
+  const resetToDefault = () => {
+    isResetting.current = true;
+
+    setSigma(DEFAULT_CONFIG.sigma);
+    setPixelSize(DEFAULT_CONFIG.pixelSize);
+    setResX(DEFAULT_CONFIG.resX);
+    setResY(DEFAULT_CONFIG.resY);
+    setModes(DEFAULT_CONFIG.modes);
+
+    localStorage.removeItem("cgh_last_config");
+    setShowRestoreToast(false);
+    setTimeout(() => {
+      isResetting.current = false;
+    }, 500);
+  };
+
+  /* --- 画布操作逻辑 --- */
   const handleWheel = (e) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -496,6 +560,44 @@ export default function CGHTool() {
         </div>
       </dialog>
 
+      <AnimatePresence>
+        {showRestoreToast && (
+          <motion.div
+            initial={{ opacity: 0, x: 50, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 20, scale: 0.95 }}
+            className="fixed bottom-12 right-12 z-100"
+          >
+            <div className="bg-base-100 border border-base-300 shadow-2xl rounded-full px-3 py-3 flex items-center gap-5">
+              <div className="flex items-center gap-3">
+                <div className="bg-none text-primary ml-4">
+                  <InfoIcon size={18} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-primary">欢迎回来</span>
+                  <span className="text-xs font-bold text-base-content">已载入上次参数配置</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={resetToDefault}
+                  className="btn btn-ghost btn-sm text-primary"
+                >
+                  重置默认
+                </button>
+
+                <button
+                  onClick={() => setShowRestoreToast(false)}
+                  className="group btn btn-ghost btn-xs btn-circle transition-all duration-75"
+                >
+                  <X size={14} className="opacity-20 group-hover:opacity-100 transition-all duration-75" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
