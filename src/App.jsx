@@ -105,6 +105,7 @@ export default function CGHTool() {
     const width = config.global.resolution[0];
     const height = config.global.resolution[1];
 
+    console.log(JSON.stringify(config, null, 2))
     try {
       const res = wasmInstance.generateCGH(JSON.stringify(config));
 
@@ -195,27 +196,33 @@ export default function CGHTool() {
   };
 
   const handleAddSubMode = (parentId, groupKey, type) => {
-    setModes(modes.map(m => {
-      if (m.id === parentId) {
+    setModes(modes.map(mode => {
+      if (mode.id === parentId) {
         const subId = Date.now() + Math.random();
-        return { ...m, [groupKey]: [...(m[groupKey] || []), { id: subId, type, n: 0, m: 0 }] };
+        return { ...mode, [groupKey]: [...(mode[groupKey] || []), { id: subId, type, n: 0, m: 0 }] };
       }
-      return m;
+      return mode;
     }));
     if (document.activeElement) document.activeElement.blur();
   };
 
   const removeSubMode = (parentId, groupKey, subId) => {
-    setModes(modes.map(m => (m.id === parentId ? { ...m, [groupKey]: m[groupKey].filter(s => s.id !== subId) } : m)));
+    setModes(modes.map(mode => (mode.id === parentId ? { ...mode, [groupKey]: mode[groupKey].filter(s => s.id !== subId) } : mode)));
   };
 
   const updateSubMode = (parentId, groupKey, subId, field, value) => {
-    setModes(modes.map(m => {
-      if (m.id === parentId) {
-        const newList = m[groupKey].map(s => s.id === subId ? { ...s, [field]: parseFloat(value) || 0 } : s);
-        return { ...m, [groupKey]: newList };
+    setModes(modes.map(mode => {
+      if (mode.id === parentId) {
+        const newList = mode[groupKey].map(s => {
+          if (s.id === subId) {
+            const val = (value === "-" || value === "") ? value : (parseFloat(value) || 0);
+            return { ...s, [field]: val };
+          }
+          return s;
+        });
+        return { ...mode, [groupKey]: newList };
       }
-      return m;
+      return mode;
     }));
   };
 
