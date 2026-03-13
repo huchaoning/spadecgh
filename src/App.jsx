@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Jimp } from "jimp";
-import createModule from '../public/wasm/cgh_wasm.js';
+import createModule from "../public/wasm/cgh_wasm.js";
 import {
   Box, Play, AlertTriangle, Info, Save, Plus,
   Trash2, Settings2, Sliders, Menu, InfoIcon
-} from 'lucide-react';
+} from "lucide-react";
 
 
 export default function CGHTool() {
@@ -28,7 +28,7 @@ export default function CGHTool() {
   const [resX, setResX] = useState(1920);
   const [resY, setResY] = useState(1080);
   const [modes, setModes] = useState([
-    { id: 1, type: 'HG', n: 0, m: 0, nx: 500, ny: 0 }
+    { id: 1, type: "HG", n: 0, m: 0, nx: 500, ny: 0 }
   ]);
 
   const lastPixelsRef = useRef(null);
@@ -89,7 +89,7 @@ export default function CGHTool() {
         nx: mode.nx,
         ny: mode.ny,
         // 如果是 PM (叠加模式)，递归或扁平化子模式
-        subModes: mode.type === 'PM' ? {
+        subModes: mode.type === "PM" ? {
           plus: mode.plusModes || [],
           minus: mode.minusModes || []
         } : null
@@ -112,7 +112,7 @@ export default function CGHTool() {
       lastPixelsRef.current = pixels;
 
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
 
       const image = ctx.createImageData(width, height);
 
@@ -172,7 +172,7 @@ export default function CGHTool() {
   /* --- 模式列表操作函数 --- */
   const addMode = () => {
     const newId = modes.length > 0 ? Math.max(...modes.map(mode => mode.id)) + 1 : 1;
-    setModes([...modes, { id: newId, type: 'HG', n: 0, m: 0, nx: 500, ny: 0 }]);
+    setModes([...modes, { id: newId, type: "HG", n: 0, m: 0, nx: 500, ny: 0 }]);
   };
 
   const removeMode = (id) => setModes(modes.filter(mode => mode.id !== id));
@@ -180,12 +180,12 @@ export default function CGHTool() {
   const updateMode = (id, field, value) => {
     setModes(modes.map(mode => {
       if (mode.id === id) {
-        if (field === 'type' && value === 'PM') {
+        if (field === "type" && value === "PM") {
           return { ...mode, type: value, plusModes: [], minusModes: [] };
         }
-        const val = (field === 'type')
+        const val = (field === "type")
           ? value
-          : (value === '-' || value === '')
+          : (value === "-" || value === "")
             ? value
             : (parseFloat(value) || 0);
         return { ...mode, [field]: val };
@@ -247,12 +247,12 @@ export default function CGHTool() {
 
         {/* --- 左侧侧边栏 --- */}
         <aside onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             handleRun();
             if (document.activeElement) document.activeElement.blur();
           }
         }}
-          className={`bg-base-200/50 border-r border-base-300 flex flex-col transition-all duration-300 ease-in-out ${showSidebar ? 'w-96' : 'w-0'} overflow-hidden`}>
+          className={`bg-base-200/50 border-r border-base-300 flex flex-col transition-all duration-300 ease-in-out ${showSidebar ? "w-96" : "w-0"} overflow-hidden`}>
           <div className="w-96 flex flex-col h-full shrink-0">
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
 
@@ -315,32 +315,32 @@ export default function CGHTool() {
                           <div className="collapse-title flex items-center gap-3 pr-12 min-h-0">
                             <span className="badge badge-sm badge-ghost font-mono shrink-0">{index + 1}</span>
                             <span className="font-mono text-xs font-bold uppercase text-primary truncate">
-                              {mode.type === 'PM' ? `PM (${(mode.plusModes?.length || 0) + (mode.minusModes?.length || 0)})` : `${mode.type}(${mode.n},${mode.m})`}
+                              {mode.type === "PM" ? `PM (${(mode.plusModes?.length || 0) + (mode.minusModes?.length || 0)})` : `${mode.type}(${mode.n},${mode.m})`}
                             </span>
                           </div>
 
                           <div className="collapse-content">
                             <div className="pt-4 space-y-4">
                               <div className="join w-full bg-base-200 p-0.5 rounded-lg">
-                                {['HG', 'LG', 'PM'].map((t) => (
-                                  <button key={t} className={`join-item btn btn-xs flex-1 border-none ${mode.type === t ? 'btn-primary shadow-sm' : 'btn-ghost text-base-content/60'}`}
-                                    onClick={() => updateMode(mode.id, 'type', t)}>
+                                {["HG", "LG", "PM"].map((t) => (
+                                  <button key={t} className={`join-item btn btn-xs flex-1 border-none ${mode.type === t ? "btn-primary shadow-sm" : "btn-ghost text-base-content/60"}`}
+                                    onClick={() => updateMode(mode.id, "type", t)}>
                                     {t}
                                   </button>
                                 ))}
                               </div>
 
-                              {mode.type === 'PM' ? (
+                              {mode.type === "PM" ? (
                                 <div className="space-y-4">
-                                  {[{ label: 'Plus Modes (+)', key: 'plusModes', color: 'text-success' }, { label: 'Minus Modes (-)', key: 'minusModes', color: 'text-error' }].map(group => (
+                                  {[{ label: "Plus 模式 (+)", key: "plusModes", color: "text-success" }, { label: "Minus 模式 (-)", key: "minusModes", color: "text-error" }].map(group => (
                                     <div key={group.key} className="space-y-2">
                                       <div className="flex justify-between items-center px-1">
-                                        <span className={`text-[10px] font-bold uppercase tracking-wider ${group.color}`}>{group.label}</span>
+                                        <span className={`text-[10px] font-bold ${group.color}`}>{group.label}</span>
                                         <div className="dropdown dropdown-end">
                                           <div tabIndex={0} role="button" className="btn btn-circle btn-ghost btn-xs text-primary bg-base-200"><Plus size={14} /></div>
                                           <ul tabIndex={0} className="dropdown-content z-100 menu p-2 shadow-2xl bg-base-100 rounded-box w-32 text-xs border border-base-300">
-                                            <li><a onClick={() => handleAddSubMode(mode.id, group.key, 'HG')}>HG 模式</a></li>
-                                            <li><a onClick={() => handleAddSubMode(mode.id, group.key, 'LG')}>LG 模式</a></li>
+                                            <li><a onClick={() => handleAddSubMode(mode.id, group.key, "HG")}>HG 模式</a></li>
+                                            <li><a onClick={() => handleAddSubMode(mode.id, group.key, "LG")}>LG 模式</a></li>
                                           </ul>
                                         </div>
                                       </div>
@@ -350,8 +350,8 @@ export default function CGHTool() {
                                             <motion.div key={sub.id} layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.8 }}
                                               className="flex items-center gap-2 bg-base-200/50 p-2 rounded-lg border border-base-300">
                                               <span className="text-[9px] font-black opacity-40 w-5 shrink-0">{sub.type}</span>
-                                              <input type="text" className="input input-bordered input-xs w-12 font-mono" value={sub.n} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, 'n', e.target.value)} />
-                                              <input type="text" className="input input-bordered input-xs w-12 font-mono" value={sub.m} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, 'm', e.target.value)} />
+                                              <input type="text" className="input input-bordered input-xs w-12 font-mono" value={sub.n} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "n", e.target.value)} />
+                                              <input type="text" className="input input-bordered input-xs w-12 font-mono" value={sub.m} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "m", e.target.value)} />
                                               <button className="btn btn-ghost btn-xs btn-square text-error/40" onClick={() => removeSubMode(mode.id, group.key, sub.id)}><Trash2 size={12} /></button>
                                             </motion.div>
                                           ))}
@@ -363,12 +363,12 @@ export default function CGHTool() {
                               ) : (
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="form-control">
-                                    <label className="label-text text-[10px] mb-1">{mode.type === 'LG' ? '角向阶数 L' : '水平阶数 M'}</label>
-                                    <input type="text" value={mode.n} onChange={(e) => updateMode(mode.id, 'n', e.target.value)} className="input input-bordered input-xs font-mono" />
+                                    <label className="label-text text-[10px] mb-1">{mode.type === "LG" ? "角向阶数 L" : "水平阶数 M"}</label>
+                                    <input type="text" value={mode.n} onChange={(e) => updateMode(mode.id, "n", e.target.value)} className="input input-bordered input-xs font-mono" />
                                   </div>
                                   <div className="form-control">
-                                    <label className="label-text text-[10px] mb-1">{mode.type === 'LG' ? '径向阶数 P' : '垂直阶数 N'}</label>
-                                    <input type="text" value={mode.m} onChange={(e) => updateMode(mode.id, 'm', e.target.value)} className="input input-bordered input-xs font-mono" />
+                                    <label className="label-text text-[10px] mb-1">{mode.type === "LG" ? "径向阶数 P" : "垂直阶数 N"}</label>
+                                    <input type="text" value={mode.m} onChange={(e) => updateMode(mode.id, "m", e.target.value)} className="input input-bordered input-xs font-mono" />
                                   </div>
                                 </div>
                               )}
@@ -376,11 +376,11 @@ export default function CGHTool() {
                               <div className="grid grid-cols-2 gap-4 border-t border-base-300 pt-3">
                                 <div className="form-control">
                                   <label className="label-text text-[10px] mb-1">载波 Nx</label>
-                                  <input type="text" value={mode.nx} onChange={(e) => updateMode(mode.id, 'nx', e.target.value)} className="input input-bordered input-xs font-mono" />
+                                  <input type="text" value={mode.nx} onChange={(e) => updateMode(mode.id, "nx", e.target.value)} className="input input-bordered input-xs font-mono" />
                                 </div>
                                 <div className="form-control">
                                   <label className="label-text text-[10px] mb-1">载波 Ny</label>
-                                  <input type="text" value={mode.ny} onChange={(e) => updateMode(mode.id, 'ny', e.target.value)} className="input input-bordered input-xs font-mono" />
+                                  <input type="text" value={mode.ny} onChange={(e) => updateMode(mode.id, "ny", e.target.value)} className="input input-bordered input-xs font-mono" />
                                 </div>
                               </div>
 
@@ -403,7 +403,7 @@ export default function CGHTool() {
                 <Play size={16} fill="currentColor" /> RUN !
               </button>
               <div className="grid grid-cols-2 gap-3">
-                <button className="btn btn-outline btn-error btn-sm" onClick={() => document.getElementById('clear_modal').showModal()}>
+                <button className="btn btn-outline btn-error btn-sm" onClick={() => document.getElementById("clear_modal").showModal()}>
                   <Trash2 size={14} /> 清空列表
                 </button>
                 <button className="btn btn-outline btn-sm" onClick={handleSave}>
@@ -418,7 +418,7 @@ export default function CGHTool() {
         <main className="flex-1 bg-base-300 relative p-8 flex flex-col gap-6">
           <div
             className="absolute inset-0 opacity-[0.03] pointer-events-none"
-            style={{ backgroundImage: 'radial-gradient(circle, #000 2px, transparent 2px)', backgroundSize: '32px 32px' }}
+            style={{ backgroundImage: "radial-gradient(circle, #000 2px, transparent 2px)", backgroundSize: "32px 32px" }}
           ></div>
 
           <div
@@ -438,7 +438,7 @@ export default function CGHTool() {
               className="max-w-full max-h-full object-contain pointer-events-none"
               style={{
                 transform: `scale(${transform.scale}) translate(${transform.x}px, ${transform.y}px)`,
-                transition: isDragging.current ? 'none' : 'transform 0.1s ease-out',
+                transition: isDragging.current ? "none" : "transform 0.1s ease-out",
               }}
             />
           </div>
