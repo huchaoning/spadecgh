@@ -72,8 +72,6 @@ export default function CGHTool() {
   };
 
 
-
-  // 生成可导出给 WASM 的 JSON 数据
   const loadConfig = () => {
     return {
       global: {
@@ -81,14 +79,13 @@ export default function CGHTool() {
         pixelSize: parseFloat(pixelSize),
         resolution: [parseInt(resX), parseInt(resY)]
       },
-      // 将 React 内部状态转化为扁平化的模式数组
       modeList: modes.map(mode => ({
         type: mode.type,
         o1: mode.o1,
         o2: mode.o2,
         nx: mode.nx,
         ny: mode.ny,
-        // 如果是 PM (叠加模式)，递归或扁平化子模式
+
         subModes: mode.type === "PM" ? {
           plus: mode.plusModes || [],
           minus: mode.minusModes || []

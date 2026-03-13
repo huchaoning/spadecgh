@@ -15,6 +15,7 @@
 
 using json = nlohmann::json;
 using namespace emscripten;
+using vector = std::vector<double>;
 using complex = std::complex<double>;
 using complex_vector = std::vector<complex>;
 
@@ -37,11 +38,12 @@ double fx2(double x)
 class HG
 {
 private:
-  int m_, n_;
+  int n_, m_;
   double w0_;
 
   double w0_sq_;
   double sqrt2_over_w0_;
+  double norm_;
 
   double calNorm()
   {
@@ -51,11 +53,9 @@ private:
   }
 
 public:
-  double norm;
-
   HG(int n, int m, double w0) : n_(n), m_(m), w0_(w0)
   {
-    norm = calNorm();
+    norm_ = calNorm();
     w0_sq_ = w0 * w0;
     sqrt2_over_w0_ = SQRT2 / w0;
   }
@@ -75,32 +75,32 @@ public:
 
     return std::polar(std::abs(wf), (wf < 0) ? PI : 0.0);
   }
-};
 
-void applyHG(complex_vector &V, HG &hg, double weight, double nx, double ny, int resX, int resY, double pixelSize)
-{
-  complex_vector wf_x(resX);
-  for (int x = 0; x < resX; ++x)
+  void apply(complex_vector &V, double weight, double nx, double ny, int resX, int resY, double pixelSize)
   {
-    double px = (x - resX / 2.0) * pixelSize;
-    wf_x[x] = hg.calHGx(px) * std::polar(1.0, TAU * (px / (resX * pixelSize)) * nx);
-  }
-
-  complex_vector wf_y(resY);
-  for (int y = 0; y < resY; ++y)
-  {
-    double py = -(y - resY / 2.0) * pixelSize;
-    wf_y[y] = hg.calHGy(py) * std::polar(1.0, TAU * (py / (resY * pixelSize)) * ny);
-  }
-
-  for (int y = 0; y < resY; ++y)
-  {
+    complex_vector wf_x(resX);
     for (int x = 0; x < resX; ++x)
     {
-      V[y * resX + x] += hg.norm * weight * wf_x[x] * wf_y[y];
+      double px = (x - resX / 2.0) * pixelSize;
+      wf_x[x] = calHGx(px) * std::polar(1.0, TAU * (px / (resX * pixelSize)) * nx);
+    }
+
+    complex_vector wf_y(resY);
+    for (int y = 0; y < resY; ++y)
+    {
+      double py = -(y - resY / 2.0) * pixelSize;
+      wf_y[y] = calHGy(py) * std::polar(1.0, TAU * (py / (resY * pixelSize)) * ny);
+    }
+
+    for (int y = 0; y < resY; ++y)
+    {
+      for (int x = 0; x < resX; ++x)
+      {
+        V[y * resX + x] += norm_ * weight * wf_x[x] * wf_y[y];
+      }
     }
   }
-}
+};
 
 val generateCGH(std::string json_str)
 {
@@ -123,7 +123,7 @@ val generateCGH(std::string json_str)
       if (mode["type"] == "HG")
       {
         auto stdHG = HG{mode["o1"], mode["o2"], w0};
-        applyHG(V, stdHG, 1.0, mode["nx"], mode["ny"], resX, resY, pixelSize);
+        stdHG.apply(V, 1.0, mode["nx"], mode["ny"], resX, resY, pixelSize);
       }
       else if (mode["type"] == "PM")
       {
@@ -138,7 +138,7 @@ val generateCGH(std::string json_str)
           if (plusModes["type"] == "HG")
           {
             auto plusHG = HG{plusModes["o1"], plusModes["o2"], w0};
-            applyHG(V, plusHG, weight, mode["nx"], mode["ny"], resX, resY, pixelSize);
+            plusHG.apply(V, weight, mode["nx"], mode["ny"], resX, resY, pixelSize);
           }
         }
 
@@ -147,46 +147,52 @@ val generateCGH(std::string json_str)
           if (minusModes["type"] == "HG")
           {
             auto minusHG = HG{minusModes["o1"], minusModes["o2"], w0};
-            applyHG(V, minusHG, -weight, mode["nx"], mode["ny"], resX, resY, pixelSize);
+            minusHG.apply(V, -weight, mode["nx"], mode["ny"], resX, resY, pixelSize);
           }
         }
       }
     }
 
-    std::vector<double> A(totalPixels);
-    std::vector<double> Phi(totalPixels);
-    std::transform(V.begin(), V.end(), A.begin(), [](const auto &v)
-                   { return std::abs(v); });
-    std::transform(V.begin(), V.end(), Phi.begin(), [](const auto &v)
-                   { return std::arg(v); });
-    double maxA = *std::max_element(A.begin(), A.end());
-    if (maxA < 1e-15)
-      maxA = 1.0;
-    std::for_each(A.begin(), A.end(), [maxA](double &a)
-                  { a /= maxA; });
+    vector A(totalPixels);
+    vector Phi(totalPixels);
+    double maxA = -1e15;
 
-    std::vector<double> cgh_val(totalPixels);
+    for (size_t i = 0; i < totalPixels; ++i)
+    {
+      double a = std::abs(V[i]);
+      double phi = std::arg(V[i]);
+      A[i] = a;
+      Phi[i] = phi;
+
+      if (a > maxA)
+        maxA = a;
+    }
+
+    std::ranges::for_each(A, [maxA](double &a)
+                          { a /= maxA; });
+
+    vector cghVal_double(totalPixels);
+    static std::vector<uint8_t> cghVal(totalPixels);
     double min_val = 1e15, max_val = -1e15;
     for (size_t i = 0; i < totalPixels; ++i)
     {
-      cgh_val[i] = fx2(A[i]) * std::sin(Phi[i]);
+      cghVal_double[i] = fx2(A[i]) * std::sin(Phi[i]);
 
-      if (cgh_val[i] < min_val)
-        min_val = cgh_val[i];
-      if (cgh_val[i] > max_val)
-        max_val = cgh_val[i];
+      if (cghVal_double[i] < min_val)
+        min_val = cghVal_double[i];
+      if (cghVal_double[i] > max_val)
+        max_val = cghVal_double[i];
     }
 
     double range = max_val - min_val;
     if (range < 1e-15)
       range = 1.0;
+    double inv_range = 255.0 / range;
 
-    for (size_t i = 0; i < totalPixels; ++i)
-    {
-      cgh_val[i] = static_cast<uint8_t>(((cgh_val[i] - min_val) / range) * 255.0);
-    }
+    std::ranges::transform(cghVal_double, cghVal.begin(), [min_val, inv_range](double c)
+                           { return static_cast<uint8_t>((c - min_val) * inv_range); });
 
-    return val(typed_memory_view(cgh_val.size(), cgh_val.data()));
+    return val(typed_memory_view(cghVal.size(), cghVal.data()));
   }
 
   catch (const std::exception &e)
