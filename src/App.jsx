@@ -308,7 +308,7 @@ export default function CGHTool() {
             <div className="text-lg font-black">
               CGH Generator
             </div>
-            <div className="font-mono text-xs opacity-40">v0.0.0</div>
+            <div className="font-mono text-xs opacity-40">v0.1</div>
           </div>
         </div>
         <div className="flex-1 flex justify-end">
