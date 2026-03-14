@@ -296,7 +296,7 @@ export default function CGHTool() {
     <div className="flex flex-col h-screen bg-base-200 overflow-hidden text-sm select-none font-sans cursor-default">
 
       {/* --- 顶部导航栏 --- */}
-      <header className="navbar bg-base-100 shadow-sm z-30 px-4 border-b border-base-300">
+      <header className="navbar bg-base-100 shadow-sm z-30 px-4 border-b border-base-200">
         <div className="flex-none">
           <button className="btn btn-ghost btn-sm btn-square" onClick={() => setShowSidebar(!showSidebar)}>
             <Menu size={20} />
@@ -308,7 +308,7 @@ export default function CGHTool() {
             <div className="text-lg font-black">
               CGH Generator
             </div>
-            <div className="font-mono text-xs text-gray-400 ">v0.0.0</div>
+            <div className="font-mono text-xs opacity-40">v0.0.0</div>
           </div>
         </div>
         <div className="flex-1 flex justify-end">
@@ -328,7 +328,7 @@ export default function CGHTool() {
             if (document.activeElement) document.activeElement.blur();
           }
         }}
-          className={`bg-base-200/50 border-r border-base-300 flex flex-col transition-all duration-300 ease-in-out ${showSidebar ? "w-96" : "w-0"} overflow-hidden`}>
+          className={`bg-base-200/40 border-r border-base-300 flex flex-col transition-all duration-300 ease-in-out ${showSidebar ? "w-96" : "w-0"} overflow-hidden`}>
           <div className="w-96 flex flex-col h-full shrink-0">
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
 
@@ -337,7 +337,7 @@ export default function CGHTool() {
                 <div className="flex items-center gap-2 mb-3 text-primary font-bold">
                   <Settings2 size={16} /> <div>全局参数</div>
                 </div>
-                <div className="bg-base-100 border border-base-300 shadow-sm p-4 rounded-xl space-y-4">
+                <div className="bg-base-100 border border-base-200 shadow-sm p-4 rounded-xl space-y-4">
                   <div className="form-control w-full">
                     <label className="label py-1 px-0"><div className="label-text font-medium text-xs">特征宽度 (σ, μm)</div></label>
                     <input type="text" value={sigma} onChange={(e) => setSigma(formatInputValue(e.target.value))} className="input input-sm input-bordered w-full " />
@@ -374,7 +374,7 @@ export default function CGHTool() {
                           }
                           className="input input-sm input-bordered w-full  pr-12"
                         />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] opacity-30 pointer-events-none">.bmp</div>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] opacity-40 pointer-events-none">.bmp</div>
                       </div>
                     </div>
                   </div>
@@ -398,12 +398,12 @@ export default function CGHTool() {
                       <motion.div key="empty-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="border-2 border-dashed border-base-300 rounded-2xl p-10 text-center flex flex-col items-center gap-3">
                         <Sliders size={32} className="opacity-20" />
-                        <div className="label-text font-medium text-xs">列表为空，点击上方 + 号开始</div>
+                        <div className="font-medium text-xs opacity-40">列表为空，点击上方 + 号开始</div>
                       </motion.div>
                     ) : (
                       modes.map((mode, index) => (
                         <motion.div key={mode.id} layout initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, x: -30 }}
-                          className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl shadow-sm overflow-hidden"
+                          className="collapse collapse-arrow bg-base-100 border border-base-200 rounded-xl shadow-sm overflow-hidden"
                         >
                           <input type="checkbox" defaultChecked />
                           <div className="collapse-title flex items-center gap-3 pr-12 min-h-0">
@@ -417,7 +417,7 @@ export default function CGHTool() {
                             <div className="pt-4 space-y-4">
                               <div className="join w-full bg-base-200 p-0.5 rounded-lg">
                                 {["HG", "LG", "PM"].map((t) => (
-                                  <button key={t} className={`join-item btn btn-xs flex-1 border-none ${mode.type === t ? "btn-primary shadow-sm" : "btn-ghost text-base-content/60"}`}
+                                  <button key={t} className={`join-item btn btn-xs flex-1 border-none ${mode.type === t ? "btn-primary shadow-sm" : "btn-ghost opacity-40"}`}
                                     onClick={() => updateMode(mode.id, "type", t)}>
                                     {t}
                                   </button>
@@ -432,17 +432,17 @@ export default function CGHTool() {
                                         <div className={`text-[10px] font-bold ${group.color}`}>{group.label}</div>
                                         <div className="dropdown dropdown-end">
                                           <div tabIndex={0} role="button" className="btn btn-circle btn-ghost btn-xs text-primary bg-base-200"><Plus size={14} /></div>
-                                          <ul tabIndex={0} className="dropdown-content z-100 menu p-2 shadow-2xl bg-base-100 rounded-box w-32 text-xs border border-base-300">
+                                          <ul tabIndex={0} className="dropdown-content z-100 menu p-2 shadow-2xl bg-base-100 rounded-box w-32 text-xs border border-base-200">
                                             <li><a onClick={() => handleAddSubMode(mode.id, group.key, "HG")}>HG 模式</a></li>
                                             <li><a onClick={() => handleAddSubMode(mode.id, group.key, "LG")}>LG 模式</a></li>
                                           </ul>
                                         </div>
                                       </div>
-                                      <div className="space-y-1.5 border-l-2 border-base-300 ml-1 pl-3">
+                                      <div className="space-y-1.5 border-l-2 border-base-200 ml-1 pl-3">
                                         <AnimatePresence mode="popLayout">
                                           {mode[group.key]?.map((sub) => (
                                             <motion.div key={sub.id} layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.8 }}
-                                              className="flex items-center gap-2 bg-base-200/50 p-2 rounded-lg border border-base-300">
+                                              className="flex items-center gap-2 bg-base-200/40 p-2 rounded-lg border border-base-200">
                                               <div className="text-[10px] font-bold opacity-40 w-5 shrink-0">{sub.type}</div>
                                               <input type="text" className="input input-bordered input-xs w-12" value={sub.o1} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o1", e.target.value)} />
                                               <input type="text" className="input input-bordered input-xs w-12" value={sub.o2} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o2", e.target.value)} />
@@ -467,7 +467,7 @@ export default function CGHTool() {
                                 </div>
                               )}
 
-                              <div className="grid grid-cols-2 gap-4 border-t border-base-300 pt-3">
+                              <div className="grid grid-cols-2 gap-4 border-t border-base-200 pt-3">
                                 <div className="form-control">
                                   <label className="label-text text-[10px] mb-1">载波 Nx</label>
                                   <input type="text" value={mode.nx} onChange={(e) => updateMode(mode.id, "nx", e.target.value)} className="input input-bordered input-xs " />
@@ -492,7 +492,7 @@ export default function CGHTool() {
             </div>
 
             {/* 侧边栏底部操作区 */}
-            <div className="p-4 border-t border-base-300 bg-base-100 space-y-3">
+            <div className="p-4 border-t border-base-200 bg-base-100 space-y-3">
               <button onClick={handleRun} className="btn btn-primary btn-block shadow-lg shadow-primary/20 active:scale-95 transition-all">
                 <Play size={16} fill="currentColor" /> 走你！！
               </button>
@@ -594,7 +594,7 @@ export default function CGHTool() {
             exit={{ opacity: 0, x: 20, scale: 0.95 }}
             className="fixed bottom-12 right-12 z-100"
           >
-            <div className="bg-base-100 border border-base-300 shadow-2xl rounded-full px-3 py-3 flex items-center gap-5">
+            <div className="bg-base-100 border border-base-200 shadow-2xl rounded-full px-3 py-3 flex items-center gap-5">
               <div className="flex items-center gap-3">
                 <div className="bg-none text-primary ml-4">
                   <InfoIcon size={18} />
