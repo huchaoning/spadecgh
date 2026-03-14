@@ -293,7 +293,7 @@ export default function CGHTool() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-base-200 overflow-hidden text-sm font-sans">
+    <div className="flex flex-col h-screen bg-base-200 overflow-hidden text-sm ">
 
       {/* --- 顶部导航栏 --- */}
       <header className="navbar bg-base-100 shadow-sm z-30 px-4 border-b border-base-300">
@@ -304,9 +304,12 @@ export default function CGHTool() {
         </div>
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
           <div className="bg-primary p-1 rounded-lg"><Box size={18} className="text-primary-content" /></div>
-          <span className="text-lg font-black">
-            CGH Generator
-          </span>
+          <div className="items-baseline flex gap-2">
+            <span className="text-lg font-black">
+              CGH Generator
+            </span>
+            <span className="font-mono text-xs text-gray-400 ">v0.0.0</span>
+          </div>
         </div>
         <div className="flex-1 flex justify-end">
           <button className="btn btn-ghost btn-sm btn-square text-base-content/40 hover:text-primary transition-colors"
@@ -337,24 +340,24 @@ export default function CGHTool() {
                 <div className="bg-base-100 border border-base-300 shadow-sm p-4 rounded-xl space-y-4">
                   <div className="form-control w-full">
                     <label className="label py-1 px-0"><span className="label-text font-medium text-xs">特征宽度 (σ, μm)</span></label>
-                    <input type="text" value={sigma} onChange={(e) => setSigma(formatInputValue(e.target.value))} className="input input-sm input-bordered focus:input-primary w-full font-mono" />
+                    <input type="text" value={sigma} onChange={(e) => setSigma(formatInputValue(e.target.value))} className="input input-sm input-bordered w-full " />
                   </div>
                   <div className="divider my-1 opacity-50"></div>
                   <div className="space-y-3">
                     <label className="label py-1 px-0"><span className="label-text font-medium text-xs">SLM 设备参数</span></label>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="form-control">
-                        <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">分辨率 X (px)</span></label>
-                        <input type="text" value={resX} onChange={(e) => setResX(formatInputValue(e.target.value))} className="input input-sm input-bordered font-mono" />
+                        <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">分辨率 X</span></label>
+                        <input type="text" value={resX} onChange={(e) => setResX(formatInputValue(e.target.value))} className="input input-sm input-bordered " />
                       </div>
                       <div className="form-control">
-                        <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">分辨率 Y (px)</span></label>
-                        <input type="text" value={resY} onChange={(e) => setResY(formatInputValue(e.target.value))} className="input input-sm input-bordered font-mono" />
+                        <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">分辨率 Y</span></label>
+                        <input type="text" value={resY} onChange={(e) => setResY(formatInputValue(e.target.value))} className="input input-sm input-bordered " />
                       </div>
                     </div>
                     <div className="form-control w-full">
                       <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">像素尺寸 (Pixel Size, μm)</span></label>
-                      <input type="text" value={pixelSize} onChange={(e) => setPixelSize(formatInputValue(e.target.value))} className="input input-sm input-bordered font-mono" />
+                      <input type="text" value={pixelSize} onChange={(e) => setPixelSize(formatInputValue(e.target.value))} className="input input-sm input-bordered " />
                     </div>
 
                     <div className="divider my-1 opacity-50"></div>
@@ -369,9 +372,9 @@ export default function CGHTool() {
                             setFileName(val);
                           }
                           }
-                          className="input input-sm input-bordered focus:input-primary w-full font-mono pr-12"
+                          className="input input-sm input-bordered w-full  pr-12"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] opacity-30 font-mono pointer-events-none">.bmp</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] opacity-30 pointer-events-none">.bmp</span>
                       </div>
                     </div>
                   </div>
@@ -404,8 +407,8 @@ export default function CGHTool() {
                         >
                           <input type="checkbox" defaultChecked />
                           <div className="collapse-title flex items-center gap-3 pr-12 min-h-0">
-                            <span className="badge badge-sm badge-ghost font-mono shrink-0">{index + 1}</span>
-                            <span className="font-mono text-xs font-bold uppercase text-primary truncate">
+                            <span className="badge badge-sm badge-ghost  shrink-0">{index + 1}</span>
+                            <span className=" text-xs font-bold text-primary truncate">
                               {mode.type === "PM" ? `PM (${(mode.plusModes?.length || 0) + (mode.minusModes?.length || 0)})` : `${mode.type}(${mode.o1},${mode.o2})`}
                             </span>
                           </div>
@@ -440,9 +443,9 @@ export default function CGHTool() {
                                           {mode[group.key]?.map((sub) => (
                                             <motion.div key={sub.id} layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.8 }}
                                               className="flex items-center gap-2 bg-base-200/50 p-2 rounded-lg border border-base-300">
-                                              <span className="text-[9px] font-black opacity-40 w-5 shrink-0">{sub.type}</span>
-                                              <input type="text" className="input input-bordered input-xs w-12 font-mono" value={sub.o1} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o1", e.target.value)} />
-                                              <input type="text" className="input input-bordered input-xs w-12 font-mono" value={sub.o2} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o2", e.target.value)} />
+                                              <span className="text-[10px] font-bold opacity-40 w-5 shrink-0">{sub.type}</span>
+                                              <input type="text" className="input input-bordered input-xs w-12" value={sub.o1} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o1", e.target.value)} />
+                                              <input type="text" className="input input-bordered input-xs w-12" value={sub.o2} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o2", e.target.value)} />
                                               <button className="btn btn-ghost btn-xs btn-square text-error/40" onClick={() => removeSubMode(mode.id, group.key, sub.id)}><Trash2 size={12} /></button>
                                             </motion.div>
                                           ))}
@@ -455,11 +458,11 @@ export default function CGHTool() {
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="form-control">
                                     <label className="label-text text-[10px] mb-1">{mode.type === "LG" ? "角向阶数 L" : "水平阶数 N"}</label>
-                                    <input type="text" value={mode.o1} onChange={(e) => updateMode(mode.id, "o1", e.target.value)} className="input input-bordered input-xs font-mono" />
+                                    <input type="text" value={mode.o1} onChange={(e) => updateMode(mode.id, "o1", e.target.value)} className="input input-bordered input-xs " />
                                   </div>
                                   <div className="form-control">
                                     <label className="label-text text-[10px] mb-1">{mode.type === "LG" ? "径向阶数 P" : "垂直阶数 M"}</label>
-                                    <input type="text" value={mode.o2} onChange={(e) => updateMode(mode.id, "o2", e.target.value)} className="input input-bordered input-xs font-mono" />
+                                    <input type="text" value={mode.o2} onChange={(e) => updateMode(mode.id, "o2", e.target.value)} className="input input-bordered input-xs " />
                                   </div>
                                 </div>
                               )}
@@ -467,11 +470,11 @@ export default function CGHTool() {
                               <div className="grid grid-cols-2 gap-4 border-t border-base-300 pt-3">
                                 <div className="form-control">
                                   <label className="label-text text-[10px] mb-1">载波 Nx</label>
-                                  <input type="text" value={mode.nx} onChange={(e) => updateMode(mode.id, "nx", e.target.value)} className="input input-bordered input-xs font-mono" />
+                                  <input type="text" value={mode.nx} onChange={(e) => updateMode(mode.id, "nx", e.target.value)} className="input input-bordered input-xs " />
                                 </div>
                                 <div className="form-control">
                                   <label className="label-text text-[10px] mb-1">载波 Ny</label>
-                                  <input type="text" value={mode.ny} onChange={(e) => updateMode(mode.id, "ny", e.target.value)} className="input input-bordered input-xs font-mono" />
+                                  <input type="text" value={mode.ny} onChange={(e) => updateMode(mode.id, "ny", e.target.value)} className="input input-bordered input-xs " />
                                 </div>
                               </div>
 
@@ -607,7 +610,7 @@ export default function CGHTool() {
                   onClick={resetToDefault}
                   className="btn btn-ghost btn-sm text-primary"
                 >
-                  重置默认
+                  恢复默认
                 </button>
 
                 <button
