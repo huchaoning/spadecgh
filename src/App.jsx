@@ -293,7 +293,7 @@ export default function CGHTool() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-base-200 overflow-hidden text-sm ">
+    <div className="flex flex-col h-screen bg-base-200 overflow-hidden text-sm select-none font-sans cursor-default">
 
       {/* --- 顶部导航栏 --- */}
       <header className="navbar bg-base-100 shadow-sm z-30 px-4 border-b border-base-300">
@@ -305,10 +305,10 @@ export default function CGHTool() {
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
           <div className="bg-primary p-1 rounded-lg"><Box size={18} className="text-primary-content" /></div>
           <div className="items-baseline flex gap-2">
-            <span className="text-lg font-black">
+            <div className="text-lg font-black">
               CGH Generator
-            </span>
-            <span className="font-mono text-xs text-gray-400 ">v0.0.0</span>
+            </div>
+            <div className="font-mono text-xs text-gray-400 ">v0.0.0</div>
           </div>
         </div>
         <div className="flex-1 flex justify-end">
@@ -335,34 +335,34 @@ export default function CGHTool() {
               {/* 全局物理参数配置 */}
               <section>
                 <div className="flex items-center gap-2 mb-3 text-primary font-bold">
-                  <Settings2 size={16} /> <span>全局参数</span>
+                  <Settings2 size={16} /> <div>全局参数</div>
                 </div>
                 <div className="bg-base-100 border border-base-300 shadow-sm p-4 rounded-xl space-y-4">
                   <div className="form-control w-full">
-                    <label className="label py-1 px-0"><span className="label-text font-medium text-xs">特征宽度 (σ, μm)</span></label>
+                    <label className="label py-1 px-0"><div className="label-text font-medium text-xs">特征宽度 (σ, μm)</div></label>
                     <input type="text" value={sigma} onChange={(e) => setSigma(formatInputValue(e.target.value))} className="input input-sm input-bordered w-full " />
                   </div>
                   <div className="divider my-1 opacity-50"></div>
                   <div className="space-y-3">
-                    <label className="label py-1 px-0"><span className="label-text font-medium text-xs">SLM 设备参数</span></label>
+                    <label className="label py-1 px-0"><div className="label-text font-medium text-xs">SLM 设备参数</div></label>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="form-control">
-                        <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">分辨率 X</span></label>
+                        <label className="label py-1 px-0"><div className="label-text-alt text-[10px]">分辨率 X</div></label>
                         <input type="text" value={resX} onChange={(e) => setResX(formatInputValue(e.target.value))} className="input input-sm input-bordered " />
                       </div>
                       <div className="form-control">
-                        <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">分辨率 Y</span></label>
+                        <label className="label py-1 px-0"><div className="label-text-alt text-[10px]">分辨率 Y</div></label>
                         <input type="text" value={resY} onChange={(e) => setResY(formatInputValue(e.target.value))} className="input input-sm input-bordered " />
                       </div>
                     </div>
                     <div className="form-control w-full">
-                      <label className="label py-1 px-0"><span className="label-text-alt text-[10px]">像素尺寸 (Pixel Size, μm)</span></label>
+                      <label className="label py-1 px-0"><div className="label-text-alt text-[10px]">像素尺寸 (Pixel Size, μm)</div></label>
                       <input type="text" value={pixelSize} onChange={(e) => setPixelSize(formatInputValue(e.target.value))} className="input input-sm input-bordered " />
                     </div>
 
                     <div className="divider my-1 opacity-50"></div>
                     <div className="form-control w-full">
-                      <label className="label py-1 px-0"><span className="label-text font-medium text-xs">保存文件名 (.bmp)</span></label>
+                      <label className="label py-1 px-0"><div className="label-text font-medium text-xs">保存文件名 (.bmp)</div></label>
                       <div className="relative">
                         <input
                           type="text"
@@ -374,7 +374,7 @@ export default function CGHTool() {
                           }
                           className="input input-sm input-bordered w-full  pr-12"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] opacity-30 pointer-events-none">.bmp</span>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] opacity-30 pointer-events-none">.bmp</div>
                       </div>
                     </div>
                   </div>
@@ -385,7 +385,7 @@ export default function CGHTool() {
               <section className="w-full">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2 text-primary font-bold">
-                    <Sliders size={16} /> <span>模式列表</span>
+                    <Sliders size={16} /> <div>模式列表</div>
                   </div>
                   <button onClick={addMode} className="btn btn-xs btn-circle btn-primary shadow-md hover:scale-110 active:scale-90 transition-all">
                     <Plus size={14} />
@@ -398,7 +398,7 @@ export default function CGHTool() {
                       <motion.div key="empty-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="border-2 border-dashed border-base-300 rounded-2xl p-10 text-center flex flex-col items-center gap-3">
                         <Sliders size={32} className="opacity-20" />
-                        <span className="label-text font-medium text-xs">列表为空，点击上方 + 号开始</span>
+                        <div className="label-text font-medium text-xs">列表为空，点击上方 + 号开始</div>
                       </motion.div>
                     ) : (
                       modes.map((mode, index) => (
@@ -407,10 +407,10 @@ export default function CGHTool() {
                         >
                           <input type="checkbox" defaultChecked />
                           <div className="collapse-title flex items-center gap-3 pr-12 min-h-0">
-                            <span className="badge badge-sm badge-ghost  shrink-0">{index + 1}</span>
-                            <span className=" text-xs font-bold text-primary truncate">
+                            <div className="badge badge-sm badge-ghost  shrink-0">{index + 1}</div>
+                            <div className=" text-xs font-bold text-primary truncate">
                               {mode.type === "PM" ? `PM (${(mode.plusModes?.length || 0) + (mode.minusModes?.length || 0)})` : `${mode.type}(${mode.o1},${mode.o2})`}
-                            </span>
+                            </div>
                           </div>
 
                           <div className="collapse-content">
@@ -429,7 +429,7 @@ export default function CGHTool() {
                                   {[{ label: "Plus 模式 (+)", key: "plusModes", color: "text-success" }, { label: "Minus 模式 (-)", key: "minusModes", color: "text-error" }].map(group => (
                                     <div key={group.key} className="space-y-2">
                                       <div className="flex justify-between items-center px-1">
-                                        <span className={`text-[10px] font-bold ${group.color}`}>{group.label}</span>
+                                        <div className={`text-[10px] font-bold ${group.color}`}>{group.label}</div>
                                         <div className="dropdown dropdown-end">
                                           <div tabIndex={0} role="button" className="btn btn-circle btn-ghost btn-xs text-primary bg-base-200"><Plus size={14} /></div>
                                           <ul tabIndex={0} className="dropdown-content z-100 menu p-2 shadow-2xl bg-base-100 rounded-box w-32 text-xs border border-base-300">
@@ -443,7 +443,7 @@ export default function CGHTool() {
                                           {mode[group.key]?.map((sub) => (
                                             <motion.div key={sub.id} layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.8 }}
                                               className="flex items-center gap-2 bg-base-200/50 p-2 rounded-lg border border-base-300">
-                                              <span className="text-[10px] font-bold opacity-40 w-5 shrink-0">{sub.type}</span>
+                                              <div className="text-[10px] font-bold opacity-40 w-5 shrink-0">{sub.type}</div>
                                               <input type="text" className="input input-bordered input-xs w-12" value={sub.o1} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o1", e.target.value)} />
                                               <input type="text" className="input input-bordered input-xs w-12" value={sub.o2} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o2", e.target.value)} />
                                               <button className="btn btn-ghost btn-xs btn-square text-error/40" onClick={() => removeSubMode(mode.id, group.key, sub.id)}><Trash2 size={12} /></button>
@@ -600,8 +600,8 @@ export default function CGHTool() {
                   <InfoIcon size={18} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-primary">欢迎回来</span>
-                  <span className="text-xs font-bold text-base-content">已载入上次参数配置</span>
+                  <div className="text-[10px] font-bold text-primary">欢迎回来</div>
+                  <div className="text-xs font-bold text-base-content">已载入上次参数配置</div>
                 </div>
               </div>
 
