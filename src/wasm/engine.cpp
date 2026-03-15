@@ -40,6 +40,7 @@ class HG
 private:
   int n_, m_;
   double w0_;
+  double sx_, sy_;
 
   double w0_sq_;
   double sqrt2_over_w0_;
@@ -53,7 +54,7 @@ private:
   }
 
 public:
-  HG(int n, int m, double w0) : n_(n), m_(m), w0_(w0)
+  HG(int n, int m, double w0, double sx, double sy) : n_(n), m_(m), w0_(w0), sx_(sx), sy_(sy)
   {
     norm_ = calNorm();
     w0_sq_ = w0 * w0;
@@ -81,15 +82,15 @@ public:
     complex_vector wf_x(resX);
     for (int x = 0; x < resX; ++x)
     {
-      double px = (x - resX / 2.0) * pixelSize;
-      wf_x[x] = calHGx(px) * std::polar(1.0, TAU * (px / (resX * pixelSize)) * nx);
+      double x_um = (x - resX / 2.0) * pixelSize;
+      wf_x[x] = calHGx(x_um - sx_) * std::polar(1.0, TAU * (x_um / (resX * pixelSize)) * nx);
     }
 
     complex_vector wf_y(resY);
     for (int y = 0; y < resY; ++y)
     {
-      double py = -(y - resY / 2.0) * pixelSize;
-      wf_y[y] = calHGy(py) * std::polar(1.0, TAU * (py / (resY * pixelSize)) * ny);
+      double y_um = -(y - resY / 2.0) * pixelSize;
+      wf_y[y] = calHGy(y_um - sy_) * std::polar(1.0, TAU * (y_um / (resY * pixelSize)) * ny);
     }
 
     for (int y = 0; y < resY; ++y)
@@ -122,7 +123,7 @@ val generateCGH(std::string json_str)
     {
       if (mode["type"] == "HG")
       {
-        auto stdHG = HG{mode["o1"], mode["o2"], w0};
+        auto stdHG = HG{mode["o1"], mode["o2"], w0, mode["sx"], mode["sy"]};
         stdHG.apply(V, 1.0, mode["nx"], mode["ny"], resX, resY, pixelSize);
       }
       else if (mode["type"] == "PM")
@@ -137,7 +138,7 @@ val generateCGH(std::string json_str)
         {
           if (plusModes["type"] == "HG")
           {
-            auto plusHG = HG{plusModes["o1"], plusModes["o2"], w0};
+            auto plusHG = HG{plusModes["o1"], plusModes["o2"], w0, mode["sx"], mode["sy"]};
             plusHG.apply(V, weight, mode["nx"], mode["ny"], resX, resY, pixelSize);
           }
         }
@@ -146,7 +147,7 @@ val generateCGH(std::string json_str)
         {
           if (minusModes["type"] == "HG")
           {
-            auto minusHG = HG{minusModes["o1"], minusModes["o2"], w0};
+            auto minusHG = HG{minusModes["o1"], minusModes["o2"], w0, mode["sx"], mode["sy"]};
             minusHG.apply(V, -weight, mode["nx"], mode["ny"], resX, resY, pixelSize);
           }
         }

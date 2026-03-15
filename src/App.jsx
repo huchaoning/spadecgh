@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 
-export default function CGHTool() {
+export default function App() {
   /* --- WASM 实例状态 --- */
   const [wasmInstance, setWasmInstance] = useState(null);
 
@@ -16,7 +16,7 @@ export default function CGHTool() {
   useEffect(() => {
     createModule().then((instance) => {
       setWasmInstance(instance);
-      console.log("WASM Ready");
+      console.log("WASM 模块就绪");
     });
   }, []);
 
@@ -26,7 +26,7 @@ export default function CGHTool() {
     resX: 1920,
     resY: 1080,
     fileName: "untitled",
-    modes: [{ id: 1, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0 }]
+    modes: [{ id: 1, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0, sx: 0, sy: 0 }]
   };
 
   /* --- 状态管理 --- */
@@ -154,6 +154,8 @@ export default function CGHTool() {
         o2: mode.o2,
         nx: mode.nx,
         ny: mode.ny,
+        sx: mode.sx,
+        sy: mode.sy,
 
         subModes: mode.type === "PM" ? {
           plus: mode.plusModes || [],
@@ -172,9 +174,11 @@ export default function CGHTool() {
     const width = config.global.resolution[0];
     const height = config.global.resolution[1];
 
-    console.log(JSON.stringify(config, null, 2))
+    console.log(`即将传给 WASM 的参数：${JSON.stringify(config, null, 2)}`)
     try {
+      const startTime = performance.now();
       const res = wasmInstance.generateCGH(JSON.stringify(config));
+      console.log(`计算 CGH 用时：${performance.now() - startTime} ms`);
 
       const pixels = res;
       lastPixelsRef.current = pixels;
@@ -308,7 +312,7 @@ export default function CGHTool() {
             <div className="text-lg font-black">
               CGH Generator
             </div>
-            <div className="font-mono text-xs opacity-40">v0.1</div>
+            <div className="font-mono text-xs opacity-40">v0.2-dev</div>
           </div>
         </div>
         <div className="flex-1 flex justify-end">
@@ -347,16 +351,16 @@ export default function CGHTool() {
                     <label className="label py-1 px-0"><div className="label-text font-medium text-xs">SLM 设备参数</div></label>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="form-control">
-                        <label className="label py-1 px-0"><div className="label-text-alt text-[10px]">分辨率 X</div></label>
+                        <label className="label py-1 px-0"><div className="label-text text-[10px]">分辨率 X</div></label>
                         <input type="text" value={resX} onChange={(e) => setResX(formatInputValue(e.target.value))} className="input input-sm input-bordered " />
                       </div>
                       <div className="form-control">
-                        <label className="label py-1 px-0"><div className="label-text-alt text-[10px]">分辨率 Y</div></label>
+                        <label className="label py-1 px-0"><div className="label-text text-[10px]">分辨率 Y</div></label>
                         <input type="text" value={resY} onChange={(e) => setResY(formatInputValue(e.target.value))} className="input input-sm input-bordered " />
                       </div>
                     </div>
                     <div className="form-control w-full">
-                      <label className="label py-1 px-0"><div className="label-text-alt text-[10px]">像素尺寸 (Pixel Size, μm)</div></label>
+                      <label className="label py-1 px-0"><div className="label-text text-[10px]">像素尺寸 (Pixel Size, μm)</div></label>
                       <input type="text" value={pixelSize} onChange={(e) => setPixelSize(formatInputValue(e.target.value))} className="input input-sm input-bordered " />
                     </div>
 
@@ -457,24 +461,33 @@ export default function CGHTool() {
                               ) : (
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="form-control">
-                                    <label className="label-text text-[10px] mb-1">{mode.type === "LG" ? "角向阶数 L" : "水平阶数 N"}</label>
+                                    <label className="label"><div className="label-text text-[10px] mb-1">{mode.type === "LG" ? "角向阶数 L" : "水平阶数 N"}</div></label>
                                     <input type="text" value={mode.o1} onChange={(e) => updateMode(mode.id, "o1", e.target.value)} className="input input-bordered input-xs " />
                                   </div>
                                   <div className="form-control">
-                                    <label className="label-text text-[10px] mb-1">{mode.type === "LG" ? "径向阶数 P" : "垂直阶数 M"}</label>
+                                    <label className="label"><div className="label-text text-[10px] mb-1">{mode.type === "LG" ? "径向阶数 P" : "垂直阶数 M"}</div></label>
                                     <input type="text" value={mode.o2} onChange={(e) => updateMode(mode.id, "o2", e.target.value)} className="input input-bordered input-xs " />
                                   </div>
                                 </div>
                               )}
 
-                              <div className="grid grid-cols-2 gap-4 border-t border-base-200 pt-3">
+                              <div className="divider my-1 opacity-50"></div>
+                              <div className="grid grid-cols-2 gap-4">
                                 <div className="form-control">
-                                  <label className="label-text text-[10px] mb-1">载波 Nx</label>
-                                  <input type="text" value={mode.nx} onChange={(e) => updateMode(mode.id, "nx", e.target.value)} className="input input-bordered input-xs " />
+                                  <label className="label"><div className="label-text text-[10px] mb-1">载波 Nx</div></label>
+                                  <input type="text" value={mode.nx} onChange={(e) => updateMode(mode.id, "nx", e.target.value)} className="input input-bordered input-xs" />
                                 </div>
                                 <div className="form-control">
-                                  <label className="label-text text-[10px] mb-1">载波 Ny</label>
-                                  <input type="text" value={mode.ny} onChange={(e) => updateMode(mode.id, "ny", e.target.value)} className="input input-bordered input-xs " />
+                                  <label className="label"><div className="label-text text-[10px] mb-1">载波 Ny</div></label>
+                                  <input type="text" value={mode.ny} onChange={(e) => updateMode(mode.id, "ny", e.target.value)} className="input input-bordered input-xs" />
+                                </div>
+                                <div className="form-control">
+                                  <label className="label"><div className="label-text text-[10px] mb-1">X 偏移 (μm)</div></label>
+                                  <input type="text" value={mode.sx} onChange={(e) => updateMode(mode.id, "sx", e.target.value)} className="input input-bordered input-xs" />
+                                </div>
+                                <div className="form-control">
+                                  <label className="label"><div className="label-text text-[10px] mb-1">Y 偏移 (μm)</div></label>
+                                  <input type="text" value={mode.sy} onChange={(e) => updateMode(mode.id, "sy", e.target.value)} className="input input-bordered input-xs" />
                                 </div>
                               </div>
 
@@ -558,10 +571,11 @@ export default function CGHTool() {
       {/* 关于项目信息 */}
       <dialog id="info_modal" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box">
-          <h3 className="font-bold text-lg text-primary flex items-center gap-2"><InfoIcon size={20} /> 关于 CGH Generator</h3>
+          <h3 className="font-bold text-lg text-primary flex items-center gap-2"><InfoIcon size={20} /> 关于本工具</h3>
           <p className="py-4 text-sm text-base-content/60 leading-relaxed">
-            基于 Arrizon 2 算法的全息图生成工具。
-            实时预览的 CGH 仅供参考，以保存的为准。
+            这是一个基于 Arrizon 2 算法的全息图生成工具，该算法可以用于生成非平凡模式，也可以用于实现空间模式分解（SPADE）测量。
+            本工具的具体名称、图标、域名以及许可证均处于待定状态。
+            作者来自杭州电子科技大学理学院，量子精密测量实验室。
           </p>
           <div className="modal-action">
             <form method="dialog" className="flex gap-2 w-full flex-row-reverse">
