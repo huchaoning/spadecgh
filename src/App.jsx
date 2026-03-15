@@ -209,8 +209,8 @@ export default function App() {
   const handleSave = async () => {
     const pixels = lastPixelsRef.current;
 
-    const w = parseInt(resX);
-    const h = parseInt(resY);
+    const w = resX;
+    const h = resY;
 
     const image = new Jimp({ width: w, height: h });
 
@@ -242,7 +242,11 @@ export default function App() {
 
   /* --- 模式列表操作函数 --- */
   const formatInputValue = (value) => {
-    return (value === "-" || value === "") ? value : (parseFloat(value) || 0);
+    if (value === "" || value === "-" || value.endsWith(".")) {
+      return value;
+    }
+    const num = parseFloat(value);
+    return isNaN(num) ? "" : num;
   };
 
   const addMode = () => {
@@ -413,7 +417,7 @@ export default function App() {
                           <div className="collapse-title flex items-center gap-3 pr-12 min-h-0">
                             <div className="badge badge-sm badge-ghost  shrink-0">{index + 1}</div>
                             <div className=" text-xs font-bold text-primary truncate">
-                              {mode.type === "PM" ? `PM (${(mode.plusModes?.length || 0) + (mode.minusModes?.length || 0)})` : `${mode.type}(${mode.o1},${mode.o2})`}
+                              {mode.type === "PM" ? `PM (${(mode.plusModes?.length || 0) + (mode.minusModes?.length || 0)})` : `${mode.type}(${mode.o1}, ${mode.o2})`}
                             </div>
                           </div>
 
