@@ -33,6 +33,19 @@ class SLM:
     norm_y = y / (resolution[1] * pixel_size)
 
 
+class _FFTUtils:
+    def __init__(self, slm_cls):
+        self.resolution = slm_cls.resolution
+
+        self.norm_x = np.fft.ifftshift(slm_cls.norm_x) / SLM.pixel_size
+        self.norm_y = np.fft.ifftshift(slm_cls.norm_y) / SLM.pixel_size
+
+    def fft(self, U_input):
+        return np.fft.fft2(U_input)
+
+    def ifft(self, U_focal):
+        return np.fft.ifft2(U_focal)
+
 
 class _Mode:
     @staticmethod
@@ -115,6 +128,7 @@ class CGH:
 
         self._is_quiet = quiet
         self._is_frozen = False
+        self._is_cached = False
 
 
     def _check_cgh(self):
@@ -131,9 +145,8 @@ class CGH:
 
     
     def unfreeze(self):
-        if hasattr(self, 'cache'):
-            del self.cache
         self._is_frozen = False
+        self._is_cached = False
         if not self._is_quiet: print('this CGH instance is now unfrozen')
 
     
@@ -171,29 +184,29 @@ class CGH:
         return _fx2(x)
     
 
-    @staticmethod
-    def _fft(U_input):
-        Ny, Nx = U_input.shape
-        N = max(Nx, Ny)
-        U_pad = np.zeros((N, N), dtype=complex)
-
-        start_y = (N - Ny) // 2
-        start_x = (N - Nx) // 2
-        U_pad[start_y : start_y + Ny, start_x : start_x + Nx] = U_input
-
-        U_focal_pad = np.fft.fftshift(np.fft.fft2(np.fft.ifftshift(U_pad)))
-        U_focal = U_focal_pad[start_y : start_y + Ny, start_x : start_x + Nx]
-
-        return U_focal
-
-
-    def cal(self, x_shift_fast=0., y_shift_fast=0.):
+    def _cal_V(self):
         V = 0
         for i, mode in enumerate(self.mode_list):
             V = V + (mode.wave_function(self.sigma) * np.exp(2j*pi * (SLM.norm_x*self.nx_list[i] + SLM.norm_y*self.ny_list[i])))
 
-        if self._is_frozen and not hasattr(self, 'cache'):
-            self.cache = self._fft(V)
+        return V
+
+
+    def cal(self, x_shift_fast=0., y_shift_fast=0.):
+        if not self._is_frozen and (x_shift_fast != 0. or y_shift_fast != 0.):
+            raise ValueError('instance must be frozen before using `x_shift_fast` or `y_shift_fast`')
+        
+        if not self._is_frozen:
+            V = self._cal_V()
+        
+        if self._is_frozen and not self._is_cached:
+            V = self._cal_V()
+            self.fft = _FFTUtils(SLM)
+            self.cache = self.fft.fft(V)
+            self._is_cached = True
+        
+        if self._is_frozen and self._is_cached:
+            V = self.fft.ifft(self.cache * np.exp(2j*pi * (self.fft.norm_x*x_shift_fast + self.fft.norm_y*y_shift_fast)))
 
         a = np.abs(V) / np.abs(V).max()
         phi = np.angle(V)
@@ -201,21 +214,8 @@ class CGH:
         _temp = self.fx2(a) * np.sin(phi)
         _temp = ((_temp - _temp.min()) / (_temp.max() - _temp.min())) * 255
 
-
-        # if x_shift_fast == 0. and y_shift_fast == 0.:
-        #     cgh = self._cal_standard()
-
-        # elif self._is_frozen and (x_shift_fast != 0. or y_shift_fast != 0.):
-        #     if not hasattr(self, 'cache'):
-        #         self.cache = self._fft(self._cal_standard())
-        #     phase_shift = np.exp(-2j * pi * (SLM.norm_x * x_shift_fast / SLM.pixel_size + SLM.norm_x * y_shift_fast / SLM.pixel_size))
-        #     cgh = np.abs(self._fft(self.cache * phase_shift))
-
-        # else:
-        #     raise ValueError('instance must be frozen before using `x_shift_fast` or `y_shift_fast`')
-
-        # self.cgh = cgh.astype(np.uint8)
-        # self.img = Image.fromarray(self.cgh)
+        self.cgh = _temp.astype(np.uint8)
+        self.img = Image.fromarray(self.cgh)
 
 
     def result(self):
@@ -240,7 +240,7 @@ class CGH:
     def __repr__(self):
         lines = [
             '========================= CGH TASK GRAPH =========================',
-            f' Sigma: {self.sigma};    Frozen: {self._is_frozen};    Quiet: {self._is_quiet}',
+            f' Sigma: {self.sigma};    Quiet: {self._is_quiet};    Frozen: {self._is_frozen};    Cached: {self._is_cached}',
             '------------------------------------------------------------------',
             ' ID   | (nx, ny)       | Mode(order_1, order_2, x_shift, y_shift)',
             '------------------------------------------------------------------'
