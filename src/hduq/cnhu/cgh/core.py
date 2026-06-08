@@ -32,18 +32,20 @@ class SLM:
     norm_y = y / (resolution[1] * pixel_size)
 
 
+
 class _FFTUtils:
     def __init__(self, slm_cls):
         self.resolution = slm_cls.resolution
 
-        self.norm_x = np.fft.ifftshift(slm_cls.norm_x) / SLM.pixel_size
-        self.norm_y = np.fft.ifftshift(slm_cls.norm_y) / SLM.pixel_size
+        self.norm_x = np.fft.ifftshift(slm_cls.norm_x) / slm_cls.pixel_size
+        self.norm_y = np.fft.ifftshift(slm_cls.norm_y) / slm_cls.pixel_size
 
     def fft(self, U_input):
         return np.fft.fft2(U_input)
 
     def ifft(self, U_focal):
         return np.fft.ifft2(U_focal)
+
 
 
 class _Mode:
@@ -68,7 +70,7 @@ class _Mode:
         return PM(_Zero(), self, '-')
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.order1}, {self.order2}, {self.x_shift}, {self.y_shift})'
+        return f'{self.__class__.__name__}({self.order_1}, {self.order_2}, {self.x_shift}, {self.y_shift})'
 
 
 
@@ -111,8 +113,6 @@ class PM(_Mode):
         self.mode1 = _Mode.check(mode1)
         self.mode2 = _Mode.check(mode2)
         self.pm = pm
-        # self.norm = self.mode1.norm + self.mode2.norm
-
 
     def wave_function(self, sigma):
         plus, minus = self.flatten()
@@ -135,8 +135,8 @@ class PM(_Mode):
 class HG(_Mode):
     def __init__(self, n, m, x_shift=0., y_shift=0.):
         if all(isinstance(x, int) and x >= 0 for x in (n, m)):
-            self.order1 = n
-            self.order2 = m
+            self.order_1 = n
+            self.order_2 = m
 
 
             self.x_shift, self.y_shift = x_shift, y_shift
@@ -148,7 +148,7 @@ class HG(_Mode):
 
     def wave_function(self, sigma):
         w0 = 2*sigma
-        n, m = self.order1, self.order2
+        n, m = self.order_1, self.order_2
 
         N = np.sqrt(2**(1-n-m) / (pi * factorial(m) * factorial(n))) / w0
         hx, hy= hermite(n)(2**.5 * self.x / w0), hermite(m)(2**.5 * self.y / w0)
