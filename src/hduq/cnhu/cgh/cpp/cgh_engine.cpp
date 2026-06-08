@@ -71,14 +71,14 @@ class HG {
     ComplexVector wf_x(res_x);
     for (int x = 0; x < res_x; ++x) {
       double x_um = (x - res_x / 2.0) * pixel_size;
-      wf_x[x] = cal_wf_x(x_um - sx_) *
+      wf_x[x] = cal_wf_x(x_um + sx_) *
                 std::polar(1.0, TAU * (x_um / (res_x * pixel_size)) * nx);
     }
 
     ComplexVector wf_y(res_y);
     for (int y = 0; y < res_y; ++y) {
       double y_um = -(y - res_y / 2.0) * pixel_size;
-      wf_y[y] = cal_wf_y(y_um - sy_) *
+      wf_y[y] = cal_wf_y(y_um + sy_) *
                 std::polar(1.0, TAU * (y_um / (res_y * pixel_size)) * ny);
     }
 
