@@ -14,11 +14,19 @@ with resources.files('hduq.cnhu.assets').joinpath('fx2.npy').open('rb') as f:
     _fx2 = interp1d(np.linspace(0, 1, 801), np.load(f))
 
 
-__all__ = ['SLM', 'HG', 'LG', 'PM', 'CGH']
+__all__ = ['HG', 'LG', 'PM', 'CGH']
+
+
+class _SLM:
+    @staticmethod
+    def check(inputs):
+        if not issubclass(inputs, _SLM):
+            raise ValueError('invalid SLM class')
+        return inputs
 
 
 
-class SLM:
+class _DefaultSLM(_SLM):
     device = 'HoloEye, PLUTO-2-NIR-011'
 
     pixel_size = 8
@@ -55,6 +63,10 @@ class _Mode:
             raise ValueError('invalid mode')
         return inputs
     
+    @property
+    def is_leaf(self):
+        return True
+    
     def flatten(self):
         visitor = _FlattenVisitor()
         visitor.visit(self, 1)
@@ -89,7 +101,16 @@ class _FlattenVisitor:
         self.minus = []
 
     def visit(self, node, sign=1):
-        if isinstance(node, PM):
+        if node.is_leaf:
+            if isinstance(node, _Zero):
+                return
+
+            if sign == 1:
+                self.plus.append(node)
+            elif sign == -1:
+                self.minus.append(node)
+
+        elif not node.is_leaf:
             self.visit(node.mode1, sign)
 
             if node.pm == '+':
@@ -97,14 +118,6 @@ class _FlattenVisitor:
             elif node.pm == '-':
                 self.visit(node.mode2, -sign)
 
-        elif isinstance(node, _Zero):
-            return
-
-        else:
-            if sign == 1:
-                self.plus.append(node)
-            elif sign == -1:
-                self.minus.append(node)
 
 
 
@@ -113,6 +126,10 @@ class PM(_Mode):
         self.mode1 = _Mode.check(mode1)
         self.mode2 = _Mode.check(mode2)
         self.pm = pm
+
+    @property
+    def is_leaf(self):
+        return False
 
     def wave_function(self, sigma):
         plus, minus = self.flatten()
@@ -138,21 +155,22 @@ class HG(_Mode):
             self.order_1 = n
             self.order_2 = m
 
-
             self.x_shift, self.y_shift = x_shift, y_shift
-            self.x, self.y = SLM.x + x_shift, SLM.y + y_shift
-            self.rho = self.x**2 + self.y**2
         else:
             raise ValueError('orders must be positive integers')
 
 
-    def wave_function(self, sigma):
+    def wave_function(self, sigma, slm_cls=_DefaultSLM):
+        _SLM.check(slm_cls)
         w0 = 2*sigma
         n, m = self.order_1, self.order_2
 
+        x, y = slm_cls.x + self.x_shift, slm_cls.y + self.y_shift
+        rho = x**2 + y**2
+
         N = np.sqrt(2**(1-n-m) / (pi * factorial(m) * factorial(n))) / w0
-        hx, hy= hermite(n)(2**.5 * self.x / w0), hermite(m)(2**.5 * self.y / w0)
-        ca = N * hx * hy * np.exp(-self.rho/(w0**2))
+        hx, hy= hermite(n)(2**.5 * x / w0), hermite(m)(2**.5 * y / w0)
+        ca = N * hx * hy * np.exp(-rho/(w0**2))
         a, phi = np.abs(ca), np.angle(ca)
 
         return a * np.exp(1j * phi)
@@ -166,7 +184,7 @@ class LG(_Mode):
 
 
 class CGH:
-    def __init__(self, sigma: float, quiet=False):
+    def __init__(self, sigma: float, quiet=False, slm_cls=_DefaultSLM):
         self.sigma = sigma
         self.mode_list, self.nx_list, self.ny_list = [], [], []
         self.cgh = None
@@ -174,6 +192,8 @@ class CGH:
         self._is_quiet = quiet
         self._is_frozen = False
         self._is_cached = False
+
+        self.slm_cls = _SLM.check(slm_cls)
 
 
     def _check_cgh(self):
@@ -232,7 +252,8 @@ class CGH:
     def _cal_V(self):
         V = 0
         for i, mode in enumerate(self.mode_list):
-            V = V + (mode.wave_function(self.sigma) * np.exp(2j*pi * (SLM.norm_x*self.nx_list[i] + SLM.norm_y*self.ny_list[i])))
+            V = V + (mode.wave_function(self.sigma, self.slm_cls) * 
+                     np.exp(2j*pi * (self.slm_cls.norm_x*self.nx_list[i] + self.slm_cls.norm_y*self.ny_list[i])))
 
         return V
 
@@ -246,7 +267,7 @@ class CGH:
         
         if self._is_frozen and not self._is_cached:
             V = self._cal_V()
-            self.fft = _FFTUtils(SLM)
+            self.fft = _FFTUtils(self.slm_cls)
             self.cache = self.fft.fft(V)
             self._is_cached = True
         
