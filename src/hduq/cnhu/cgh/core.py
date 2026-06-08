@@ -13,6 +13,8 @@ import importlib.resources as resources
 with resources.files('hduq.cnhu.assets').joinpath('fx2.npy').open('rb') as f:
     _fx2 = interp1d(np.linspace(0, 1, 801), np.load(f))
 
+from ._hook import cal_cpp
+
 
 __all__ = ['HG', 'LG', 'PM', 'CGH']
 
@@ -131,11 +133,11 @@ class PM(_Mode):
     def is_leaf(self):
         return False
 
-    def wave_function(self, sigma):
+    def wave_function(self, sigma, slm_cls=_DefaultSLM):
         plus, minus = self.flatten()
         norm = len(plus) + len(minus)
-        wf1 = self.mode1.wave_function(sigma)
-        wf2 = self.mode2.wave_function(sigma)
+        wf1 = self.mode1.wave_function(sigma, slm_cls)
+        wf2 = self.mode2.wave_function(sigma, slm_cls)
         if self.pm == '+':
             return (wf1 + wf2) / np.sqrt(norm)
         elif self.pm == '-':
@@ -258,30 +260,39 @@ class CGH:
         return V
 
 
-    def cal(self, x_shift_fast=0., y_shift_fast=0.):
-        if not self._is_frozen and (x_shift_fast != 0. or y_shift_fast != 0.):
-            raise ValueError('instance must be frozen before using `x_shift_fast` or `y_shift_fast`')
-        
-        if not self._is_frozen:
-            V = self._cal_V()
-        
-        if self._is_frozen and not self._is_cached:
-            V = self._cal_V()
-            self.fft = _FFTUtils(self.slm_cls)
-            self.cache = self.fft.fft(V)
-            self._is_cached = True
-        
-        if self._is_frozen and self._is_cached:
-            V = self.fft.ifft(self.cache * np.exp(2j*pi * (self.fft.norm_x*x_shift_fast + self.fft.norm_y*y_shift_fast)))
+    def cal(self, x_shift_fast=0., y_shift_fast=0., backend='python'):
+        if backend.lower() in ('py', 'python'):
 
-        a = np.abs(V) / np.abs(V).max()
-        phi = np.angle(V)
+            if not self._is_frozen and (x_shift_fast != 0. or y_shift_fast != 0.):
+                raise ValueError('instance must be frozen before using `x_shift_fast` or `y_shift_fast`')
+            
+            if not self._is_frozen:
+                V = self._cal_V()
+            
+            if self._is_frozen and not self._is_cached:
+                V = self._cal_V()
+                self.fft = _FFTUtils(self.slm_cls)
+                self.cache = self.fft.fft(V)
+                self._is_cached = True
+            
+            if self._is_frozen and self._is_cached:
+                V = self.fft.ifft(self.cache * np.exp(2j*pi * (self.fft.norm_x*x_shift_fast + self.fft.norm_y*y_shift_fast)))
 
-        _temp = self.fx2(a) * np.sin(phi)
-        _temp = ((_temp - _temp.min()) / (_temp.max() - _temp.min())) * 255
+            a = np.abs(V) / np.abs(V).max()
+            phi = np.angle(V)
 
-        self.cgh = _temp.astype(np.uint8)
-        self.img = Image.fromarray(self.cgh)
+            _temp = self.fx2(a) * np.sin(phi)
+            _temp = ((_temp - _temp.min()) / (_temp.max() - _temp.min())) * 255
+
+            self.cgh = _temp.astype(np.uint8)
+            self.img = Image.fromarray(self.cgh)
+
+        elif backend.lower() in ('c++', 'cpp'):
+            self.cgh = cal_cpp(self)
+            self.img = Image.fromarray(self.cgh)
+
+        else:
+            raise ValueError
 
 
     def result(self):
