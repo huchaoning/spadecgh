@@ -27,7 +27,8 @@ dependencies = []
 cnhu = [
     "numpy",
     "scipy",
-    "pillow"
+    "pillow",
+    "cffi"
 ]
 
 
