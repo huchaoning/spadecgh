@@ -42,7 +42,7 @@ jobs:
 
       - name: collect artifacts
         run: |
-          python -c "import os, shutil; os.makedirs('dist-bin/${{ runner.os }}', exist_ok=True); [shutil.copy(os.path.join('src/hduq/cnhu/cgh/lib', f), 'dist-bin/${{ runner.os }}/') for f in os.listdir('src/hduq/cnhu/cgh/lib') if f.endswith(('.so', '.dylib', '.dll', '.lib'))]"
+          python -c "import os, shutil; os.makedirs('dist-bin/${{ runner.os }}', exist_ok=True); [shutil.copy(os.path.join('src/hduq/cnhu/cgh/lib', f), 'dist-bin/${{ runner.os }}/') for f in os.listdir('src/hduq/cnhu/cgh/lib')]"
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
