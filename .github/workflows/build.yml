@@ -2,6 +2,9 @@ name: build-wheel
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   ##################################
@@ -49,7 +52,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: hduq-cnhu-cgh-cpp-${{ matrix.os }}
+          name: cnhu-cgh-engine-${{ matrix.os }}
           path: artifact/
 
 
@@ -89,3 +92,29 @@ jobs:
         with:
           name: hduq-whl
           path: dist/*.whl
+
+
+  #################################
+  ######## publish to pypi ########
+  #################################
+  publish-pypi:
+    runs-on: ubuntu-latest
+    needs: build-wheel
+
+    environment:
+      name: pypi
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: download wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: hduq-whl
+          path: dist/
+
+      - name: publish to pypi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
