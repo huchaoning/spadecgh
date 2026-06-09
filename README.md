@@ -7,7 +7,7 @@
 
 ## Architecture
 
-To keep the core package ultra-lightweight and prevent dependency bloat, `hduq` adopts an **Isolated Architecture**:
+To prevent dependency bloat, `hduq` adopts an **Isolated Architecture**:
 - Installing the core `hduq` package will not install any heavy third-party dependencies.
 - Submodules are fully isolated. To use a specific submodule, you must install its corresponding extra dependencies.
 
