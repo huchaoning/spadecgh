@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hduq"
-description = "HDU Quantum Metrology Lab Python Utils"
+description = "HDUQ Python utils"
 dynamic = ["version"]
 
 readme = "README.md"
