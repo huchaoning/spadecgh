@@ -188,7 +188,7 @@ class LG(_Mode):
 class CGH:
     def __init__(self, sigma: float, quiet=False, slm_cls=_DefaultSLM):
         self.sigma = sigma
-        self.mode_list, self.nx_list, self.ny_list = [], [], []
+        self._mode_list, self._nx_list, self._ny_list = [], [], []
         self.cgh = None
 
         self._is_quiet = quiet
@@ -199,12 +199,12 @@ class CGH:
         self.cgh_engine_cpp = CGHEngineCPP() if CGHEngineCPP().is_available else None
 
 
-    def _check_cgh(self):
-        if not self.mode_list:
+    def _check_cgh(self, *args, **kwargs):
+        if not self._mode_list:
             raise RuntimeError('No modes added. Use add_modes() to add at least one mode.')
         if self.cgh is None:
             if not self._is_quiet: print('CGH not generated. Running cal() automatically...')
-            self.cal()
+            self.cal(*args, **kwargs)
 
     
     def freeze(self):
@@ -220,30 +220,30 @@ class CGH:
     
     def _check_frozen(self):
         if self._is_frozen:
-            raise RuntimeError('this instance is frozen, call `.unfreeze()` before modifying `mode_list`')
+            raise RuntimeError('this instance is frozen, call `.unfreeze()` before modifying `_mode_list`')
 
 
-    def add_modes(self, mode_list, nx_list, ny_list):
+    def add_modes(self, _mode_list, _nx_list, _ny_list):
         self._check_frozen()
-        mode_list = np.atleast_1d(mode_list)
-        nx_list = np.atleast_1d(nx_list)
-        ny_list = np.atleast_1d(ny_list)
+        _mode_list = np.atleast_1d(_mode_list)
+        _nx_list = np.atleast_1d(_nx_list)
+        _ny_list = np.atleast_1d(_ny_list)
 
-        for mode in mode_list:
+        for mode in _mode_list:
             _Mode.check(mode)
 
-        if not (len(mode_list) == len(nx_list) == len(ny_list)):
-            raise ValueError('mode_list, nx_list, and ny_list must have the same length')
+        if not (len(_mode_list) == len(_nx_list) == len(_ny_list)):
+            raise ValueError('_mode_list, _nx_list, and _ny_list must have the same length')
         
-        self.mode_list.extend(mode_list)
-        self.nx_list.extend(nx_list)
-        self.ny_list.extend(ny_list)
+        self._mode_list.extend(_mode_list)
+        self._nx_list.extend(_nx_list)
+        self._ny_list.extend(_ny_list)
  
     
     def clear_modes(self):
         self._check_frozen()
         if not self._is_quiet: print('resetting...')
-        self.mode_list, self.nx_list, self.ny_list = [], [], []
+        self._mode_list, self._nx_list, self._ny_list = [], [], []
         self.cgh = None
 
 
@@ -254,9 +254,9 @@ class CGH:
 
     def _cal_V(self):
         V = 0
-        for i, mode in enumerate(self.mode_list):
+        for i, mode in enumerate(self._mode_list):
             V = V + (mode.wave_function(self.sigma, self.slm_cls) * 
-                     np.exp(2j*pi * (self.slm_cls.norm_x*self.nx_list[i] + self.slm_cls.norm_y*self.ny_list[i])))
+                     np.exp(2j*pi * (self.slm_cls.norm_x*self._nx_list[i] + self.slm_cls.norm_y*self._ny_list[i])))
 
         return V
 
@@ -292,6 +292,9 @@ class CGH:
             if self.cgh_engine_cpp is not None:
                 self.cgh = self.cgh_engine_cpp.compute(self)
                 self.img = Image.fromarray(self.cgh)
+
+                if x_shift_fast != 0. or y_shift_fast != 0.:
+                    print('C++ backend is enabled, FFT cache is not implemented; `shift_fast` options will be ignored')
             else:
                 raise SystemError('C++ engine is not available')
 
@@ -299,18 +302,18 @@ class CGH:
             raise ValueError('invalid `backend` option')
 
 
-    def result(self):
-        self._check_cgh()
+    def result(self, *args, **kwargs):
+        self._check_cgh(*args, **kwargs)
         return self.cgh
 
 
-    def show(self):
-        self._check_cgh()
+    def show(self, *args, **kwargs):
+        self._check_cgh(*args, **kwargs)
         self.img.show()
 
 
-    def save(self, file, override=False):
-        self._check_cgh()
+    def save(self, file, override=False, *args, **kwargs):
+        self._check_cgh(*args, **kwargs)
         file = path.expanduser(file)
         if not path.exists(file) or override:
             self.img.save(file)
@@ -319,7 +322,8 @@ class CGH:
 
 
     def __repr__(self):
-        lines = [
+        lines = [ 
+            '\nhduq.cnhu.cgh.CGH instance\n',
             '========================= CGH TASK GRAPH =========================',
             f' Sigma: {self.sigma};    Quiet: {self._is_quiet};    Frozen: {self._is_frozen};    Cached: {self._is_cached}',
             '------------------------------------------------------------------',
@@ -327,7 +331,7 @@ class CGH:
             '------------------------------------------------------------------'
         ]
         
-        for i, (m, nx, ny) in enumerate(zip(self.mode_list, self.nx_list, self.ny_list)):
+        for i, (m, nx, ny) in enumerate(zip(self._mode_list, self._nx_list, self._ny_list)):
             nx_v = nx.item() if hasattr(nx, 'item') else nx
             ny_v = ny.item() if hasattr(ny, 'item') else ny
             
