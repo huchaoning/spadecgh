@@ -2,6 +2,4 @@ build:
     mkdir -p build
     cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
     cmake --build build --config Release
-    mkdir -p ../../../src/hduq/cnhu/cgh/lib
-    touch ../../../src/hduq/cnhu/cgh/lib/__init__.py
-    cp -r lib/* ../../../src/hduq/cnhu/cgh/lib/
+    cp build/cgh_engine.* ../../../src/hduq/cnhu/assets/

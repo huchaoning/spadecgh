@@ -138,7 +138,12 @@ dmypy.json
 cython_debug/
 
 
-# Manually Added
+# manually added
 .DS_Store
 .vscode
 test.ipynb
+
+# cgh_engine (cnhu)
+cgh_engine.so
+cgh_engine.dylib
+cgh_engine.dll

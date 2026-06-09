@@ -40,20 +40,20 @@ jobs:
       - name: collect native library
         shell: bash
         run: |
-          mkdir -p artifact
+          mkdir -p cnhu-artifact
 
           if [ "$RUNNER_OS" = "Linux" ]; then
-            cp src/hduq/cnhu/cgh/lib/*.so artifact/
+            cp src/hduq/cnhu/assets/*.so cnhu-artifact/
           elif [ "$RUNNER_OS" = "Windows" ]; then
-            cp src/hduq/cnhu/cgh/lib/*.dll artifact/
+            cp src/hduq/cnhu/assets/*.dll cnhu-artifact/
           elif [ "$RUNNER_OS" = "macOS" ]; then
-            cp src/hduq/cnhu/cgh/lib/*.dylib artifact/
+            cp src/hduq/cnhu/assets/*.dylib cnhu-artifact/
           fi
 
       - uses: actions/upload-artifact@v4
         with:
           name: cnhu-cgh-engine-${{ matrix.os }}
-          path: artifact/
+          path: cnhu-artifact/
 
 
   ####################################
@@ -73,17 +73,17 @@ jobs:
       - name: install build
         run: pip install build
 
-      - name: download libs
+      # by cnhu
+      - name: download libs (cnhu)
         uses: actions/download-artifact@v4
         with:
-          path: bundle/
+          path: cnhu-bundle/
 
-      - name: assemble lib folder (cnhu)
+      - name: copy to assets folder (cnhu)
         run: |
-          mkdir -p src/hduq/cnhu/cgh/lib
-          cp bundle/*/* src/hduq/cnhu/cgh/lib/
-          touch src/hduq/cnhu/cgh/lib/__init__.py
-          ls -l src/hduq/cnhu/cgh/lib/
+          cp cnhu-bundle/*/* src/hduq/cnhu/assets/
+          ls -l src/hduq/cnhu/assets/
+      # end
 
       - name: build wheel
         run: python -m build --wheel
@@ -97,24 +97,24 @@ jobs:
   #################################
   ######## publish to pypi ########
   #################################
-  publish-pypi:
-    runs-on: ubuntu-latest
-    needs: build-wheel
+  # publish-pypi:
+  #   runs-on: ubuntu-latest
+  #   needs: build-wheel
 
-    environment:
-      name: pypi
+  #   environment:
+  #     name: pypi
 
-    permissions:
-      id-token: write
+  #   permissions:
+  #     id-token: write
 
-    steps:
-      - name: download wheel
-        uses: actions/download-artifact@v4
-        with:
-          name: hduq-whl
-          path: dist/
+  #   steps:
+  #     - name: download wheel
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: hduq-whl
+  #         path: dist/
 
-      - name: publish to pypi
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist/
+  #     - name: publish to pypi
+  #       uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         packages-dir: dist/
