@@ -5,12 +5,12 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(
-    cpp
-    cpp/third_party/boost_math
-    cpp/third_party/nlohmann_json
+    .
+    third_party/boost_math
+    third_party/nlohmann_json
 )
 
-add_library(cgh_engine SHARED cpp/cgh_engine.cpp)
+add_library(cgh_engine SHARED cgh_engine.cpp)
 
 set_target_properties(cgh_engine PROPERTIES PREFIX "")
 

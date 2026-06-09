@@ -196,7 +196,7 @@ class CGH:
         self._is_cached = False
 
         self.slm_cls = _SLM.check(slm_cls)
-        self.cgh_engine_cpp = CGHEngineCPP if CGHEngineCPP.is_available else None
+        self.cgh_engine_cpp = CGHEngineCPP() if CGHEngineCPP().is_available else None
 
 
     def _check_cgh(self):

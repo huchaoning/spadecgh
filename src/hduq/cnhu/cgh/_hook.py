@@ -4,6 +4,8 @@ import platform
 from cffi import FFI
 import numpy as np
 
+from importlib.resources import files
+
 
 class CGHEngineCPP:
     _ffi = FFI()
@@ -13,7 +15,6 @@ class CGHEngineCPP:
         self._lib = self._load_library()
 
     def _load_library(self):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
         system_type = platform.system()
 
         if system_type == "Darwin":
@@ -25,14 +26,11 @@ class CGHEngineCPP:
         else:
             return None
 
-        lib_path = os.path.join(current_dir, 'lib', lib_name)
-        if not os.path.exists(lib_path):
-            return None
-
-        try:
-            return self._ffi.dlopen(lib_path)
-        except Exception:
-            return None
+        lib_package = files('hduq.cnhu.cgh.lib')
+        with lib_package.joinpath(lib_name) as lib_path:
+            if not lib_path.exists():
+                return None
+            return self._ffi.dlopen(str(lib_path))
 
     @property
     def is_available(self):

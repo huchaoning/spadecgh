@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel", "setuptools-scm"]
+requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 
@@ -10,9 +10,7 @@ dynamic = ["version"]
 
 readme = "README.md"
 license = { file = "LICENSE" }
-authors = [
-    { name = "HDU Quantum Metrology Lab" }
-]
+authors = [{ name = "HDU Quantum Metrology Lab" }]
 
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
@@ -24,12 +22,11 @@ dependencies = []
 
 
 [project.optional-dependencies]
-cnhu = [
-    "numpy",
-    "scipy",
-    "pillow",
-    "cffi"
-]
+cnhu = ["numpy", "scipy", "pillow", "cffi"]
+
+
+[tool.setuptools.package-data]
+hduq = ["**/*.so", "**/*.dll", "**/*.dylib"]
 
 
 [tool.setuptools.packages.find]
