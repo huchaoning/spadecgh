@@ -87,7 +87,7 @@ def _serialize_cgh(cgh):
         'modes': []
     }
 
-    for mode, nx, ny in zip(cgh.mode_list, cgh.nx_list, cgh.ny_list):
+    for mode, nx, ny in zip(cgh._mode_list, cgh.nx_list, cgh.ny_list):
         mode_json = _serialize_mode(mode)
         mode_json['nx'] = float(nx)
         mode_json['ny'] = float(ny)
