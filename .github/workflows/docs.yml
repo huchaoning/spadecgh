@@ -3,6 +3,9 @@ name: deploy-docs
 on:
   push:
     branches: [main]
+    paths:
+      - "docs/**"
+      - "!docs/temp/**"
 
 permissions:
   contents: read

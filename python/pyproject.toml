@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hducgh"
-description = "HDU CGH utils"
+description = "Hangzhou Dianzi University computer-generated hologram toolkit"
 dynamic = ["version"]
 
 readme = "README.md"
