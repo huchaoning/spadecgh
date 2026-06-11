@@ -1,0 +1,117 @@
+name: build-and-publish
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  ##################################
+  ######## compile cpp/cnhu ########
+  ##################################
+  compile-cpp-cnhu:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022, macos-14]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: install tools
+        run: pip install build
+
+      - name: install just
+        uses: taiki-e/install-action@just
+
+      - name: build cpp
+        run: |
+          cd cpp/cnhu/cgh_engine
+          just build
+
+      - name: collect native library
+        shell: bash
+        run: |
+          mkdir -p cnhu-artifact
+
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            cp src/hduq/cnhu/assets/*.so cnhu-artifact/
+          elif [ "$RUNNER_OS" = "Windows" ]; then
+            cp src/hduq/cnhu/assets/*.dll cnhu-artifact/
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            cp src/hduq/cnhu/assets/*.dylib cnhu-artifact/
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cnhu-cgh-engine-${{ matrix.os }}
+          path: cnhu-artifact/
+
+
+  ####################################
+  ######## build python wheel ########
+  ####################################
+  build-wheel:
+    runs-on: ubuntu-latest
+    needs: compile-cpp-cnhu  # by cnhu 
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3"
+
+      - name: install build
+        run: pip install build
+
+      # by cnhu
+      - name: download libs (cnhu)
+        uses: actions/download-artifact@v4
+        with:
+          path: cnhu-bundle/
+
+      - name: copy to assets folder (cnhu)
+        run: |
+          cp cnhu-bundle/*/* src/hduq/cnhu/assets/
+          ls -l src/hduq/cnhu/assets/
+      # end
+
+      - name: build wheel
+        run: python -m build --wheel
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hduq-whl
+          path: dist/*.whl
+
+
+  #################################
+  ######## publish to pypi ########
+  #################################
+  publish-pypi:
+    runs-on: ubuntu-latest
+    needs: build-wheel
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: download wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: hduq-whl
+          path: dist/
+
+      - name: publish to pypi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/

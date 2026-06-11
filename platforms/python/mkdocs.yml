@@ -1,0 +1,18 @@
+site_name: HDUQ Python utils
+repo_url: https://github.com/huchaoning/hduq
+
+
+theme:
+  name: readthedocs
+  language: en
+
+
+edit_uri: edit/main/docs/
+
+
+plugins:
+  - search
+
+
+nav:
+  - Home: "index.md"
