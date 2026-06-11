@@ -14,4 +14,4 @@ install:
 
 
 uninstall:
-    pip uninstall -e hducgh
+    pip uninstall hducgh -y
