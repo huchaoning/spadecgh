@@ -5,8 +5,8 @@ build-cpp:
     cp cpp/lib/Release/* python/src/hducgh/assets/
 
 
-clean-lib:
-    rm -rf cpp/build cpp/lib
+clean-cpp:
+    rm -rf cpp/build cpp/lib build
 
 
 install:
