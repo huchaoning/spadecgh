@@ -1,0 +1,68 @@
+name: Deploy
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-2022
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: '5.0.2'
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+      
+      - run: npm run build
+
+      - name: Check Dist
+        run: if (!(Test-Path "dist/index.html")) { throw "dist/index.html not found!" }
+
+      - name: Update Web
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to Pages
+        uses: actions/deploy-pages@v4
+
+      - name: Package Windows App
+        if: startsWith(github.ref, 'refs/tags/')
+        run: npx electron-forge make
+
+      - name: Upload Artifact
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: App-Windows-Portable
+          path: out/make/zip/win32/x64/*.zip
+          compression-level: 0 
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/make/zip/win32/x64/*.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false
