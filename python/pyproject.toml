@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "hduq"
-description = "HDUQ Python utils"
+name = "hducgh"
+description = "HDU CGH utils"
 dynamic = ["version"]
 
 readme = "README.md"
 license = { file = "LICENSE" }
-authors = [{ name = "HDU Quantum Metrology Lab" }]
+authors = [{ name = "HDU quantum metrology lab" }]
 
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
@@ -18,21 +18,18 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-dependencies = []
-
-
-[project.optional-dependencies]
-cnhu = ["numpy", "scipy", "pillow", "cffi"]
+dependencies = ["numpy", "scipy", "pillow", "cffi"]
 
 
 [tool.setuptools.package-data]
-hduq = ["**/*.so", "**/*.dll", "**/*.dylib"]
+hducgh = ["**/*.so", "**/*.dll", "**/*.dylib"]
 
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["hduq*"]
+include = ["hducgh*"]
 
 
 [tool.setuptools_scm]
+root = ".."
 local_scheme = "no-local-version"

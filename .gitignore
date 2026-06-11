@@ -167,10 +167,5 @@ dist-ssr
 # manually added
 .DS_Store
 .vscode
+hducgh_backend_*
 test.ipynb
-
-# cgh_engine
-engine.wasm
-cgh_engine.so
-cgh_engine.dylib
-cgh_engine.dll

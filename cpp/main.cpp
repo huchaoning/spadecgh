@@ -1,15 +1,15 @@
 #include <algorithm>
+#include <boost/math/special_functions/factorials.hpp>
+#include <boost/math/special_functions/hermite.hpp>
 #include <cmath>
 #include <complex>
 #include <iostream>
+#include <json.hpp>
 #include <numbers>
 #include <string>
 #include <vector>
 
 #include "fx2.hpp"
-#include "third_party/boost_math/boost/math/special_functions/factorials.hpp"
-#include "third_party/boost_math/boost/math/special_functions/hermite.hpp"
-#include "third_party/nlohmann_json/json.hpp"
 
 using json = nlohmann::json;
 
@@ -91,9 +91,9 @@ class HG {
 };
 
 #ifdef _WIN32
-  #define API_EXPORT __declspec(dllexport)
+#define API_EXPORT __declspec(dllexport)
 #else
-  #define API_EXPORT
+#define API_EXPORT
 #endif
 
 extern "C" {

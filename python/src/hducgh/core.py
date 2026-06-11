@@ -13,7 +13,7 @@ import importlib.resources as resources
 with resources.files('hduq.cnhu.assets').joinpath('fx2.npy').open('rb') as f:
     _fx2 = interp1d(np.linspace(0, 1, 801), np.load(f))
 
-from ._hook import CGHEngineCPP
+from ._hook import _CppBackend
 
 
 __all__ = ['HG', 'LG', 'PM', 'CGH']
@@ -195,8 +195,8 @@ class CGH:
         self._is_frozen = False
         self._is_cached = False
 
-        self.slm_cls = _SLM.check(slm_cls)
-        self.cgh_engine_cpp = CGHEngineCPP() if CGHEngineCPP().is_available else None
+        self._slm_cls = _SLM.check(slm_cls)
+        self._cpp_backend = _CppBackend()
 
 
     def _check_cgh(self, *args, **kwargs):
@@ -255,8 +255,8 @@ class CGH:
     def _cal_V(self):
         V = 0
         for i, mode in enumerate(self._mode_list):
-            V = V + (mode.wave_function(self.sigma, self.slm_cls) * 
-                     np.exp(2j*pi * (self.slm_cls.norm_x*self._nx_list[i] + self.slm_cls.norm_y*self._ny_list[i])))
+            V = V + (mode.wave_function(self.sigma, self._slm_cls) * 
+                     np.exp(2j*pi * (self._slm_cls.norm_x*self._nx_list[i] + self._slm_cls.norm_y*self._ny_list[i])))
 
         return V
 
@@ -272,7 +272,7 @@ class CGH:
             
             if self._is_frozen and not self._is_cached:
                 V = self._cal_V()
-                self.fft = _FFTUtils(self.slm_cls)
+                self.fft = _FFTUtils(self._slm_cls)
                 self.cache = self.fft.fft(V)
                 self._is_cached = True
             
@@ -289,8 +289,8 @@ class CGH:
             self.img = Image.fromarray(self.cgh)
 
         elif backend.lower() in ('c++', 'cpp'):
-            if self.cgh_engine_cpp is not None:
-                self.cgh = self.cgh_engine_cpp.compute(self)
+            if self._cpp_backend.is_available:
+                self.cgh = self._cpp_backend.compute(self)
                 self.img = Image.fromarray(self.cgh)
 
                 if x_shift_fast != 0. or y_shift_fast != 0.:
@@ -323,7 +323,7 @@ class CGH:
 
     def __repr__(self):
         lines = [ 
-            '\nhduq.cnhu.cgh.CGH instance\n',
+            '\nhducgh.CGH instance\n',
             '========================= CGH TASK GRAPH =========================',
             f' Sigma: {self.sigma};    Quiet: {self._is_quiet};    Frozen: {self._is_frozen};    Cached: {self._is_cached}',
             '------------------------------------------------------------------',

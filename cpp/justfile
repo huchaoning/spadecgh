@@ -1,5 +1,0 @@
-build:
-    mkdir -p build
-    cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
-    cmake --build build --config Release
-    cp lib/cgh_engine.* ../../../src/hduq/cnhu/assets/

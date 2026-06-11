@@ -7,7 +7,7 @@ import numpy as np
 from importlib.resources import files
 
 
-class CGHEngineCPP:
+class _CppBackend:
     _ffi = FFI()
     _ffi.cdef('int cal(const char* json_str, unsigned char* out_buffer);')
 
@@ -17,16 +17,16 @@ class CGHEngineCPP:
     def _load_library(self):
         system_type = platform.system()
 
-        if system_type == "Darwin":
-            lib_name = "cgh_engine.dylib"
-        elif system_type == "Linux":
-            lib_name = "cgh_engine.so"
-        elif system_type == "Windows":
-            lib_name = "cgh_engine.dll"
+        if system_type.lower() == "darwin":
+            lib_name = "hducgh_backend_macos_universal.dylib"
+        elif system_type.lower() == "linux":
+            lib_name = "hducgh_backend_linux_x64.so"
+        elif system_type.lower() == "windows":
+            lib_name = "hducgh_backend_win_x64.dll"
         else:
             return None
 
-        lib_package = files('hduq.cnhu.assets')
+        lib_package = files('hducgh.assets')
         with lib_package.joinpath(lib_name) as lib_path:
             if not lib_path.exists():
                 return None
@@ -81,8 +81,8 @@ def _serialize_cgh(cgh):
     data = {
         'global': {
             'sigma': float(cgh.sigma),
-            'pixel_size': float(cgh.slm_cls.pixel_size),
-            'resolution': list(cgh.slm_cls.resolution),
+            'pixel_size': float(cgh._slm_cls.pixel_size),
+            'resolution': list(cgh._slm_cls.resolution),
         },
         'modes': []
     }
