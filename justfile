@@ -16,6 +16,16 @@ build-wasm:
     cmake --build cpp/build_wasm
 
 
+npm-install:
+    cd web_app && npm install
+
+npm-dev:
+	cd web_app && npm run dev
+
+npm-fix:
+    cd web_app && npm audit fix
+
+
 install:
     pip install -e ./python
 
