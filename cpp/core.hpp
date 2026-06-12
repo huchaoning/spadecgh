@@ -7,12 +7,11 @@
 #include "common.hpp"
 #include "fx2.hpp"
 
-using json = nlohmann::json;
 using HG = HermiteGaussian;
 using LG = LaguerreGaussian;
 
 int core(const char* json_str, uint8_t* out_buffer) {
-  auto j = json::parse(json_str);
+  auto j = nlohmann::json::parse(json_str);
 
   double sigma = j["global"]["sigma"];
   double w0 = 2.0 * sigma;

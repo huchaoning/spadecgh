@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cmath>
 #include <complex>
+#include <cstdint>
 #include <numbers>
 #include <vector>
 
