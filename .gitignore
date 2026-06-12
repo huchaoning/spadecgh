@@ -168,4 +168,6 @@ dist-ssr
 .DS_Store
 .vscode
 hducgh_backend_*
+build_py
+build_wasm
 test.ipynb

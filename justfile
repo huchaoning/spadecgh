@@ -1,12 +1,19 @@
 build-cpp:
-    mkdir -p cpp/build
-    cmake -B cpp/build -S cpp/ -DCMAKE_BUILD_TYPE=Release
-    cmake --build cpp/build --config Release
-    cp cpp/lib/* python/src/hducgh/assets/
+    mkdir -p cpp/build_py
+    cmake -B cpp/build_py -S cpp/ -DCMAKE_BUILD_TYPE=Release
+    cmake --build cpp/build_py --config Release
 
 
 clean-cpp:
-    rm -rf cpp/build cpp/lib build
+    rm -rf build
+    rm -rf cpp/build_py cpp/lib
+    rm -rf cpp/build_wasm web_app/public/wasm
+
+
+build-wasm:
+    mkdir -p cpp/build_wasm
+    cd cpp/build_wasm && emcmake cmake ..
+    cmake --build cpp/build_wasm
 
 
 install:
