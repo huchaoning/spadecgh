@@ -2,7 +2,7 @@ build-cpp:
     mkdir -p cpp/build
     cmake -B cpp/build -S cpp/ -DCMAKE_BUILD_TYPE=Release
     cmake --build cpp/build --config Release
-    cp cpp/lib/Release/* python/src/hducgh/assets/
+    cp cpp/lib/* python/src/hducgh/assets/
 
 
 clean-cpp:
