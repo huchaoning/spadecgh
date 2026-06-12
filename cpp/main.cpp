@@ -1,20 +1,23 @@
-// #include <algorithm>
 #include <iostream>
 #include <json.hpp>
-// #include <string>
+#include <string>
 
 #include "HermiteGaussian.hpp"
+#include "LaguerreGaussian.hpp"
 #include "common.hpp"
 #include "fx2.hpp"
 
 using json = nlohmann::json;
 using HG = HermiteGaussian;
+using LG = LaguerreGaussian;
 
 #ifdef _WIN32
 #define API_EXPORT __declspec(dllexport)
 #else
 #define API_EXPORT
 #endif
+
+std::string algo = "arrzion2";
 
 extern "C" {
 API_EXPORT int cal(const char* json_str, uint8_t* out_buffer) {
@@ -39,18 +42,27 @@ API_EXPORT int cal(const char* json_str, uint8_t* out_buffer) {
       if (mode["type"] == "HG") {
         auto hg = HG{mode["o1"], mode["o2"], w0, mode["sx"], mode["sy"]};
         hg.broadcast(V, 1.0, nx, ny, res_x, res_y, pixel_size);
+
+      } else if (mode["type"] == "LG") {
+        auto lg = LG{mode["o1"], mode["o2"], w0, mode["sx"], mode["sy"]};
+        lg.broadcast(V, 1.0, nx, ny, res_x, res_y, pixel_size);
+
       } else if (mode["type"] == "PM") {
         auto& children = mode["children"];
         size_t n_modes = children["plus"].size() + children["minus"].size();
         if (n_modes == 0) continue;
 
         double weight = 1.0 / std::sqrt(static_cast<double>(n_modes));
-
         for (auto& plus_mode : children["plus"]) {
           if (plus_mode["type"] == "HG") {
             auto hg = HG{plus_mode["o1"], plus_mode["o2"], w0, plus_mode["sx"],
                          plus_mode["sy"]};
             hg.broadcast(V, weight, nx, ny, res_x, res_y, pixel_size);
+
+          } else if (plus_mode["type"] == "LG") {
+            auto lg = LG{plus_mode["o1"], plus_mode["o2"], w0, plus_mode["sx"],
+                         plus_mode["sy"]};
+            lg.broadcast(V, weight, nx, ny, res_x, res_y, pixel_size);
           }
         }
 
@@ -59,6 +71,11 @@ API_EXPORT int cal(const char* json_str, uint8_t* out_buffer) {
             auto hg = HG{minus_mode["o1"], minus_mode["o2"], w0,
                          minus_mode["sx"], minus_mode["sy"]};
             hg.broadcast(V, -weight, nx, ny, res_x, res_y, pixel_size);
+
+          } else if (minus_mode["type"] == "LG") {
+            auto lg = LG{minus_mode["o1"], minus_mode["o2"], w0,
+                         minus_mode["sx"], minus_mode["sy"]};
+            lg.broadcast(V, -weight, nx, ny, res_x, res_y, pixel_size);
           }
         }
       }
