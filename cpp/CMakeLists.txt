@@ -35,7 +35,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/nlohmann_json
 )
 
-add_library(${TARGET_NAME} SHARED main.cpp)
+add_library(${TARGET_NAME} SHARED main_py.cpp)
 
 set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "")
 
