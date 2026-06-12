@@ -12,7 +12,7 @@ clean-cpp:
 
 build-wasm:
     mkdir -p cpp/build_wasm
-    cd cpp/build_wasm && emcmake cmake ..
+    cd cpp/build_wasm && emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
     cmake --build cpp/build_wasm
 
 

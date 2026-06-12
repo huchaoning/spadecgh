@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Jimp } from "jimp";
-import createModule from "../public/wasm/cgh_wasm.js";
+import createModule from "../public/wasm/hducgh_backend_web.js";
 import {
   Box, Play, AlertTriangle, Info, Save, Plus,
   Trash2, Settings2, Sliders, Menu, InfoIcon, X
@@ -145,23 +145,39 @@ export default function App() {
     return {
       global: {
         sigma: parseFloat(sigma),
-        pixelSize: parseFloat(pixelSize),
+        pixel_size: parseFloat(pixelSize),
         resolution: [parseInt(resX), parseInt(resY)]
       },
-      modeList: modes.map(mode => ({
-        type: mode.type,
-        o1: mode.o1,
-        o2: mode.o2,
-        nx: mode.nx,
-        ny: mode.ny,
-        sx: mode.sx,
-        sy: mode.sy,
+      modes: modes.map(mode => {
+        const base = {
+          type: mode.type,
+          o1: parseInt(mode.o1) || 0,
+          o2: parseInt(mode.o2) || 0,
+          nx: parseFloat(mode.nx) || 0,
+          ny: parseFloat(mode.ny) || 0,
+          sx: parseFloat(mode.sx) || 0,
+          sy: parseFloat(mode.sy) || 0,
+        };
 
-        subModes: mode.type === "PM" ? {
-          plus: mode.plusModes || [],
-          minus: mode.minusModes || []
-        } : null
-      }))
+        if (mode.type === "PM") {
+          return {
+            ...base,
+            children: {
+              plus: (mode.plusModes || []).map(sub => ({
+                type: sub.type,
+                o1: sub.o1,
+                o2: sub.o2,
+              })),
+              minus: (mode.minusModes || []).map(sub => ({
+                type: sub.type,
+                o1: sub.o1,
+                o2: sub.o2,
+              }))
+            }
+          };
+        }
+        return base;
+      })
     };
   };
 
@@ -177,7 +193,7 @@ export default function App() {
     console.log(`即将传给 WASM 的参数：${JSON.stringify(config, null, 2)}`)
     try {
       const startTime = performance.now();
-      const res = wasmInstance.generateCGH(JSON.stringify(config));
+      const res = wasmInstance.cal(JSON.stringify(config));
       console.log(`计算 CGH 用时：${performance.now() - startTime} ms`);
 
       const pixels = res;

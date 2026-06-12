@@ -1,0 +1,23 @@
+CC = emcc
+
+SRC = ./main_wasm.cpp
+OUTPUT_DIR = ./wasm
+OUTPUT = $(OUTPUT_DIR)/hducgh_backend_web.js
+INC = -I../third_party/nlohmann_json -I../third_party/boost_math
+
+CFLAGS = -O3 \
+         $(INC) \
+         -std=c++20 \
+         -s MODULARIZE=1 \
+         -s EXPORT_ES6=1 \
+         -s ALLOW_MEMORY_GROWTH=1 \
+         --bind
+
+all: $(OUTPUT)
+
+$(OUTPUT): $(SRC)
+	mkdir -p $(OUTPUT_DIR)
+	$(CC) $(SRC) $(CFLAGS) -o $(OUTPUT)
+
+clean:
+	rm -rf $(OUTPUT_DIR)/hducgh_backend_web.js $(OUTPUT_DIR)/hducgh_backend_web.wasm

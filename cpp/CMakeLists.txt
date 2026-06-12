@@ -15,6 +15,7 @@ if(EMSCRIPTEN)
     set(WASM_TARGET_NAME "hducgh_backend_web")
 
     add_executable(${WASM_TARGET_NAME} main_wasm.cpp)
+    target_compile_options(${WASM_TARGET_NAME} PRIVATE -O3)
 
     set_target_properties(${WASM_TARGET_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${WASM_OUTDIR}"
