@@ -108,13 +108,26 @@ export default function App() {
 
   /* --- 画布操作逻辑 --- */
   const handleWheel = (e) => {
-    e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
     setTransform(prev => ({
       ...prev,
       scale: Math.max(0.1, Math.min(prev.scale * delta, 20))
     }));
   };
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const onWheelHandler = (e) => {
+      e.preventDefault();
+      handleWheel(e);
+    };
+    container.addEventListener("wheel", onWheelHandler, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", onWheelHandler);
+    };
+  });
 
   const handleMouseDown = (e) => {
     if (e.button !== 0) return;
@@ -167,11 +180,15 @@ export default function App() {
                 type: sub.type,
                 o1: sub.o1,
                 o2: sub.o2,
+                sx: sub.sx,
+                sy: sub.sy,
               })),
               minus: (mode.minusModes || []).map(sub => ({
                 type: sub.type,
                 o1: sub.o1,
                 o2: sub.o2,
+                sx: sub.sx,
+                sy: sub.sy,
               }))
             }
           };
@@ -289,7 +306,7 @@ export default function App() {
     setModes(modes.map(mode => {
       if (mode.id === parentId) {
         const subId = Date.now() + Math.random();
-        return { ...mode, [groupKey]: [...(mode[groupKey] || []), { id: subId, type, o1: 0, o2: 0 }] };
+        return { ...mode, [groupKey]: [...(mode[groupKey] || []), { id: subId, type, o1: 0, o2: 0, sx: 0, sy: 0 }] };
       }
       return mode;
     }));
@@ -470,6 +487,8 @@ export default function App() {
                                               <div className="text-[10px] font-bold opacity-40 w-5 shrink-0">{sub.type}</div>
                                               <input type="text" className="input input-bordered input-xs w-12" value={sub.o1} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o1", e.target.value)} />
                                               <input type="text" className="input input-bordered input-xs w-12" value={sub.o2} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "o2", e.target.value)} />
+                                              <input type="text" className="input input-bordered input-xs w-12" value={sub.sx} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "sx", e.target.value)} />
+                                              <input type="text" className="input input-bordered input-xs w-12" value={sub.sy} onChange={(e) => updateSubMode(mode.id, group.key, sub.id, "sy", e.target.value)} />
                                               <button className="btn btn-ghost btn-xs btn-square text-error/40" onClick={() => removeSubMode(mode.id, group.key, sub.id)}><Trash2 size={12} /></button>
                                             </motion.div>
                                           ))}
