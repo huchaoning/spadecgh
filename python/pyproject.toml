@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hducgh"
-description = "Hangzhou Dianzi University computer-generated hologram toolkit"
+description = "HDU CGH toolkit [Quantum@HDU]"
 dynamic = ["version"]
 
 readme = "README.md"
 license = { file = "LICENSE" }
-authors = [{ name = "HDU quantum metrology lab" }]
+authors = [{ name = "Quantum Metrology Laboratory, Hangzhou Dianzi University" }]
 
 classifiers = [
     "License :: OSI Approved :: Apache Software License",

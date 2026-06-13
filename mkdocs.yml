@@ -1,6 +1,7 @@
-site_name: HDU CGH toolkit [Quantum@HDU]
+site_name: Documentation of HDU CGH toolkit [Quantum@HDU]
 site_url: https://hducgh.researchi.group/
 use_directory_urls: true
+copyright: "Quantum Metrology Laboratory, Hangzhou Dianzi University <a href='http://hduq.researchi.group'>[Quantum@HDU]</a>."
 
 repo_url: https://github.com/huchaoning/hducgh
 
