@@ -6,7 +6,7 @@
   "main": "main.js",
   "scripts": {
     "dev": "vite",
-    "build": "make && vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

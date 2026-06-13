@@ -2,15 +2,22 @@ name: build-and-publish
 
 on:
   workflow_dispatch:
+
   push:
+    branches: [main]
+    paths:
+      - "python/**"
+      - "cpp/**"
+      - ".github/workflows/**"
+
     tags:
       - 'v*'
 
 jobs:
-  ##################################
-  ######## compile cpp/cnhu ########
-  ##################################
-  compile-cpp-cnhu:
+  #############################
+  ######## compile cpp ########
+  #############################
+  compile-cpp:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -34,26 +41,25 @@ jobs:
 
       - name: build cpp
         run: |
-          cd cpp/cnhu/cgh_engine
-          just build
+          just build-cpp
 
       - name: collect native library
         shell: bash
         run: |
-          mkdir -p cnhu-artifact
+          mkdir -p cpp-artifact
 
           if [ "$RUNNER_OS" = "Linux" ]; then
-            cp src/hduq/cnhu/assets/*.so cnhu-artifact/
+            cp python/src/hducgh/assets/*.so cpp-artifact/
           elif [ "$RUNNER_OS" = "Windows" ]; then
-            cp src/hduq/cnhu/assets/*.dll cnhu-artifact/
+            cp python/src/hducgh/assets/*.dll cpp-artifact/
           elif [ "$RUNNER_OS" = "macOS" ]; then
-            cp src/hduq/cnhu/assets/*.dylib cnhu-artifact/
+            cp python/src/hducgh/assets/*.dylib cpp-artifact/
           fi
 
       - uses: actions/upload-artifact@v4
         with:
-          name: cnhu-cgh-engine-${{ matrix.os }}
-          path: cnhu-artifact/
+          name: cpp-artifact-${{ matrix.os }}
+          path: cpp-artifact/
 
 
   ####################################
@@ -61,7 +67,7 @@ jobs:
   ####################################
   build-wheel:
     runs-on: ubuntu-latest
-    needs: compile-cpp-cnhu  # by cnhu 
+    needs: compile-cpp
 
     steps:
       - uses: actions/checkout@v4
@@ -73,25 +79,23 @@ jobs:
       - name: install build
         run: pip install build
 
-      # by cnhu
-      - name: download libs (cnhu)
+      - name: download libs
         uses: actions/download-artifact@v4
         with:
-          path: cnhu-bundle/
+          path: cpp-bundle/
 
-      - name: copy to assets folder (cnhu)
+      - name: copy to assets folder
         run: |
-          cp cnhu-bundle/*/* src/hduq/cnhu/assets/
-          ls -l src/hduq/cnhu/assets/
-      # end
+          cp cpp-bundle/*/* python/src/hducgh/assets/
+          ls -l python/src/hducgh/assets/
 
       - name: build wheel
-        run: python -m build --wheel
+        run: cd python && python -m build --wheel
 
       - uses: actions/upload-artifact@v4
         with:
-          name: hduq-whl
-          path: dist/*.whl
+          name: hducgh-whl
+          path: python/dist/*.whl
 
 
   #################################

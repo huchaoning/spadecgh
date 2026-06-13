@@ -1,11 +1,14 @@
 name: deploy-docs
 
 on:
+  workflow_dispatch:
+
   push:
     branches: [main]
     paths:
       - "docs/**"
       - "!docs/temp/**"
+      - ".github/workflows/**"
 
 permissions:
   contents: read
