@@ -1,4 +1,7 @@
 site_name: HDU CGH toolkit [Quantum@HDU]
+site_url: https://hducgh.researchi.group/docs/
+use_directory_urls: true
+
 repo_url: https://github.com/huchaoning/hducgh
 
 

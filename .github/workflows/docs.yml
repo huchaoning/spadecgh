@@ -33,9 +33,12 @@ jobs:
       - run: pip install mkdocs
       - run: mkdocs build
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: deploy docs to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: site
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          destination_dir: docs
+          keep_files: true
 
-      - uses: actions/deploy-pages@v4
-        id: deploy
+
