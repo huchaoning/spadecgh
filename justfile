@@ -19,10 +19,10 @@ build-wasm:
 npm-install:
     cd web_app && npm install
 
-npm-dev:
-	cd web_app && npm run dev
+run-dev:
+	cd web_app && npm run dev -- --port 8888
 
-npm-fix:
+audit-fix:
     cd web_app && npm audit fix
 
 

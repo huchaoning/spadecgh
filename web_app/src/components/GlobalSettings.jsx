@@ -1,0 +1,96 @@
+import { Settings2 } from "lucide-react";
+import { formatInputValue } from "../utils/formatInput";
+
+export default function GlobalSettings({
+    sigma, setSigma,
+    pixelSize, setPixelSize,
+    resX, setResX,
+    resY, setResY,
+    fileName, setFileName,
+}) {
+    return (
+        <section>
+            <div className="flex items-center gap-2 mb-3 text-primary font-bold">
+                <Settings2 size={16} /> <div>全局参数</div>
+            </div>
+            <div className="bg-base-100 border border-base-200 shadow-sm p-4 rounded-xl space-y-4">
+                <div className="form-control w-full">
+                    <label className="label py-1 px-0">
+                        <div className="label-text font-medium text-xs">特征宽度 (σ, μm)</div>
+                    </label>
+                    <input
+                        type="text"
+                        value={sigma}
+                        onChange={(e) => setSigma(formatInputValue(e.target.value))}
+                        className="input input-sm input-bordered w-full"
+                    />
+                </div>
+
+                <div className="divider my-1 opacity-50"></div>
+
+                <div className="space-y-3">
+                    <label className="label py-1 px-0">
+                        <div className="label-text font-medium text-xs">SLM 设备参数</div>
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="form-control">
+                            <label className="label py-1 px-0">
+                                <div className="label-text text-[10px]">分辨率 X</div>
+                            </label>
+                            <input
+                                type="text"
+                                value={resX}
+                                onChange={(e) => setResX(formatInputValue(e.target.value))}
+                                className="input input-sm input-bordered"
+                            />
+                        </div>
+                        <div className="form-control">
+                            <label className="label py-1 px-0">
+                                <div className="label-text text-[10px]">分辨率 Y</div>
+                            </label>
+                            <input
+                                type="text"
+                                value={resY}
+                                onChange={(e) => setResY(formatInputValue(e.target.value))}
+                                className="input input-sm input-bordered"
+                            />
+                        </div>
+                    </div>
+                    <div className="form-control w-full">
+                        <label className="label py-1 px-0">
+                            <div className="label-text text-[10px]">像素尺寸 (Pixel Size, μm)</div>
+                        </label>
+                        <input
+                            type="text"
+                            value={pixelSize}
+                            onChange={(e) => setPixelSize(formatInputValue(e.target.value))}
+                            className="input input-sm input-bordered"
+                        />
+                    </div>
+
+                    <div className="divider my-1 opacity-50"></div>
+
+                    <div className="form-control w-full">
+                        <label className="label py-1 px-0">
+                            <div className="label-text font-medium text-xs">保存文件名 (.bmp)</div>
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={fileName}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/[\\/:*?"<>|]/g, "");
+                                    setFileName(val);
+                                }}
+                                className="input input-sm input-bordered w-full pr-12"
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] opacity-40 pointer-events-none">
+                                .bmp
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
