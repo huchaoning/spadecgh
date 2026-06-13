@@ -38,7 +38,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
-          destination_dir: docs
           keep_files: true
           user_name: ${{ secrets.GH_PAGES_USER_NAME }}
           user_email: ${{ secrets.GH_PAGES_USER_EMAIL }}
