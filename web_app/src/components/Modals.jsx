@@ -6,17 +6,18 @@ export default function Modals({ onClearModes }) {
             <dialog id="clear_modal" className="modal modal-bottom sm:modal-middle">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg text-error flex items-center gap-2">
-                        <AlertTriangle size={20} /> 确认清除？
+                        <AlertTriangle size={20} /> Confirm?
                     </h3>
                     <p className="py-4 text-sm text-base-content/60">
-                        此操作将清空所有已配置的模式。该操作不可撤销。
+                        This action will clear all configured modes. 
+                        This operation cannot be undone.
                     </p>
                     <div className="modal-action">
                         <form method="dialog" className="flex gap-2 w-full flex-row-reverse">
                             <button className="btn btn-error btn-sm w-20" onClick={onClearModes}>
-                                确认
+                                Confirm
                             </button>
-                            <button className="btn btn-ghost btn-sm w-20">取消</button>
+                            <button className="btn btn-ghost btn-sm w-20">Cancel</button>
                         </form>
                     </div>
                 </div>
@@ -25,23 +26,23 @@ export default function Modals({ onClearModes }) {
             <dialog id="info_modal" className="modal modal-bottom sm:modal-middle">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg text-primary flex items-center gap-2">
-                        <InfoIcon size={20} /> 关于本工具
+                        <InfoIcon size={20} /> About this
                     </h3>
                     <p className="py-4 text-sm text-base-content/60 leading-relaxed">
-                        这是一个基于 Arrizon 2 算法的全息图生成工具，该算法可以用于生成非平凡模式，也可以用于实现空间模式分解（SPADE）测量。
-                        本工具的具体名称、图标、域名以及许可证均处于待定状态。
-                        作者来自杭州电子科技大学理学院，量子精密测量实验室。
+                        This is a hologram generation toolkit based on the Arrizon 2 algorithm, which can be used to generate non-trivial modes or implement spatial mode demultiplexing (SPADE) measurements.
+                        The specific name, icon, domain, and license of this tool are currently TBD.
+                        The author is from the Quantum Metrology Laboratory, School of Science, Hangzhou Dianzi University.
                     </p>
                     <div className="modal-action">
                         <form method="dialog" className="flex gap-2 w-full flex-row-reverse">
-                            <button className="btn btn-primary btn-sm w-20">确定</button>
+                            <button className="btn btn-primary btn-sm w-20">OK</button>
                             <a
                                 className="btn btn-ghost btn-sm w-20"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                href="https://gitee.com/vxyi/cgh-app"
+                                href="https://github.com/huchaoning/hducgh"
                             >
-                                Gitee
+                                GitHub
                             </a>
                         </form>
                     </div>
@@ -51,19 +52,21 @@ export default function Modals({ onClearModes }) {
             <dialog id="error_modal" className="modal modal-bottom sm:modal-middle">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg text-error flex items-center gap-2">
-                        <AlertTriangle size={20} /> 输入错误
+                        <AlertTriangle size={20} /> Input error
                     </h3>
                     <p className="py-4 text-sm text-base-content/60">
-                        非法的输入参数，请检查输入是否有误。如果确认无误但错误继续存在，请报告问题。
+                        Invalid input parameters. 
+                        Please check your entries for errors. 
+                        If you have confirmed they are correct but the error persists, please report the issue.
                     </p>
                     <div className="modal-action">
                         <form method="dialog" className="flex gap-2 w-full flex-row-reverse">
-                            <button className="btn btn-primary btn-sm w-20">关闭</button>
+                            <button className="btn btn-primary btn-sm w-20">Close</button>
                             <a
                                 className="btn btn-ghost btn-sm w-20"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                href="https://gitee.com/vxyi/cgh-app/issues"
+                                href="https://github.com/huchaoning/hducgh/issues"
                             >
                                 Issues
                             </a>

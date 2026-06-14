@@ -4,13 +4,11 @@ import ModeList from "./ModeList";
 
 export default function Sidebar({
     showSidebar,
-    // 全局参数
     sigma, setSigma,
     pixelSize, setPixelSize,
     resX, setResX,
     resY, setResY,
     fileName, setFileName,
-    // 模式列表
     modes,
     onAddMode,
     onRemoveMode,
@@ -18,7 +16,6 @@ export default function Sidebar({
     onAddSubMode,
     onRemoveSubMode,
     onUpdateSubMode,
-    // 操作
     onRun,
     onSave,
     onClearModes,
@@ -66,17 +63,17 @@ export default function Sidebar({
                         onClick={onRun}
                         className="btn btn-primary btn-block shadow-lg shadow-primary/20 active:scale-95 transition-all"
                     >
-                        <Play size={16} fill="currentColor" /> 走你！！
+                        <Play size={16} fill="currentColor" /> RUN!
                     </button>
                     <div className="grid grid-cols-2 gap-3">
                         <button
                             className="btn btn-outline btn-error btn-sm"
-                            onClick={onClearModes}
+                            onClick={() => document.getElementById("clear_modal").showModal()}
                         >
-                            <Trash2 size={14} /> 清空列表
+                            <Trash2 size={14} /> Clear
                         </button>
                         <button className="btn btn-outline btn-sm" onClick={onSave}>
-                            <Save size={14} /> 保存结果
+                            <Save size={14} /> Save
                         </button>
                     </div>
                 </div>

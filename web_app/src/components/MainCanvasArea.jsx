@@ -6,22 +6,19 @@ export default function MainCanvasArea({ canvasRef, width, height }) {
     const isDragging = useRef(false);
     const lastPos = useRef({ x: 0, y: 0 });
 
-    const handleWheel = (e) => {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        setTransform((prev) => ({
-            ...prev,
-            scale: Math.max(0.1, Math.min(prev.scale * delta, 20)),
-        }));
-    };
-
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
+
         const onWheel = (e) => {
             e.preventDefault();
-            handleWheel(e);
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            setTransform((prev) => ({
+                ...prev,
+                scale: Math.max(0.1, Math.min(prev.scale * delta, 20)),
+            }));
         };
+
         container.addEventListener("wheel", onWheel, { passive: false });
         return () => container.removeEventListener("wheel", onWheel);
     }, []);
@@ -62,7 +59,6 @@ export default function MainCanvasArea({ canvasRef, width, height }) {
                 ref={containerRef}
                 onDoubleClick={() => setTransform({ scale: 1, x: 0, y: 0 })}
                 className="flex-1 flex flex-col bg-neutral rounded-2xl shadow-2xl border border-white/5 overflow-hidden relative group items-center justify-center p-4 cursor-grab active:cursor-grabbing select-none"
-                onWheel={handleWheel}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}

@@ -10,7 +10,7 @@ from PIL import Image
 
 from scipy.interpolate import interp1d
 import importlib.resources as resources
-with resources.files('hduq.cnhu.assets').joinpath('fx2.npy').open('rb') as f:
+with resources.files('hducgh.assets').joinpath('fx2.npy').open('rb') as f:
     _fx2 = interp1d(np.linspace(0, 1, 801), np.load(f))
 
 from ._hook import _CppBackend

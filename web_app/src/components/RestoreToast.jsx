@@ -15,14 +15,14 @@ export default function RestoreToast({ show, onClose, onReset }) {
                             <InfoIcon size={18} />
                         </div>
                         <div className="flex flex-col">
-                            <div className="text-[10px] font-bold text-primary">欢迎回来</div>
-                            <div className="text-xs font-bold text-base-content">已载入上次参数配置</div>
+                            <div className="text-[10px] font-bold text-primary">Welcome back!</div>
+                            <div className="text-xs font-bold text-base-content">Previous configuration loaded.</div>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <button onClick={onReset} className="btn btn-ghost btn-sm text-primary">
-                            恢复默认
+                            Reset
                         </button>
                         <button
                             onClick={onClose}

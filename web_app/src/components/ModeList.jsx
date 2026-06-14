@@ -15,7 +15,7 @@ export default function ModeList({
         <section className="w-full">
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2 text-primary font-bold">
-                    <Sliders size={16} /> <div>模式列表</div>
+                    <Sliders size={16} /> <div>Modes to be demultiplexed</div>
                 </div>
                 <button
                     onClick={onAddMode}
@@ -37,7 +37,7 @@ export default function ModeList({
                         >
                             <Sliders size={32} className="opacity-20" />
                             <div className="font-medium text-xs opacity-40">
-                                列表为空，点击上方 + 号开始
+                                List is empty. Click + to start.
                             </div>
                         </motion.div>
                     ) : (
@@ -78,8 +78,8 @@ export default function ModeList({
                                         {mode.type === "PM" ? (
                                             <div className="space-y-4">
                                                 {[
-                                                    { label: "Plus 模式 (+)", key: "plusModes", color: "text-success" },
-                                                    { label: "Minus 模式 (-)", key: "minusModes", color: "text-error" },
+                                                    { label: "Plus modes (+)", key: "plusModes", color: "text-success" },
+                                                    { label: "Minus modes (-)", key: "minusModes", color: "text-error" },
                                                 ].map((group) => (
                                                     <div key={group.key} className="space-y-2">
                                                         <div className="flex justify-between items-center px-1">
@@ -100,12 +100,12 @@ export default function ModeList({
                                                                 >
                                                                     <li>
                                                                         <a onClick={() => onAddSubMode(mode.id, group.key, "HG")}>
-                                                                            HG 模式
+                                                                            HG mode
                                                                         </a>
                                                                     </li>
                                                                     <li>
                                                                         <a onClick={() => onAddSubMode(mode.id, group.key, "LG")}>
-                                                                            LG 模式
+                                                                            LG mode
                                                                         </a>
                                                                     </li>
                                                                 </ul>
@@ -176,7 +176,7 @@ export default function ModeList({
                                                 <div className="form-control">
                                                     <label className="label">
                                                         <div className="label-text text-[10px] mb-1">
-                                                            {mode.type === "LG" ? "角向阶数 L" : "水平阶数 N"}
+                                                            {mode.type === "LG" ? "Azimuthal index L" : "Horizontal index N"}
                                                         </div>
                                                     </label>
                                                     <input
@@ -189,7 +189,7 @@ export default function ModeList({
                                                 <div className="form-control">
                                                     <label className="label">
                                                         <div className="label-text text-[10px] mb-1">
-                                                            {mode.type === "LG" ? "径向阶数 P" : "垂直阶数 M"}
+                                                            {mode.type === "LG" ? "Radial index P" : "Vertical index M"}
                                                         </div>
                                                     </label>
                                                     <input
@@ -209,12 +209,12 @@ export default function ModeList({
                                                     <label className="label">
                                                         <div className="label-text text-[10px] mb-1">
                                                             {field === "nx"
-                                                                ? "载波 Nx"
+                                                                ? "Carrier X"
                                                                 : field === "ny"
-                                                                    ? "载波 Ny"
+                                                                    ? "Carrier Y"
                                                                     : field === "sx"
-                                                                        ? "X 偏移 (μm)"
-                                                                        : "Y 偏移 (μm)"}
+                                                                        ? "Shift X (μm)"
+                                                                        : "Shift Y (μm)"}
                                                         </div>
                                                     </label>
                                                     <input
@@ -231,7 +231,7 @@ export default function ModeList({
                                             onClick={() => onRemoveMode(mode.id)}
                                             className="btn btn-error btn-outline btn-xs btn-block"
                                         >
-                                            <Trash2 size={12} /> 删除该模式
+                                            <Trash2 size={12} /> Delete
                                         </button>
                                     </div>
                                 </div>
