@@ -15,7 +15,7 @@ if(EMSCRIPTEN)
     set(WASM_TARGET_NAME "hducgh_backend_web")
 
     add_executable(${WASM_TARGET_NAME} main_wasm.cpp)
-    target_compile_options(${WASM_TARGET_NAME} PRIVATE -O3 -ffast-math)
+    target_compile_options(${WASM_TARGET_NAME} PRIVATE -O3)
 
     set_target_properties(${WASM_TARGET_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${WASM_OUTDIR}"
@@ -69,7 +69,7 @@ else()
     endif()
 
     if(MSVC)
-        target_compile_options(${PY_TARGET_NAME} PRIVATE /Ox /fp:fast /MP)
+        target_compile_options(${PY_TARGET_NAME} PRIVATE /Ox /MP)
 
         if(OpenMP_FOUND)
             target_compile_options(${PY_TARGET_NAME} PRIVATE /openmp)
@@ -80,7 +80,7 @@ else()
         endif()
 
     else()
-        target_compile_options(${PY_TARGET_NAME} PRIVATE -O3 -ffast-math)
+        target_compile_options(${PY_TARGET_NAME} PRIVATE -O3)
 
         if(ARCH_NAME STREQUAL "x64")
             target_compile_options(${PY_TARGET_NAME} PRIVATE -mavx2 -mfma)
