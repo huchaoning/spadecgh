@@ -15,7 +15,7 @@ if(EMSCRIPTEN)
     set(WASM_TARGET_NAME "hducgh_backend_web")
 
     add_executable(${WASM_TARGET_NAME} main_wasm.cpp)
-    target_compile_options(${WASM_TARGET_NAME} PRIVATE -O3)
+    target_compile_options(${WASM_TARGET_NAME} PRIVATE -O3 -ffast-math)
 
     set_target_properties(${WASM_TARGET_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${WASM_OUTDIR}"
@@ -60,4 +60,30 @@ else()
         LIBRARY_OUTPUT_DIRECTORY_RELEASE "${PY_OUTDIR}"
         RUNTIME_OUTPUT_DIRECTORY_RELEASE "${PY_OUTDIR}"
     )
+
+    find_package(OpenMP)
+    if(OpenMP_FOUND)
+        target_link_libraries(${PY_TARGET_NAME} PRIVATE OpenMP::OpenMP_CXX)
+    else()
+        target_compile_definitions(${PY_TARGET_NAME} PRIVATE DISABLE_OPENMP)
+    endif()
+
+    if(MSVC)
+        target_compile_options(${PY_TARGET_NAME} PRIVATE /Ox /fp:fast /MP)
+
+        if(OpenMP_FOUND)
+            target_compile_options(${PY_TARGET_NAME} PRIVATE /openmp)
+        endif()
+
+        if(ARCH_NAME STREQUAL "x64")
+            target_compile_options(${PY_TARGET_NAME} PRIVATE /arch:AVX2)
+        endif()
+
+    else()
+        target_compile_options(${PY_TARGET_NAME} PRIVATE -O3 -ffast-math)
+
+        if(ARCH_NAME STREQUAL "x64")
+            target_compile_options(${PY_TARGET_NAME} PRIVATE -mavx2 -mfma)
+        endif()
+    endif()
 endif()

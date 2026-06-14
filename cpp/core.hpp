@@ -1,6 +1,7 @@
 #pragma once
 
 #include <json.hpp>
+#include <limits>
 
 #include "HermiteGaussian.hpp"
 #include "LaguerreGaussian.hpp"
@@ -83,8 +84,8 @@ int core(const char* json_str, uint8_t* out_buffer) {
     for (size_t i = 0; i < total_pixels; ++i) A[i] /= max_a;
 
   DoubleVector cgh_double(total_pixels);
-  double min_val = 1e15;
-  double max_val = -1e15;
+  double min_val = std::numeric_limits<double>::max();
+  double max_val = -std::numeric_limits<double>::max();
 
   for (size_t i = 0; i < total_pixels; ++i) {
     cgh_double[i] = fx2(A[i]) * std::sin(Phi[i]);
