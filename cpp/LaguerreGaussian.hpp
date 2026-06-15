@@ -14,8 +14,8 @@ struct LaguerreGaussian {
   double sqrt2_over_w0_;
   double norm_;
 
-  LaguerreGaussian(int p, int l, double w0, double sx, double sy)
-      : p_(p), l_(l), w0_(w0), sx_(sx), sy_(sy) {
+  LaguerreGaussian(int l, int p, double w0, double sx, double sy)
+      : l_(l), p_(p), w0_(w0), sx_(sx), sy_(sy) {
     norm_ = cal_norm();
     w0_sq_ = w0 * w0;
     sqrt2_over_w0_ = SQRT2 / w0;

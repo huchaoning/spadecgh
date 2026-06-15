@@ -26,7 +26,7 @@ export default function Modals({ onClearModes }) {
             <dialog id="info_modal" className="modal modal-bottom sm:modal-middle">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg text-primary flex items-center gap-2">
-                        <InfoIcon size={20} /> About this
+                        <InfoIcon size={20} /> About
                     </h3>
                     <p className="py-4 text-sm text-base-content/60 leading-relaxed">
                         This is a hologram generation toolkit based on the Arrizon 2 algorithm, which can be used to generate non-trivial modes or implement spatial mode demultiplexing (SPADE) measurements.

@@ -22,7 +22,7 @@ export default function Navbar({ showSidebar, setShowSidebar }) {
                         <span className="font-serif italic">web-app</span>
                     </div>
                     
-                    <div className="font-mono text-xs opacity-40">v1.0.0</div>
+                    <div className="font-mono text-xs opacity-40">v0.1.0a1</div>
                 </div>
             </div>
             <div className="flex-1 flex justify-end">

@@ -182,10 +182,10 @@ class HG(_Mode):
 
 
 class LG(_Mode):
-    def __init__(self, p, l, x_shift=0., y_shift=0.):
-        if all(isinstance(x, int) for x in (p, l)):
-            self.order_1 = p
-            self.order_2 = l
+    def __init__(self, l, p, x_shift=0., y_shift=0.):
+        if all(isinstance(x, int) for x in (l, p)):
+            self.order_1 = l
+            self.order_2 = p
 
             self.x_shift, self.y_shift = x_shift, y_shift
         else:

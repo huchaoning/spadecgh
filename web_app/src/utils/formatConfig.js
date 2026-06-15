@@ -1,33 +1,33 @@
-export const buildConfig = ({ sigma, pixelSize, resX, resY, modes }) => {
+export const formatConfig = ({ sigma, pixelSize, resX, resY, modes }) => {
     return {
         global: {
-            sigma: parseFloat(sigma),
-            pixel_size: parseFloat(pixelSize),
-            resolution: [parseInt(resX), parseInt(resY)]
+            sigma,
+            pixel_size: pixelSize,
+            resolution: [resX, resY]
         },
         modes: modes.map(mode => {
             const base = {
                 type: mode.type,
-                o1: parseInt(mode.o1) || 0,
-                o2: parseInt(mode.o2) || 0,
-                nx: parseFloat(mode.nx) || 0,
-                ny: parseFloat(mode.ny) || 0,
-                sx: parseFloat(mode.sx) || 0,
-                sy: parseFloat(mode.sy) || 0,
+                o1: mode.o1,
+                o2: mode.o2,
+                nx: mode.nx,
+                ny: mode.ny,
+                sx: mode.sx,
+                sy: mode.sy,
             };
 
             if (mode.type === "PM") {
                 return {
                     ...base,
                     children: {
-                        plus: (mode.plusModes || []).map(sub => ({
+                        plus: mode.plusModes.map(sub => ({
                             type: sub.type,
                             o1: sub.o1,
                             o2: sub.o2,
                             sx: sub.sx,
                             sy: sub.sy,
                         })),
-                        minus: (mode.minusModes || []).map(sub => ({
+                        minus: mode.minusModes.map(sub => ({
                             type: sub.type,
                             o1: sub.o1,
                             o2: sub.o2,

@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import createModule from "../../public/wasm/hducgh_backend_web.js";
-import { DEFAULT_CONFIG } from "./constants";
-import { formatInputValue } from "./formatInput";
-import { buildConfig } from "./configBuilder";
-import { exportBmp } from "./exportBmp";
+import { DEFAULT_CONFIG } from "./constants.js";
+import { formatInputValue } from "./formatInput.js";
+import { formatConfig } from "./formatConfig.js";
+import { exportBmp } from "./exportBmp.js";
 
 export function useCGHCore(canvasRef) {
     const [wasmInstance, setWasmInstance] = useState(null);
     useEffect(() => {
         createModule().then((inst) => {
             setWasmInstance(inst);
-            console.log("WASM 模块就绪");
+            console.log("wasm ready");
         });
     }, []);
 
@@ -134,13 +134,14 @@ export function useCGHCore(canvasRef) {
 
     const handleRun = () => {
         if (modes.length === 0 || !wasmInstance || !canvasRef.current) return;
-        const config = buildConfig({ sigma, pixelSize, resX, resY, modes });
+        const config = formatConfig({ sigma, pixelSize, resX, resY, modes });
         const width = config.global.resolution[0];
         const height = config.global.resolution[1];
         try {
             const startTime = performance.now();
             const pixels = wasmInstance.cal(JSON.stringify(config));
-            console.log(`计算 CGH 用时：${performance.now() - startTime} ms`);
+            console.log(`wasm payload: ${JSON.stringify(config, null, 2)}`)
+            console.log(`time used: ${performance.now() - startTime} ms`);
             lastPixelsRef.current = pixels;
             const ctx = canvasRef.current.getContext("2d");
             const image = ctx.createImageData(width, height);

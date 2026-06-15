@@ -15,8 +15,8 @@ export default function RestoreToast({ show, onClose, onReset }) {
                             <InfoIcon size={18} />
                         </div>
                         <div className="flex flex-col">
-                            <div className="text-[10px] font-bold text-primary">Welcome back!</div>
-                            <div className="text-xs font-bold text-base-content">Previous configuration loaded.</div>
+                            <div className="text-xs font-bold text-primary">Welcome back</div>
+                            <div className="text-xs font-bold text-base-content">Previous configuration loaded</div>
                         </div>
                     </div>
 
