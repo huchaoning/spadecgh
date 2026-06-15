@@ -1,9 +1,10 @@
-export const formatConfig = ({ sigma, pixelSize, resX, resY, modes }) => {
+export const formatConfig = ({ sigma, pixelSize, resX, resY, modes, algo }) => {
     return {
         global: {
             sigma,
             pixel_size: pixelSize,
-            resolution: [resX, resY]
+            resolution: [resX, resY],
+            algorithm: algo
         },
         modes: modes.map(mode => {
             const base = {

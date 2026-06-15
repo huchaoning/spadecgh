@@ -11,6 +11,7 @@ export default function Sidebar({
     resX, setResX,
     resY, setResY,
     fileName, setFileName,
+    algo, setAlgo,
     modes,
     onAddMode,
     onRemoveMode,
@@ -53,6 +54,8 @@ export default function Sidebar({
                             setResY={setResY}
                             fileName={fileName}
                             setFileName={setFileName}
+                            algo={algo}
+                            setAlgo={setAlgo}
                         />
 
                         <ModeList

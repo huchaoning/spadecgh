@@ -7,6 +7,7 @@ export default function GlobalSettings({
     resX, setResX,
     resY, setResY,
     fileName, setFileName,
+    algo, setAlgo,
 }) {
     return (
         <section>
@@ -70,22 +71,39 @@ export default function GlobalSettings({
 
                     <div className="divider my-1 opacity-50"></div>
 
-                    <div className="form-control w-full">
-                        <label className="label py-1 px-0">
-                            <div className="label-text font-medium text-xs">Save file name (.bmp)</div>
-                        </label>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                value={fileName}
-                                onChange={(e) => {
-                                    const val = e.target.value.replace(/[\\/:*?"<>|]/g, "");
-                                    setFileName(val);
-                                }}
-                                className="input input-sm input-bordered w-full pr-12"
-                            />
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] opacity-40 pointer-events-none">
-                                .bmp
+                    <div className="space-y-3">
+                        <div className="form-control w-full">
+                            <label className="label py-1 px-0">
+                                <div className="label-text font-medium text-xs">Algorithm</div>
+                            </label>
+                            <select
+                                value={algo}
+                                onChange={(e) => setAlgo(e.target.value)}
+                                className="select select-sm select-bordered w-full font-normal text-xs"
+                            >
+                                <option value="davis">Davis</option>
+                                <option value="arrizon_1">Arrizón 1</option>
+                                <option value="arrizon_2">Arrizón 2</option>
+                            </select>
+                        </div>
+
+                        <div className="form-control w-full">
+                            <label className="label py-1 px-0">
+                                <div className="label-text font-medium text-xs">Save file name (.bmp)</div>
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={fileName}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/[\\/:*?"<>|]/g, "");
+                                        setFileName(val);
+                                    }}
+                                    className="input input-sm input-bordered w-full pr-12"
+                                />
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] opacity-40 pointer-events-none">
+                                    .bmp
+                                </div>
                             </div>
                         </div>
                     </div>
