@@ -3,7 +3,7 @@ from numpy import pi
 
 from math import factorial
 
-from scipy.special import hermite, laguerre
+from scipy.special import hermite, genlaguerre
 
 from os import path
 from PIL import Image
@@ -195,6 +195,20 @@ class LG(_Mode):
         else:
             raise ValueError('orders must be integers')
 
+    def wave_function(self, sigma, slm_cls=_DefaultSLM):
+        SLM.check(slm_cls)
+        w0 = 2*sigma
+        l, p = self.order_1, self.order_2
+
+        x, y = slm_cls.x + self.x_shift, slm_cls.y + self.y_shift
+        rho = np.sqrt(x**2 + y**2)
+        phi = np.arctan2(y, x)
+
+        N = np.sqrt(2.0 * factorial(p) / (pi * factorial(p + np.abs(l))))
+        lag = (np.sqrt(2) * rho / w0)**np.abs(l) * genlaguerre(p, np.abs(l))(2 * (rho / w0)**2) * np.exp(-(rho / w0)**2)
+        wf = N * lag * np.exp(-1j * l * phi)
+        return wf.astype(complex)
+
 
 
 class CGH:
@@ -259,11 +273,6 @@ class CGH:
         self.cgh = None
 
 
-    @staticmethod
-    def fx2(x):
-        return _fx2(x)
-    
-
     def _cal_V(self):
         V = 0
         for i, mode in enumerate(self._mode_list):
@@ -273,7 +282,8 @@ class CGH:
         return V
 
 
-    def cal(self, x_shift_fast=0., y_shift_fast=0., backend='python'):
+    def cal(self, x_shift_fast=0., y_shift_fast=0., backend='python', algorithm='arrizon_2'):
+        self.algorithm = algorithm.lower()
         if backend.lower() in ('py', 'python'):
 
             if not self._is_frozen and (x_shift_fast != 0. or y_shift_fast != 0.):
@@ -294,7 +304,15 @@ class CGH:
             a = np.abs(V) / np.abs(V).max()
             phi = np.angle(V)
 
-            _temp = self.fx2(a) * np.sin(phi)
+            if self.algorithm == 'davis':
+                _temp = _fx0(a) * np.mod(phi, 2 * pi)
+            elif self.algorithm == 'arrizon_1':
+                _temp = np.mod(phi, 2 * pi) - pi + _fx1(a) * np.sin(phi)
+            elif self.algorithm == 'arrizon_2':
+                _temp = _fx2(a) * np.sin(phi)
+            else:
+                raise ValueError(f'invalid algorithm "{self.algorithm}", must be one of: `davis`, `arrizon_1`, `arrizon_2`')
+
             _temp = ((_temp - _temp.min()) / (_temp.max() - _temp.min())) * 255
 
             self.cgh = _temp.astype(np.uint8)

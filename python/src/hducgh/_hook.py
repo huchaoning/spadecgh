@@ -83,6 +83,7 @@ def _serialize_cgh(cgh):
             'sigma': float(cgh.sigma),
             'pixel_size': float(cgh._slm_cls.pixel_size),
             'resolution': list(cgh._slm_cls.resolution),
+            'algorithm': str(cgh.algorithm)
         },
         'modes': []
     }

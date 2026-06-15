@@ -2,6 +2,7 @@
 
 #include <json.hpp>
 #include <limits>
+#include <string>
 
 #include "HermiteGaussian.hpp"
 #include "LaguerreGaussian.hpp"
@@ -20,9 +21,11 @@ int core(const char* json_str, uint8_t* out_buffer) {
   double sigma = j["global"]["sigma"];
   double w0 = 2.0 * sigma;
   double pixel_size = j["global"]["pixel_size"];
+
   int res_x = j["global"]["resolution"][0];
   int res_y = j["global"]["resolution"][1];
   size_t total_pixels = size_t(res_x) * size_t(res_y);
+  std::string algo = j["global"]["algorithm"];
 
   ComplexVector V(total_pixels, Complex(0.0, 0.0));
 
@@ -86,21 +89,31 @@ int core(const char* json_str, uint8_t* out_buffer) {
   if (max_a > 1e-15)
     for (size_t i = 0; i < total_pixels; ++i) A[i] /= max_a;
 
-  DoubleVector cgh_double(total_pixels);
+  DoubleVector cgh(total_pixels);
   double min_val = std::numeric_limits<double>::max();
   double max_val = -std::numeric_limits<double>::max();
 
-  for (size_t i = 0; i < total_pixels; ++i) {
-    cgh_double[i] = fx<fx2_data>(A[i]) * std::sin(Phi[i]);
-    if (cgh_double[i] < min_val) min_val = cgh_double[i];
-    if (cgh_double[i] > max_val) max_val = cgh_double[i];
+#define LOOP(FUNC)                            \
+  for (size_t i = 0; i < total_pixels; ++i) { \
+    cgh[i] = (FUNC);                          \
+    if (cgh[i] < min_val) min_val = cgh[i];   \
+    if (cgh[i] > max_val) max_val = cgh[i];   \
   }
+
+  if (algo == "davis") {
+    LOOP(fx<fx0_data>(A[i]) * (Phi[i] - TAU * std::floor(Phi[i] / TAU)));
+  } else if (algo == "arrizon_1") {
+    LOOP(Phi[i] + fx<fx1_data>(A[i]) * std::sin(Phi[i]));
+  } else if (algo == "arrizon_2") {
+    LOOP(fx<fx2_data>(A[i]) * std::sin(Phi[i]));
+  }
+#undef LOOP
 
   double range = max_val - min_val;
   double inv_range = (range > 1e-15) ? (255.0 / range) : 1.0;
 
   for (size_t i = 0; i < total_pixels; ++i)
-    out_buffer[i] = uint8_t((cgh_double[i] - min_val) * inv_range);
+    out_buffer[i] = uint8_t((cgh[i] - min_val) * inv_range);
 
   return 0;
 }
