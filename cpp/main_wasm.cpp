@@ -11,7 +11,7 @@ val cal(std::string json_str) {
   auto j = nlohmann::json::parse(json_str);
   int res_x = j["global"]["resolution"][0];
   int res_y = j["global"]["resolution"][1];
-  size_t total_pixels = static_cast<size_t>(res_x) * res_y;
+  size_t total_pixels = size_t(res_x) * size_t(res_y);
 
   static std::vector<uint8_t> out_buffer;
   out_buffer.resize(total_pixels);

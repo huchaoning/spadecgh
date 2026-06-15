@@ -19,7 +19,7 @@ int core(const char* json_str, uint8_t* out_buffer) {
   double pixel_size = j["global"]["pixel_size"];
   int res_x = j["global"]["resolution"][0];
   int res_y = j["global"]["resolution"][1];
-  size_t total_pixels = static_cast<size_t>(res_x) * res_y;
+  size_t total_pixels = size_t(res_x) * size_t(res_y);
 
   ComplexVector V(total_pixels, Complex(0.0, 0.0));
 
@@ -40,7 +40,7 @@ int core(const char* json_str, uint8_t* out_buffer) {
       size_t n_modes = children["plus"].size() + children["minus"].size();
       if (n_modes == 0) continue;
 
-      double weight = 1.0 / std::sqrt(static_cast<double>(n_modes));
+      double weight = 1.0 / std::sqrt(double(n_modes));
       for (auto& plus_mode : children["plus"]) {
         if (plus_mode["type"] == "HG") {
           auto hg = HG{plus_mode["o1"], plus_mode["o2"], w0, plus_mode["sx"],
@@ -97,7 +97,7 @@ int core(const char* json_str, uint8_t* out_buffer) {
   double inv_range = (range > 1e-15) ? (255.0 / range) : 1.0;
 
   for (size_t i = 0; i < total_pixels; ++i)
-    out_buffer[i] = static_cast<uint8_t>((cgh_double[i] - min_val) * inv_range);
+    out_buffer[i] = uint8_t((cgh_double[i] - min_val) * inv_range);
 
   return 0;
 }

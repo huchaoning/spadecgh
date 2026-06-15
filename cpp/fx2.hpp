@@ -77,9 +77,9 @@ static const double fx2_data[] = {
 
 double fx2(double x) {
   double pos = x * 800.0;
-  int i = static_cast<int>(pos);
+  int i = int(pos);
   if (i >= 800) return fx2_data[800];
   if (i < 0) return fx2_data[0];
-  double t = pos - i;
+  double t = pos - double(i);
   return fx2_data[i] * (1.0 - t) + fx2_data[i + 1] * t;
 }

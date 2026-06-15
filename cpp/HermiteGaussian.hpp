@@ -30,13 +30,13 @@ struct HermiteGaussian {
   Complex cal_wf_x(double x) {
     double hx = boost::math::hermite(n_, x * sqrt2_over_w0_);
     double wf = hx * std::exp(-(x * x) / w0_sq_);
-    return std::polar(std::abs(wf), (wf < 0) ? PI : 0.0);
+    return Complex(wf, 0.0);
   }
 
   Complex cal_wf_y(double y) {
     double hy = boost::math::hermite(m_, y * sqrt2_over_w0_);
     double wf = hy * std::exp(-(y * y) / w0_sq_);
-    return std::polar(std::abs(wf), (wf < 0) ? PI : 0.0);
+    return Complex(wf, 0.0);
   }
 
   void broadcast(ComplexVector& V, double weight, double nx, double ny,

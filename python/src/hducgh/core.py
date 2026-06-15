@@ -16,31 +16,35 @@ with resources.files('hducgh.assets').joinpath('fx2.npy').open('rb') as f:
 from ._hook import _CppBackend
 
 
-__all__ = ['HG', 'LG', 'PM', 'CGH']
+__all__ = ['SLM', 'HG', 'LG', 'PM', 'CGH']
 
 
-class _SLM:
+class SLM:
     @staticmethod
     def check(inputs):
-        if not issubclass(inputs, _SLM):
+        if not (isinstance(inputs, type) and issubclass(inputs, SLM)):
             raise ValueError('invalid SLM class')
         return inputs
 
+    def __init_subclass__(cls):
+        res = cls.resolution
+        ps = cls.pixel_size
+
+        cls.x, cls.y = np.meshgrid(
+            np.arange(-res[0]/2, res[0]/2) * ps,
+            -np.arange(-res[1]/2, res[1]/2) * ps
+        )
+
+        cls.norm_x = cls.x / (res[0] * ps)
+        cls.norm_y = cls.y / (res[1] * ps)
 
 
-class _DefaultSLM(_SLM):
+
+class _DefaultSLM(SLM):
     device = 'HoloEye, PLUTO-2-NIR-011'
 
     pixel_size = 8
     resolution = (1920, 1080)
-    
-    x, y = np.meshgrid(
-           np.arange(-resolution[0]/2, resolution[0]/2) * pixel_size,
-          -np.arange(-resolution[1]/2, resolution[1]/2) * pixel_size)
-    
-    norm_x = x / (resolution[0] * pixel_size)
-    norm_y = y / (resolution[1] * pixel_size)
-
 
 
 class _FFTUtils:
@@ -163,7 +167,7 @@ class HG(_Mode):
 
 
     def wave_function(self, sigma, slm_cls=_DefaultSLM):
-        _SLM.check(slm_cls)
+        SLM.check(slm_cls)
         w0 = 2*sigma
         n, m = self.order_1, self.order_2
 
@@ -172,10 +176,8 @@ class HG(_Mode):
 
         N = np.sqrt(2**(1-n-m) / (pi * factorial(m) * factorial(n))) / w0
         hx, hy= hermite(n)(2**.5 * x / w0), hermite(m)(2**.5 * y / w0)
-        ca = N * hx * hy * np.exp(-rho/(w0**2))
-        a, phi = np.abs(ca), np.angle(ca)
-
-        return a * np.exp(1j * phi)
+        wf = N * hx * hy * np.exp(-rho/(w0**2))
+        return wf.astype(complex)
 
 
 
@@ -201,7 +203,7 @@ class CGH:
         self._is_frozen = False
         self._is_cached = False
 
-        self._slm_cls = _SLM.check(slm_cls)
+        self._slm_cls = SLM.check(slm_cls)
         self._cpp_backend = _CppBackend()
 
 
