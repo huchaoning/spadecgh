@@ -4,7 +4,7 @@ import platform
 from cffi import FFI
 import numpy as np
 
-from importlib.resources import files
+from importlib import resources
 
 
 class _CppBackend:
@@ -26,8 +26,8 @@ class _CppBackend:
         else:
             return None
 
-        lib_package = files('hducgh.assets')
-        with lib_package.joinpath(lib_name) as lib_path:
+        lib_resource = resources.files('hducgh.assets').joinpath(lib_name)
+        with resources.as_file(lib_resource) as lib_path:
             if not lib_path.exists():
                 return None
             return self._ffi.dlopen(str(lib_path))
