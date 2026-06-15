@@ -5,8 +5,11 @@
 
 #include "HermiteGaussian.hpp"
 #include "LaguerreGaussian.hpp"
+#include "assets/fx0_data.hpp"
+#include "assets/fx1_data.hpp"
+#include "assets/fx2_data.hpp"
 #include "common.hpp"
-#include "fx2.hpp"
+#include "fx.hpp"
 
 using HG = HermiteGaussian;
 using LG = LaguerreGaussian;
@@ -88,7 +91,7 @@ int core(const char* json_str, uint8_t* out_buffer) {
   double max_val = -std::numeric_limits<double>::max();
 
   for (size_t i = 0; i < total_pixels; ++i) {
-    cgh_double[i] = fx2(A[i]) * std::sin(Phi[i]);
+    cgh_double[i] = fx<fx2_data>(A[i]) * std::sin(Phi[i]);
     if (cgh_double[i] < min_val) min_val = cgh_double[i];
     if (cgh_double[i] > max_val) max_val = cgh_double[i];
   }

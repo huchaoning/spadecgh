@@ -74,12 +74,3 @@ static const double fx2_data[] = {
     1.516, 1.522, 1.526, 1.532, 1.538, 1.544, 1.55,  1.556, 1.562, 1.57,  1.576,
     1.582, 1.59,  1.596, 1.604, 1.612, 1.62,  1.628, 1.636, 1.644, 1.654, 1.664,
     1.674, 1.684, 1.696, 1.708, 1.722, 1.738, 1.758, 1.784, 1.842};
-
-double fx2(double x) {
-  double pos = x * 800.0;
-  int i = int(pos);
-  if (i >= 800) return fx2_data[800];
-  if (i < 0) return fx2_data[0];
-  double t = pos - double(i);
-  return fx2_data[i] * (1.0 - t) + fx2_data[i + 1] * t;
-}
