@@ -1,0 +1,29 @@
+name: pytest
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  pytest-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3"
+
+    - name: install just
+      uses: taiki-e/install-action@just
+
+    - name: install package
+      run: |
+        just build-cpp
+        just install
+        pip install pytest
+
+    - name: run pytest
+      run: pytest

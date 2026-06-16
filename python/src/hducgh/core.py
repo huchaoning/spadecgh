@@ -167,21 +167,38 @@ class HG(_Mode):
 
             self.x_shift, self.y_shift = x_shift, y_shift
         else:
-            raise ValueError('orders must be positive integers')
+            raise ValueError('n and m must be positive integers')
 
 
+    # def wave_function(self, sigma, slm_cls=_DefaultSLM):
+    #     SLM.check(slm_cls)
+    #     w0 = 2*sigma
+    #     n, m = self.order_1, self.order_2
+
+    #     x, y = slm_cls.x + self.x_shift, slm_cls.y + self.y_shift
+    #     rho = x**2 + y**2
+
+    #     N = np.sqrt(2**(1-n-m) / (pi * factorial(m) * factorial(n))) / w0
+    #     hx, hy= hermite(n)(2**.5 * x / w0), hermite(m)(2**.5 * y / w0)
+    #     wf = N * hx * hy * np.exp(-rho/(w0**2))
+    #     return wf.astype(complex)
+    
     def wave_function(self, sigma, slm_cls=_DefaultSLM):
         SLM.check(slm_cls)
-        w0 = 2*sigma
+        w0 = 2 * sigma
         n, m = self.order_1, self.order_2
-
-        x, y = slm_cls.x + self.x_shift, slm_cls.y + self.y_shift
-        rho = x**2 + y**2
-
         N = np.sqrt(2**(1-n-m) / (pi * factorial(m) * factorial(n))) / w0
-        hx, hy= hermite(n)(2**.5 * x / w0), hermite(m)(2**.5 * y / w0)
-        wf = N * hx * hy * np.exp(-rho/(w0**2))
-        return wf.astype(complex)
+
+        x = slm_cls.x[0, :] + self.x_shift
+        y = slm_cls.y[:, 0] + self.y_shift
+
+        hx = hermite(n)(2**.5 * x / w0)
+        wf_x = (hx * np.exp(-(x ** 2) / w0**2)).astype(complex)
+
+        hy = hermite(m)(2**.5 * y / w0)
+        wf_y = (hy * np.exp(-(y ** 2) / w0**2)).astype(complex)
+       
+        return N * (wf_y[:, np.newaxis] * wf_x)
 
 
 
@@ -189,11 +206,14 @@ class LG(_Mode):
     def __init__(self, l, p, x_shift=0., y_shift=0.):
         if all(isinstance(x, int) for x in (l, p)):
             self.order_1 = l
-            self.order_2 = p
+            if p >= 0:
+                self.order_2 = p
+            else:
+                raise ValueError('p must be positive')
 
             self.x_shift, self.y_shift = x_shift, y_shift
         else:
-            raise ValueError('orders must be integers')
+            raise ValueError('l and p must be integers')
 
     def wave_function(self, sigma, slm_cls=_DefaultSLM):
         SLM.check(slm_cls)
@@ -201,11 +221,11 @@ class LG(_Mode):
         l, p = self.order_1, self.order_2
 
         x, y = slm_cls.x + self.x_shift, slm_cls.y + self.y_shift
-        rho = np.sqrt(x**2 + y**2)
+        r = np.sqrt(x**2 + y**2)
         phi = np.arctan2(y, x)
 
-        N = np.sqrt(2.0 * factorial(p) / (pi * factorial(p + np.abs(l))))
-        lag = (np.sqrt(2) * rho / w0)**np.abs(l) * genlaguerre(p, np.abs(l))(2 * (rho / w0)**2) * np.exp(-(rho / w0)**2)
+        N = np.sqrt(2.0 * factorial(p) / (pi * factorial(p + np.abs(l)))) / w0
+        lag = (2**.5 * r / w0)**abs(l) * genlaguerre(p, abs(l))(2 * (r / w0)**2) * np.exp(-(r / w0)**2)
         wf = N * lag * np.exp(-1j * l * phi)
         return wf.astype(complex)
 
@@ -307,7 +327,7 @@ class CGH:
             if self.algorithm == 'davis':
                 _temp = _fx0(a) * np.mod(phi, 2 * pi)
             elif self.algorithm == 'arrizon_1':
-                _temp = np.mod(phi, 2 * pi) - pi + _fx1(a) * np.sin(phi)
+                _temp = phi + _fx1(a) * np.sin(phi)
             elif self.algorithm == 'arrizon_2':
                 _temp = _fx2(a) * np.sin(phi)
             else:

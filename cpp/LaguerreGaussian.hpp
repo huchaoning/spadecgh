@@ -35,9 +35,9 @@ struct LaguerreGaussian {
     double rho_sq = rho * rho;
 
     double lag = boost::math::laguerre(p_, std::abs(l_), rho_sq);
-    Complex wf = Complex(std::pow(rho, std::abs(l_)) * lag * std::exp(-(r * r) / w0_sq_), 0.0);
+    double amplitude = std::pow(rho, std::abs(l_)) * lag * std::exp(-(r * r) / w0_sq_);
     Complex phase = std::polar(1.0, -l_ * phi);
-    return wf * phase;
+    return Complex(amplitude, 0.0) * phase;
   }
 
   void broadcast(ComplexVector& V, double weight, double nx, double ny,
