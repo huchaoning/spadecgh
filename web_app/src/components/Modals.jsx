@@ -29,7 +29,7 @@ export default function Modals({ onClearModes }) {
                         <InfoIcon size={20} /> About
                     </h3>
                     <p className="py-4 text-sm text-base-content/60 leading-relaxed">
-                        This is a hologram generation toolkit based on the Arrizon 2 algorithm, which can be used to generate non-trivial modes or implement spatial mode demultiplexing (SPADE) measurements.
+                        This is a hologram generation toolkit, which can be used to implement spatial mode demultiplexing (SPADE) measurements or generate non-trivial modes.
                         The specific name, icon, domain, and license of this tool are currently TBD.
                         The author is from the Quantum Metrology Laboratory, School of Science, Hangzhou Dianzi University.
                     </p>

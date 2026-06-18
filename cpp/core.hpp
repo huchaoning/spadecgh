@@ -6,7 +6,6 @@
 
 #include "HermiteGaussian.hpp"
 #include "LaguerreGaussian.hpp"
-#include "assets/fx0_data.hpp"
 #include "assets/fx1_data.hpp"
 #include "assets/fx2_data.hpp"
 #include "common.hpp"
@@ -14,6 +13,22 @@
 
 using HG = HermiteGaussian;
 using LG = LaguerreGaussian;
+
+double davis_impl(double a, double phi) {
+  return fx<fx1_data>(a) * (phi - TAU * std::floor(phi / TAU));
+}
+
+double arrizon_impl(double a, double phi) {
+  return fx<fx2_data>(a) * std::sin(phi);
+}
+
+#define ALGO_LOOP(ALGO)                       \
+  for (size_t i = 0; i < total_pixels; ++i) { \
+    double val = ALGO(A[i], Phi[i]);          \
+    cgh[i] = val;                             \
+    if (val < min_val) min_val = val;         \
+    if (val > max_val) max_val = val;         \
+  }
 
 int core(const char* json_str, uint8_t* out_buffer) {
   auto j = nlohmann::json::parse(json_str);
@@ -93,21 +108,11 @@ int core(const char* json_str, uint8_t* out_buffer) {
   double min_val = std::numeric_limits<double>::max();
   double max_val = -std::numeric_limits<double>::max();
 
-#define LOOP(FUNC)                            \
-  for (size_t i = 0; i < total_pixels; ++i) { \
-    cgh[i] = (FUNC);                          \
-    if (cgh[i] < min_val) min_val = cgh[i];   \
-    if (cgh[i] > max_val) max_val = cgh[i];   \
-  }
-
   if (algo == "davis") {
-    LOOP(fx<fx0_data>(A[i]) * (Phi[i] - TAU * std::floor(Phi[i] / TAU)));
-  } else if (algo == "arrizon_1") {
-    LOOP(Phi[i] + fx<fx1_data>(A[i]) * std::sin(Phi[i]));
-  } else if (algo == "arrizon_2") {
-    LOOP(fx<fx2_data>(A[i]) * std::sin(Phi[i]));
+    ALGO_LOOP(davis_impl);
+  } else if (algo == "arrizon") {
+    ALGO_LOOP(arrizon_impl);
   }
-#undef LOOP
 
   double range = max_val - min_val;
   double inv_range = (range > 1e-15) ? (255.0 / range) : 1.0;
@@ -117,3 +122,5 @@ int core(const char* json_str, uint8_t* out_buffer) {
 
   return 0;
 }
+
+#undef ALGO_LOOP

@@ -82,8 +82,7 @@ export default function GlobalSettings({
                                 className="select select-sm select-bordered w-full font-normal text-xs"
                             >
                                 <option value="davis">Davis</option>
-                                <option value="arrizon_1">Arrizón 1</option>
-                                <option value="arrizon_2">Arrizón 2</option>
+                                <option value="arrizon">Arrizón</option>
                             </select>
                         </div>
 

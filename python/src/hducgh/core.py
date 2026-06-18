@@ -10,8 +10,6 @@ from PIL import Image
 
 from scipy.interpolate import interp1d
 import importlib.resources as resources
-with resources.files('hducgh.assets').joinpath('fx0_data.npy').open('rb') as f:
-    _fx0 = interp1d(np.linspace(0, 1, 801), np.load(f))
 with resources.files('hducgh.assets').joinpath('fx1_data.npy').open('rb') as f:
     _fx1 = interp1d(np.linspace(0, 1, 801), np.load(f))
 with resources.files('hducgh.assets').joinpath('fx2_data.npy').open('rb') as f:
@@ -21,6 +19,20 @@ from ._hook import _CppBackend
 
 
 __all__ = ['SLM', 'HG', 'LG', 'PM', 'CGH']
+
+
+def _davis_impl(a, phi):
+    return _fx1(a) * np.mod(phi, 2 * pi)
+
+
+def _arrizon_impl(a, phi):
+    return _fx2(a) * np.sin(phi)
+
+
+_BUILTIN_ALGORITHMS = {
+    'davis': _davis_impl,
+    'arrizon': _arrizon_impl,
+}
 
 
 class SLM:
@@ -302,9 +314,24 @@ class CGH:
         return V
 
 
-    def cal(self, x_shift_fast=0., y_shift_fast=0., backend='python', algorithm='arrizon_2'):
-        self.algorithm = algorithm.lower()
+    def cal(self, x_shift_fast=0., y_shift_fast=0., backend='python', algorithm='arrizon', args=None, kwargs=None):
+        if args is None:
+            args = ()
+        if kwargs is None:
+            kwargs = {}
+
         if backend.lower() in ('py', 'python'):
+            if isinstance(algorithm, str):
+                algo_lower = algorithm.lower()
+                if algo_lower not in _BUILTIN_ALGORITHMS:
+                    raise ValueError(f'invalid algorithm "{algorithm}", must be one of {list(_BUILTIN_ALGORITHMS.keys())} or a callable object')
+                algo_func = _BUILTIN_ALGORITHMS[algo_lower]
+                self.algorithm = algo_lower
+            elif callable(algorithm):
+                algo_func = algorithm
+                self.algorithm = getattr(algorithm, '__name__', 'custom_callable')
+            else:
+                raise TypeError('`algorithm` must be a string (built-in) or a callable object (custom)')
 
             if not self._is_frozen and (x_shift_fast != 0. or y_shift_fast != 0.):
                 raise ValueError('instance must be frozen before using `x_shift_fast` or `y_shift_fast`')
@@ -324,14 +351,7 @@ class CGH:
             a = np.abs(V) / np.abs(V).max()
             phi = np.angle(V)
 
-            if self.algorithm == 'davis':
-                _temp = _fx0(a) * np.mod(phi, 2 * pi)
-            elif self.algorithm == 'arrizon_1':
-                _temp = phi + _fx1(a) * np.sin(phi)
-            elif self.algorithm == 'arrizon_2':
-                _temp = _fx2(a) * np.sin(phi)
-            else:
-                raise ValueError(f'invalid algorithm "{self.algorithm}", must be one of: `davis`, `arrizon_1`, `arrizon_2`')
+            _temp = algo_func(a, phi, *args, **kwargs)
 
             _temp = ((_temp - _temp.min()) / (_temp.max() - _temp.min())) * 255
 
@@ -339,6 +359,10 @@ class CGH:
             self.img = Image.fromarray(self.cgh)
 
         elif backend.lower() in ('c++', 'cpp'):
+            if not isinstance(algorithm, str):
+                raise TypeError('C++ backend only supports built-in algorithms specified as string')
+            self.algorithm = algorithm.lower()
+            
             if self._cpp_backend.is_available:
                 self.cgh = self._cpp_backend.compute(self)
                 self.img = Image.fromarray(self.cgh)
