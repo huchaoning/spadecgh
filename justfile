@@ -1,3 +1,5 @@
+ARCH := if os() == "macos" { "universal" } else { "x64" }
+
 build-cpp:
     mkdir -p cpp/build_py
     cmake -B cpp/build_py -S cpp/ -DCMAKE_BUILD_TYPE=Release
@@ -14,6 +16,10 @@ clean:
 build-wasm:
     mkdir -p cpp/build_wasm
     cd cpp/build_wasm && emcmake cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build .
+
+
+build-app:
+    cd web_app && BUILD_TARGET=electron npm run build && npx electron-forge make --arch={{ARCH}}
 
 
 npm-install:

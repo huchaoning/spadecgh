@@ -1,6 +1,7 @@
-module.exports = {
+const config = {
     packagerConfig: {
         asar: true,
+        osxSign: false,
         ignore: (path) => {
             if (!path) return false;
             const allowedPaths = [
@@ -15,10 +16,38 @@ module.exports = {
             return !isAllowed;
         },
     },
-    makers: [
-        {
-            name: '@electron-forge/maker-zip',
-            platforms: ['win32'],
-        },
-    ],
+    makers: [],
 };
+
+
+if (process.platform === 'darwin') {
+    config.makers.push({
+        name: '@electron-forge/maker-zip',
+        platforms: ['darwin'],
+        arch: ['universal'],
+        config: {
+            options: {
+                level: 9
+            }
+        },
+    });
+} else if (process.platform === 'win32') {
+    config.makers.push({
+        name: '@electron-forge/maker-zip',
+        platforms: ['win32'],
+        config: {
+            options: {
+                level: 9
+            }
+        }
+    });
+} else if (process.platform === 'linux') {
+    config.makers.push({
+        name: '@reforged/maker-appimage',
+        config: {
+            compression: 'xz'
+        },
+    });
+}
+
+module.exports = config;

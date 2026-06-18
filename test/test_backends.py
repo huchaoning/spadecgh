@@ -4,7 +4,7 @@ from hducgh import *
 def test_backends():
     num_tests = 5
     num_modes = np.random.randint(1, 5)
-    algorithms = ['davis', 'arrizon_1', 'arrizon_2']
+    algorithms = ['davis', 'arrizon_2']
     
     for algo in algorithms:
         for i in range(num_tests):

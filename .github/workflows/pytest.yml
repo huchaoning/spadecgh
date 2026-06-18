@@ -1,12 +1,13 @@
-name: pytest
+name: run-pytest
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
+  push:
+    branches: [main]
+
 jobs:
-  pytest-test:
+  run-pytest:
     runs-on: ubuntu-latest
 
     steps:

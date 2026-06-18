@@ -171,3 +171,4 @@ hducgh_backend_*
 build_py
 build_wasm
 test.ipynb
+web_app/out/

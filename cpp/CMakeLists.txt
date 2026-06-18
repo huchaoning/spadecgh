@@ -15,15 +15,18 @@ if(EMSCRIPTEN)
     set(WASM_TARGET_NAME "hducgh_backend_web")
 
     add_executable(${WASM_TARGET_NAME} main_wasm.cpp)
-    target_compile_options(${WASM_TARGET_NAME} PRIVATE -O3)
 
     set_target_properties(${WASM_TARGET_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${WASM_OUTDIR}"
         SUFFIX ".js"
     )
 
+    target_compile_options(${WASM_TARGET_NAME} PRIVATE
+        "-O3" "-msimd128" "-mbulk-memory"
+    )
+
     target_link_options(${WASM_TARGET_NAME} PRIVATE
-        "-O3" "-sMODULARIZE=1" "-sEXPORT_ES6=1" "-sALLOW_MEMORY_GROWTH=1" "--bind"
+        "-O3" "-msimd128" "-mbulk-memory" "-sMODULARIZE=1" "-sEXPORT_ES6=1" "-sALLOW_MEMORY_GROWTH=1" "--bind"
     )
 
 else()
