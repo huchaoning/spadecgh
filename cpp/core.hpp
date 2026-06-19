@@ -15,19 +15,20 @@ using HG = HermiteGaussian;
 using LG = LaguerreGaussian;
 
 double davis_impl(double a, double phi) {
-  return fx<fx1_data>(a) * (phi - TAU * std::floor(phi / TAU));
+  return fx<fx1_data>(a) * phi;
+  // return fx<fx1_data>(a) * (phi - TAU * std::floor(phi / TAU));
 }
 
 double arrizon_impl(double a, double phi) {
   return fx<fx2_data>(a) * std::sin(phi);
 }
 
-#define ALGO_LOOP(ALGO)                       \
-  for (size_t i = 0; i < total_pixels; ++i) { \
-    double val = ALGO(A[i], Phi[i]);          \
-    cgh[i] = val;                             \
-    if (val < min_val) min_val = val;         \
-    if (val > max_val) max_val = val;         \
+#define ALGO_LOOP(ALGO_IMPL, ...)                        \
+  for (size_t i = 0; i < total_pixels; ++i) {            \
+    double val = ALGO_IMPL(A[i], Phi[i], ##__VA_ARGS__); \
+    cgh[i] = val;                                        \
+    if (val < min_val) min_val = val;                    \
+    if (val > max_val) max_val = val;                    \
   }
 
 int core(const char* json_str, uint8_t* out_buffer) {

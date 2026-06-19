@@ -22,7 +22,7 @@ __all__ = ['SLM', 'HG', 'LG', 'PM', 'CGH']
 
 
 def _davis_impl(a, phi):
-    return _fx1(a) * np.mod(phi, 2 * pi)
+    return _fx1(a) * phi
 
 
 def _arrizon_impl(a, phi):

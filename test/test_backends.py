@@ -2,7 +2,7 @@ import numpy as np
 from hducgh import *
 
 def test_backends():
-    num_tests = 5
+    num_tests = 20
     num_modes = np.random.randint(1, 5)
     algorithms = ['davis', 'arrizon']
     
