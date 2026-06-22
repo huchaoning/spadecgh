@@ -27,4 +27,4 @@ jobs:
         pip install pytest
 
     - name: run pytest
-      run: pytest
+      run: just test

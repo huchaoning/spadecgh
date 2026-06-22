@@ -281,11 +281,11 @@ class CGH:
             raise RuntimeError('this instance is frozen, call `.unfreeze()` before modifying `_mode_list`')
 
 
-    def add_modes(self, _mode_list, _nx_list, _ny_list):
+    def add_modes(self, mode_list, nx_list, ny_list):
         self._check_frozen()
-        _mode_list = np.atleast_1d(_mode_list)
-        _nx_list = np.atleast_1d(_nx_list)
-        _ny_list = np.atleast_1d(_ny_list)
+        _mode_list = np.atleast_1d(mode_list)
+        _nx_list = np.atleast_1d(nx_list)
+        _ny_list = np.atleast_1d(ny_list)
 
         for mode in _mode_list:
             _Mode.check(mode)

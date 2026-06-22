@@ -1,8 +1,10 @@
 import numpy as np
+import logging
 from hducgh import *
 
 def test_backends():
     num_tests = 20
+    atol = 1
     num_modes = np.random.randint(1, 5)
     algorithms = ['davis', 'arrizon']
     
@@ -24,19 +26,22 @@ def test_backends():
                 cgh.cal(algorithm=algo, backend='cpp')
                 data_cpp = cgh.cgh.copy()
 
-                diff = data_py.astype(int) - data_cpp.astype(int)
-                max_dev = np.max(np.abs(diff))
-                
-                error_pixels = np.sum(np.abs(diff) > 1)
-                error_rate = (error_pixels / data_py.size) * 100
+                diff = np.abs(data_py - data_cpp)
+                max_dev = np.max(diff)
 
-                assert np.allclose(data_cpp, data_py, atol=1), (
-                    f"                                                                  \n"
-                    f" algorithm: {algo}                                                \n"
-                    f"------------------------------------------------------------------\n"
-                    f" {repr(cgh)}                                                      \n"
-                    f"------------------------------------------------------------------\n"
-                    f" max deviation: {max_dev}                                         \n"
-                    f" mismatched pixels (diff > 1): {error_pixels} / {data_py.size} ({error_rate:.2f}%)\n"
-                    f"==================================================================\n"
+                error_pixels = np.sum(diff > 0)
+                error_rate = (error_pixels / data_py.size) * 100
+                mismatched_pixels = f'mismatched pixels: {error_pixels} / {data_py.size} ({error_rate:.2f}%)'
+                is_passed = bool(np.allclose(data_cpp, data_py, atol=atol))
+
+                logging.info(f'algo {algo}; loop {i} ({j}): {mismatched_pixels}, passed (max deviation = {max_dev})')
+                assert is_passed, (
+                    f'======================= YOU SHALL NOT PASS =======================\n'
+                    f' algorithm: {algo}                                                \n'
+                    f'------------------------------------------------------------------\n'
+                    f' {repr(cgh)}                                                      \n'
+                    f'------------------------------------------------------------------\n'
+                    f' max deviation: {max_dev}                                         \n'
+                    f' {mismatched_pixels}                                              \n'
+                    f'==================================================================\n'
                 )

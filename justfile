@@ -52,3 +52,7 @@ uninstall:
 
 push:
     git add . && git commit -m "work in progress... | $(date '+%Y-%m-%d %H:%M:%S')" && git push
+
+
+test:
+    pytest -vv --log-cli-level=INFO
