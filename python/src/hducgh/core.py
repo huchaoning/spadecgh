@@ -291,7 +291,7 @@ class CGH:
             _Mode.check(mode)
 
         if not (len(_mode_list) == len(_nx_list) == len(_ny_list)):
-            raise ValueError('_mode_list, _nx_list, and _ny_list must have the same length')
+            raise ValueError('mode_list, nx_list, and ny_list must have the same length')
         
         self._mode_list.extend(_mode_list)
         self._nx_list.extend(_nx_list)
