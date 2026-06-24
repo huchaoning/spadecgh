@@ -6,29 +6,32 @@
 
 #include "HermiteGaussian.hpp"
 #include "LaguerreGaussian.hpp"
-#include "assets/fx1_data.hpp"
-#include "assets/fx2_data.hpp"
+#include "assets/farrizon_uint16.hpp"
+#include "assets/fdavis_uint16.hpp"
+#include "assets/fhybrid_uint16.hpp"
 #include "common.hpp"
 #include "fx.hpp"
 
 using HG = HermiteGaussian;
 using LG = LaguerreGaussian;
 
-double davis_impl(double a, double phi) {
-  return fx<fx1_data>(a) * phi;
-  // return fx<fx1_data>(a) * (phi - TAU * std::floor(phi / TAU));
-}
+double davis_impl(double a, double phi) { return fx<fdavis_uint16>(a) * phi; }
 
 double arrizon_impl(double a, double phi) {
-  return fx<fx2_data>(a) * std::sin(phi);
+  return fx<farrizon_uint16>(a) * std::sin(phi);
+}
+
+double hybrid_impl(double a, double phi, double zeta) {
+  return fx2d<fhybrid_uint16>(a, zeta) *
+         (zeta * phi + (1.0 - zeta) * std::sin(phi));
 }
 
 #define ALGO_LOOP(ALGO_IMPL, ...)                        \
   for (size_t i = 0; i < total_pixels; ++i) {            \
     double val = ALGO_IMPL(A[i], Phi[i], ##__VA_ARGS__); \
     cgh[i] = val;                                        \
-    if (val < min_val) min_val = val;                    \
-    if (val > max_val) max_val = val;                    \
+    min_val = std::min(min_val, val);                    \
+    max_val = std::max(max_val, val);                    \
   }
 
 int core(const char* json_str, uint8_t* out_buffer) {
@@ -42,6 +45,7 @@ int core(const char* json_str, uint8_t* out_buffer) {
   int res_y = j["global"]["resolution"][1];
   size_t total_pixels = size_t(res_x) * size_t(res_y);
   std::string algo = j["global"]["algorithm"];
+  double zeta = j["global"]["zeta"];
 
   ComplexVector V(total_pixels, Complex(0.0, 0.0));
 
@@ -99,13 +103,13 @@ int core(const char* json_str, uint8_t* out_buffer) {
     double a = std::abs(V[i]);
     A[i] = a;
     Phi[i] = std::arg(V[i]);
-    if (a > max_a) max_a = a;
+    max_a = std::max(max_a, a);
   }
 
   if (max_a > 1e-15)
     for (size_t i = 0; i < total_pixels; ++i) A[i] /= max_a;
 
-  DoubleVector cgh(total_pixels);
+  DoubleVector& cgh = A;  // reuse memory
   double min_val = std::numeric_limits<double>::max();
   double max_val = -std::numeric_limits<double>::max();
 
@@ -113,6 +117,8 @@ int core(const char* json_str, uint8_t* out_buffer) {
     ALGO_LOOP(davis_impl);
   } else if (algo == "arrizon") {
     ALGO_LOOP(arrizon_impl);
+  } else if (algo == "hybrid") {
+    ALGO_LOOP(hybrid_impl, zeta);
   }
 
   double range = max_val - min_val;
