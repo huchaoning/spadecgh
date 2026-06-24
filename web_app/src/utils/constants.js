@@ -5,5 +5,6 @@ export const DEFAULT_CONFIG = {
     resY: 1080,
     fileName: "untitled",
     algo: "arrizon",
+    zeta: 0.5,
     modes: [{ id: 1, type: "HG", o1: 0, o2: 0, nx: 500, ny: 0, sx: 0, sy: 0 }]
 };

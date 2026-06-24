@@ -21,6 +21,7 @@ export function useCGHCore(canvasRef) {
     const [modes, setModes] = useState(DEFAULT_CONFIG.modes);
     const [fileName, setFileName] = useState(DEFAULT_CONFIG.fileName);
     const [algo, setAlgo] = useState(DEFAULT_CONFIG.algo);
+    const [zeta, setZeta] = useState(DEFAULT_CONFIG.zeta);
     const [showRestoreToast, setShowRestoreToast] = useState(false);
     const lastPixelsRef = useRef(null);
 
@@ -36,6 +37,7 @@ export function useCGHCore(canvasRef) {
             if (config.modes) setModes(config.modes);
             if (config.fileName) setFileName(config.fileName);
             if (config.algo) setAlgo(config.algo);
+            if (config.zeta !== undefined) setZeta(config.zeta);
             setShowRestoreToast(true);
             const timer = setTimeout(() => setShowRestoreToast(false), 5000);
             return () => clearTimeout(timer);
@@ -52,17 +54,18 @@ export function useCGHCore(canvasRef) {
                 resY != DEFAULT_CONFIG.resY ||
                 fileName != DEFAULT_CONFIG.fileName ||
                 algo != DEFAULT_CONFIG.algo ||
+                zeta != DEFAULT_CONFIG.zeta ||
                 JSON.stringify(modes) !== JSON.stringify(DEFAULT_CONFIG.modes);
             if (hasChanged) {
                 localStorage.setItem("cgh_last_config", JSON.stringify({
-                    sigma, pixelSize, resX, resY, modes, fileName, algo
+                    sigma, pixelSize, resX, resY, modes, fileName, algo, zeta
                 }));
             } else {
                 localStorage.removeItem("cgh_last_config");
             }
         }, 500);
         return () => clearTimeout(timer);
-    }, [sigma, pixelSize, resX, resY, modes, fileName, algo]);
+    }, [sigma, pixelSize, resX, resY, modes, fileName, algo, zeta]);
 
     const resetToDefault = () => {
         isResetting.current = true;
@@ -73,6 +76,7 @@ export function useCGHCore(canvasRef) {
         setModes(DEFAULT_CONFIG.modes);
         setFileName(DEFAULT_CONFIG.fileName);
         setAlgo(DEFAULT_CONFIG.algo);
+        setZeta(DEFAULT_CONFIG.zeta);
         localStorage.removeItem("cgh_last_config");
         setShowRestoreToast(false);
         setTimeout(() => { isResetting.current = false; }, 500);
@@ -138,7 +142,7 @@ export function useCGHCore(canvasRef) {
 
     const handleRun = () => {
         if (modes.length === 0 || !wasmInstance || !canvasRef.current) return;
-        const config = formatConfig({ sigma, pixelSize, resX, resY, modes, algo });
+        const config = formatConfig({ sigma, pixelSize, resX, resY, modes, algo, zeta });
         const width = config.global.resolution[0];
         const height = config.global.resolution[1];
         try {
@@ -179,6 +183,7 @@ export function useCGHCore(canvasRef) {
         addSubMode, removeSubMode, updateSubMode,
         showRestoreToast, setShowRestoreToast,
         algo, setAlgo,
+        zeta, setZeta,
         resetToDefault, handleRun, handleSave,
         clearModes: () => setModes([]),
     };

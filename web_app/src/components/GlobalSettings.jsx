@@ -1,5 +1,5 @@
 import { Settings2 } from "lucide-react";
-import { formatInputValue } from "../utils/formatInput";
+import { formatInputValue, formatInputZeta } from "../utils/formatInput";
 
 export default function GlobalSettings({
     sigma, setSigma,
@@ -8,6 +8,7 @@ export default function GlobalSettings({
     resY, setResY,
     fileName, setFileName,
     algo, setAlgo,
+    zeta, setZeta,
 }) {
     return (
         <section>
@@ -83,8 +84,36 @@ export default function GlobalSettings({
                             >
                                 <option value="davis">Davis</option>
                                 <option value="arrizon">Arrizón</option>
+                                <option value="hybrid">Hybrid</option>
                             </select>
                         </div>
+
+                        {algo === "hybrid" && (
+                            <div className="bg-base-200/50 p-2.5 rounded-xl border border-base-200 w-full">
+                                <label className="label py-1 px-0">
+                                    <div className="label-text text-[10px]">Hybrid factor (ζ)</div>
+                                </label>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="range"
+                                        min="0" max="1" step="0.01"
+                                        value={zeta}
+                                        onChange={(e) => setZeta(parseFloat(e.target.value))}
+                                        className="range range-xs range-primary flex-1"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={zeta}
+                                        onChange={(e) => setZeta(formatInputZeta(e.target.value))}
+                                        onBlur={(e) => {
+                                            const final = formatInputZeta(e.target.value);
+                                            setZeta(final);
+                                        }}
+                                        className="input input-xs input-bordered w-14 px-1 text-center"
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         <div className="form-control w-full">
                             <label className="label py-1 px-0">

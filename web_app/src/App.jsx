@@ -23,6 +23,7 @@ export default function App() {
                     resY={core.resY} setResY={core.setResY}
                     fileName={core.fileName} setFileName={core.setFileName}
                     algo={core.algo} setAlgo={core.setAlgo}
+                    zeta={core.zeta} setZeta={core.setZeta}
                     modes={core.modes}
                     onAddMode={core.addMode}
                     onRemoveMode={core.removeMode}
