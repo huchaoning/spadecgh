@@ -61,8 +61,8 @@ struct LaguerreGaussian {
 #pragma omp parallel for
 #endif
     for (int y = 0; y < res_y; ++y) {
+      double y_um = -(y - res_y / 2.0) * pixel_size;
       for (int x = 0; x < res_x; ++x) {
-        double y_um = -(y - res_y / 2.0) * pixel_size;
         double x_um = (x - res_x / 2.0) * pixel_size;
         Complex wf = cal_wf(x_um + sx_, y_um + sy_);
         V[y * res_x + x] += norm_ * weight * wf * kx[x] * ky[y];

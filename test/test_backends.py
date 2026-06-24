@@ -21,10 +21,10 @@ def test_backends():
                 cgh.add_modes(mode(o1, o2, np.random.normal(0, 160), np.random.normal(0, 90)), np.random.normal(0, 500), np.random.normal(0, 50))
 
                 cgh.cal(algorithm=algo, backend='py')
-                data_py = cgh.cgh.copy()
+                data_py = cgh.cgh.astype(float).copy()
 
                 cgh.cal(algorithm=algo, backend='cpp')
-                data_cpp = cgh.cgh.copy()
+                data_cpp = cgh.cgh.astype(float).copy()
 
                 diff = np.abs(data_py - data_cpp)
                 max_dev = np.max(diff)
@@ -34,14 +34,14 @@ def test_backends():
                 mismatched_pixels = f'mismatched pixels: {error_pixels} / {data_py.size} ({error_rate:.2f}%)'
                 is_passed = bool(np.allclose(data_cpp, data_py, atol=atol))
 
-                logging.info(f'algo {algo}; loop {i} ({j}): {mismatched_pixels}, passed (max deviation = {max_dev})')
+                logging.info(f'algo {algo}; loop {i} ({j}): {mismatched_pixels}, passed (max deviation = {int(max_dev)})')
                 assert is_passed, (
                     f'======================= YOU SHALL NOT PASS =======================\n'
                     f' algorithm: {algo}                                                \n'
                     f'------------------------------------------------------------------\n'
                     f' {repr(cgh)}                                                      \n'
                     f'------------------------------------------------------------------\n'
-                    f' max deviation: {max_dev}                                         \n'
+                    f' max deviation: {int(max_dev)}                                         \n'
                     f' {mismatched_pixels}                                              \n'
                     f'==================================================================\n'
                 )

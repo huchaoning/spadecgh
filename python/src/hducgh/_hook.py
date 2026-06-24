@@ -36,18 +36,21 @@ class _CppBackend:
     def is_available(self):
         return self._lib is not None
 
-    def compute(self, cgh_instance):
+    def cal(self, cgh_instance, dump=False):
         if self._lib == None:
             raise RuntimeError('C++ library is not loaded')
 
         ir_dict = _serialize_cgh(cgh_instance)
+
+        if dump:
+            print('C++ payload: ' + json.dumps(ir_dict, indent=2))
+
         json_bytes = json.dumps(ir_dict).encode('utf-8')
 
         res_x, res_y = ir_dict['global']['resolution']
         cgh_array = np.zeros((res_y, res_x), dtype=np.uint8)
 
-        out_ptr = self._ffi.cast(
-            'unsigned char*', self._ffi.from_buffer(cgh_array))
+        out_ptr = self._ffi.cast('unsigned char*', self._ffi.from_buffer(cgh_array))
 
         status = self._lib.cal(json_bytes, out_ptr)
         if status != 0:
@@ -83,7 +86,8 @@ def _serialize_cgh(cgh):
             'sigma': float(cgh.sigma),
             'pixel_size': float(cgh._slm_cls.pixel_size),
             'resolution': list(cgh._slm_cls.resolution),
-            'algorithm': str(cgh.algorithm)
+            'algorithm': str(cgh.algo),
+            'zeta': float(cgh.zeta)
         },
         'modes': []
     }

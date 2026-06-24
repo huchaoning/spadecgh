@@ -10,29 +10,18 @@ from PIL import Image
 
 from scipy.interpolate import interp1d
 import importlib.resources as resources
-with resources.files('hducgh.assets').joinpath('fx1_data.npy').open('rb') as f:
-    _fx1 = interp1d(np.linspace(0, 1, 801), np.load(f))
-with resources.files('hducgh.assets').joinpath('fx2_data.npy').open('rb') as f:
-    _fx2 = interp1d(np.linspace(0, 1, 801), np.load(f))
+with resources.files('hducgh.assets').joinpath('fdavis_uint16.npy').open('rb') as f:
+    _fdavis = interp1d(np.linspace(0, 1, 801), np.load(f).astype(float) * 1e-4)
+with resources.files('hducgh.assets').joinpath('farrizon_uint16.npy').open('rb') as f:
+    _farrizon = interp1d(np.linspace(0, 1, 801), np.load(f).astype(float) * 1e-4)
+with resources.files('hducgh.assets').joinpath('fhybrid_uint16.npy').open('rb') as f:
+    _fhybrid_data = np.load(f).astype(float) * 1e-4
+    _fhybrid = [interp1d(np.linspace(0, 1, 801), _fhybrid_data[idx]) for idx in range(101)]
 
 from ._hook import _CppBackend
 
 
 __all__ = ['SLM', 'HG', 'LG', 'PM', 'CGH']
-
-
-def _davis_impl(a, phi):
-    return _fx1(a) * phi
-
-
-def _arrizon_impl(a, phi):
-    return _fx2(a) * np.sin(phi)
-
-
-_BUILTIN_ALGORITHMS = {
-    'davis': _davis_impl,
-    'arrizon': _arrizon_impl,
-}
 
 
 class SLM:
@@ -181,7 +170,6 @@ class HG(_Mode):
         else:
             raise ValueError('n and m must be positive integers')
 
-
     # def wave_function(self, sigma, slm_cls=_DefaultSLM):
     #     SLM.check(slm_cls)
     #     w0 = 2*sigma
@@ -264,18 +252,18 @@ class CGH:
             if not self._is_quiet: print('CGH not generated. Running cal() automatically...')
             self.cal(*args, **kwargs)
 
-    
+
     def freeze(self):
         self._is_frozen = True
         if not self._is_quiet: print('this CGH instance is now frozen')
 
-    
+
     def unfreeze(self):
         self._is_frozen = False
         self._is_cached = False
         if not self._is_quiet: print('this CGH instance is now unfrozen')
 
-    
+
     def _check_frozen(self):
         if self._is_frozen:
             raise RuntimeError('this instance is frozen, call `.unfreeze()` before modifying `_mode_list`')
@@ -296,8 +284,8 @@ class CGH:
         self._mode_list.extend(_mode_list)
         self._nx_list.extend(_nx_list)
         self._ny_list.extend(_ny_list)
- 
-    
+
+
     def clear_modes(self):
         self._check_frozen()
         if not self._is_quiet: print('resetting...')
@@ -314,25 +302,43 @@ class CGH:
         return V
 
 
-    def cal(self, x_shift_fast=0., y_shift_fast=0., backend='python', algorithm='arrizon', args=None, kwargs=None):
-        if args is None:
-            args = ()
-        if kwargs is None:
-            kwargs = {}
+    def cal(self, x_shift_fast=0., y_shift_fast=0., backend='python', algorithm='arrizon', zeta=None, custom_options=None, dump=False):
+        custom_options = {} if custom_options is None else custom_options
+        self.zeta = -1 if zeta is None else zeta
+        if isinstance(algorithm, str):
+            self.algo = algorithm.lower()
+
+            if self.algo == 'davis':
+                algo_impl = lambda a, phi: _fdavis(a) * phi
+
+            elif self.algo == 'arrizon':
+                algo_impl = lambda a, phi: _farrizon(a) * np.sin(phi)
+
+            elif self.algo == 'hybrid':
+                if zeta is None:
+                    raise ValueError('`zeta` must be provided for hybrid algorithm')
+                if zeta < 0 or zeta > 1:
+                    raise ValueError('`zeta` must be in [0, 1]')
+
+                zeta_r = np.round(zeta, 2)
+                if not np.isclose(zeta, zeta_r):
+                    if not self._is_quiet: print(f'warning: zeta={zeta} is rounded to {zeta_r} (step=0.01)') 
+
+                self.zeta = zeta_r
+                algo_impl = lambda a, phi: _fhybrid[int(zeta_r * 100)](a) * (zeta_r * phi + (1 - zeta_r) * np.sin(phi))
+
+            else:
+                raise ValueError(f'invalid algorithm "{algorithm}", must be one of (davis, arrizon, hybrid) or a callable object')
+
+        elif callable(algorithm):
+            algo_impl = algorithm
+            self.algo = getattr(algorithm, '__name__', 'custom_callable')
+
+        else:
+            raise TypeError('`algorithm` must be a string (built-in) or a callable object (custom)')
+
 
         if backend.lower() in ('py', 'python'):
-            if isinstance(algorithm, str):
-                algo_lower = algorithm.lower()
-                if algo_lower not in _BUILTIN_ALGORITHMS:
-                    raise ValueError(f'invalid algorithm "{algorithm}", must be one of {list(_BUILTIN_ALGORITHMS.keys())} or a callable object')
-                algo_func = _BUILTIN_ALGORITHMS[algo_lower]
-                self.algorithm = algo_lower
-            elif callable(algorithm):
-                algo_func = algorithm
-                self.algorithm = getattr(algorithm, '__name__', 'custom_callable')
-            else:
-                raise TypeError('`algorithm` must be a string (built-in) or a callable object (custom)')
-
             if not self._is_frozen and (x_shift_fast != 0. or y_shift_fast != 0.):
                 raise ValueError('instance must be frozen before using `x_shift_fast` or `y_shift_fast`')
             
@@ -351,20 +357,20 @@ class CGH:
             a = np.abs(V) / np.abs(V).max()
             phi = np.angle(V)
 
-            _temp = algo_func(a, phi, *args, **kwargs)
+            _temp = algo_impl(a, phi, **custom_options)
 
             _temp = ((_temp - _temp.min()) / (_temp.max() - _temp.min())) * 255
 
             self.cgh = _temp.astype(np.uint8)
             self.img = Image.fromarray(self.cgh)
 
+
         elif backend.lower() in ('c++', 'cpp'):
             if not isinstance(algorithm, str):
                 raise TypeError('C++ backend only supports built-in algorithms specified as string')
-            self.algorithm = algorithm.lower()
             
             if self._cpp_backend.is_available:
-                self.cgh = self._cpp_backend.compute(self)
+                self.cgh = self._cpp_backend.cal(self, dump)
                 self.img = Image.fromarray(self.cgh)
 
                 if x_shift_fast != 0. or y_shift_fast != 0.:

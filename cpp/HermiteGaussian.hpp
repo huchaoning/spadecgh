@@ -56,7 +56,7 @@ struct HermiteGaussian {
     }
 
     for (int y = 0; y < res_y; ++y) {
-      Complex wf_y_val = wf_y[y];
+      const Complex& wf_y_val = wf_y[y];
       for (int x = 0; x < res_x; ++x) {
         V[y * res_x + x] += norm_ * weight * wf_x[x] * wf_y_val;
       }
