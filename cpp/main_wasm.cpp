@@ -1,6 +1,7 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
+#include <json.hpp>
 #include <string>
 
 #include "core.hpp"
