@@ -50,7 +50,7 @@ if (process.platform === 'darwin') {
         name: '@reforged/maker-appimage',
         config: {
             compression: 'xz',
-            icon: 'icon/icon.png'
+            icon: 'icons/icon.png'
         },
     });
 }
