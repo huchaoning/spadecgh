@@ -6,9 +6,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 function createWindow() {
-    const win = new BrowserWindow({
+    const mainWindow = new BrowserWindow({
         width: 1440,
         height: 810,
+        titleBarStyle: 'hidden',
+        title: 'hducgh',
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -16,9 +18,14 @@ function createWindow() {
         },
         autoHideMenuBar: true,
         icon: path.join(__dirname, 'dist/favicon.png'),
+        ...(process.platform !== 'darwin' && { titleBarOverlay: true })
     });
 
-    win.loadFile(path.join(__dirname, 'dist/index.html'));
+    mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
+
+    mainWindow.webContents.on('did-finish-load', () => {
+        mainWindow.setTitle('hducgh');
+    });
 }
 
 app.whenReady().then(createWindow);

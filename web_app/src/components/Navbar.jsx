@@ -6,17 +6,20 @@ export default function Navbar({ showSidebar, setShowSidebar }) {
     const subTitle = __IS_ELECTRON__ ? 'offline-app' : 'web-app';
 
     return (
-        <header className="navbar bg-base-100 shadow-sm z-30 px-4 border-b border-base-200">
-            <div className="flex-none">
+        <header
+            className={`navbar bg-base-100 shadow-sm z-30 px-4 border-b border-base-200 ${__IS_ELECTRON__ ? 'pt-8' : ''}`}
+            style={__IS_ELECTRON__ ? { WebkitAppRegion: 'drag' } : {}}
+        >
+            <div className="flex-none" style={{ WebkitAppRegion: 'no-drag' }}>
                 <button
-                    className="btn btn-ghost btn-sm btn-square"
+                    className="btn btn-ghost btn-sm btn-square hover:text-primary transition-colors"
                     onClick={() => setShowSidebar(!showSidebar)}
                 >
                     <Menu size={20} />
                 </button>
             </div>
 
-            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' }}>
 
                 <div className="w-8 h-8 flex items-center justify-center bg-base-100 rounded-xl border border-base-300 shadow-sm overflow-hidden p-1.5">
                     <img
@@ -38,7 +41,7 @@ export default function Navbar({ showSidebar, setShowSidebar }) {
                 </div>
             </div>
 
-            <div className="flex-1 flex justify-end items-center gap-2">
+            <div className="flex-1 flex justify-end items-center gap-2" style={{ WebkitAppRegion: 'no-drag' }}>
                 {!__IS_ELECTRON__ && (
                     <>
                         <button
