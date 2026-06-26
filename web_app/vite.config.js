@@ -11,5 +11,9 @@ export default defineConfig(({ mode }) => {
             react(),
             tailwindcss(),
         ],
+
+        define: {
+            '__IS_ELECTRON__': JSON.stringify(isElectron),
+        }
     }
 })
