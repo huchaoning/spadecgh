@@ -15,6 +15,7 @@ function createWindow() {
             webSecurity: false,
         },
         autoHideMenuBar: true,
+        icon: path.join(__dirname, 'dist/favicon.png'),
     });
 
     win.loadFile(path.join(__dirname, 'dist/index.html'));

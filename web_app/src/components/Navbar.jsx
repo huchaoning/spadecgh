@@ -39,14 +39,18 @@ export default function Navbar({ showSidebar, setShowSidebar }) {
             </div>
 
             <div className="flex-1 flex justify-end items-center gap-2">
-                <button
-                    className="btn btn-ghost btn-sm btn-square text-base-content/40 hover:text-primary transition-colors"
-                    onClick={() => window.open("https://hducgh.researchi.group/", "_blank")}
-                >
-                    <BookIcon size={20} />
-                </button>
+                {!__IS_ELECTRON__ && (
+                    <>
+                        <button
+                            className="btn btn-ghost btn-sm btn-square text-base-content/40 hover:text-primary transition-colors"
+                            onClick={() => window.open("https://hducgh.researchi.group/", "_blank")}
+                        >
+                            <BookIcon size={20} />
+                        </button>
 
-                <div className="divider divider-horizontal m-0 py-2"></div>
+                        <div className="divider divider-horizontal m-0 py-2"></div>
+                    </>
+                )}
 
                 <button
                     className="btn btn-ghost btn-sm btn-square text-base-content/40 hover:text-primary transition-colors"

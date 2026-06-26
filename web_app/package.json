@@ -1,7 +1,7 @@
 {
   "name": "hducgh",
   "private": true,
-  "version": "0.1.0a1",
+  "version": "0.1.0a2",
   "type": "module",
   "main": "main.js",
   "scripts": {

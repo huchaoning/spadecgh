@@ -1,13 +1,17 @@
+const path = require('path');
+
 const config = {
     packagerConfig: {
         asar: true,
         osxSign: false,
+        icon: path.join(__dirname, 'icons/icon'),
         ignore: (path) => {
             if (!path) return false;
             const allowedPaths = [
                 '/dist',
                 '/main.js',
                 '/package.json',
+                '/icons',
             ];
 
             const isAllowed = allowedPaths.some(p => path.startsWith(p));

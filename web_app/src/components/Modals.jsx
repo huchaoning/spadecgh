@@ -9,7 +9,7 @@ export default function Modals({ onClearModes }) {
                         <AlertTriangle size={20} /> Confirm?
                     </h3>
                     <p className="py-4 text-sm text-base-content/60">
-                        This action will clear all configured modes. 
+                        This action will clear all configured modes.
                         This operation cannot be undone.
                     </p>
                     <div className="modal-action">
@@ -36,14 +36,16 @@ export default function Modals({ onClearModes }) {
                     <div className="modal-action">
                         <form method="dialog" className="flex gap-2 w-full flex-row-reverse">
                             <button className="btn btn-primary btn-sm w-20">OK</button>
-                            <a
-                                className="btn btn-ghost btn-sm w-20"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                href="https://github.com/huchaoning/hducgh"
-                            >
-                                GitHub
-                            </a>
+                            {!__IS_ELECTRON__ && (
+                                <a
+                                    className="btn btn-ghost btn-sm w-20"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    href="https://github.com/huchaoning/hducgh"
+                                >
+                                    GitHub
+                                </a>
+                            )}
                         </form>
                     </div>
                 </div>
@@ -55,21 +57,23 @@ export default function Modals({ onClearModes }) {
                         <AlertTriangle size={20} /> Input error
                     </h3>
                     <p className="py-4 text-sm text-base-content/60">
-                        Invalid input parameters. 
-                        Please check your entries for errors. 
+                        Invalid input parameters.
+                        Please check your entries for errors.
                         If you have confirmed they are correct but the error persists, please report the issue.
                     </p>
                     <div className="modal-action">
                         <form method="dialog" className="flex gap-2 w-full flex-row-reverse">
                             <button className="btn btn-primary btn-sm w-20">Close</button>
-                            <a
-                                className="btn btn-ghost btn-sm w-20"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                href="https://github.com/huchaoning/hducgh/issues"
-                            >
-                                Issues
-                            </a>
+                            {!__IS_ELECTRON__ && (
+                                <a
+                                    className="btn btn-ghost btn-sm w-20"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    href="https://github.com/huchaoning/hducgh/issues"
+                                >
+                                    Issues
+                                </a>
+                            )}
                         </form>
                     </div>
                 </div>
