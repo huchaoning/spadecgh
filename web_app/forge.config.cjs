@@ -2,6 +2,7 @@ const path = require('path');
 
 const config = {
     packagerConfig: {
+        name: "Offline application of HDU CGH toolkit [Quantum@HDU]",
         asar: true,
         osxSign: false,
         icon: path.join(__dirname, 'icons/icon'),

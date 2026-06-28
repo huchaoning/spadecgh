@@ -10,21 +10,28 @@ function createWindow() {
         width: 1440,
         height: 810,
         titleBarStyle: 'hidden',
-        title: 'hducgh',
-        webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-            webSecurity: false,
-        },
+        title: 'Offline application of HDU CGH toolkit [Quantum@HDU]',
+        backgroundColor: '#fff',
+        show: false,
         autoHideMenuBar: true,
         icon: path.join(__dirname, 'dist/favicon.png'),
-        ...(process.platform !== 'darwin' && { titleBarOverlay: true })
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: true,
+            nodeIntegration: false,
+        },
+        ...(process.platform !== 'darwin' && {
+            titleBarOverlay: {
+                color: '#fff',
+            }
+        })
     });
 
     mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
 
     mainWindow.webContents.on('did-finish-load', () => {
-        mainWindow.setTitle('hducgh');
+        mainWindow.setTitle('Offline application of HDU CGH toolkit [Quantum@HDU]');
+        mainWindow.show();
     });
 }
 
