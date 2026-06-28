@@ -2,7 +2,7 @@ const path = require('path');
 
 const config = {
     packagerConfig: {
-        name: "Offline application of HDU CGH toolkit [Quantum@HDU]",
+        name: "HDU CGH",
         asar: true,
         osxSign: false,
         icon: path.join(__dirname, 'icons/icon'),
@@ -52,6 +52,8 @@ if (process.platform === 'darwin') {
         config: {
             compression: 'xz',
             options: {
+                bin: 'HDU CGH',
+                name: 'HDU CGH',
                 icon: path.join(__dirname, 'icons/icon.png'),
             },
         },
