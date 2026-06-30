@@ -1,6 +1,7 @@
 {
     "productName": "hducgh",
     "asar": true,
+    "afterPack": "afterPack.js",
     "directories": {
         "output": "out"
     },
@@ -8,7 +9,8 @@
         "dist/**/*",
         "main.js",
         "package.json",
-        "icons/**/*"
+        "icons/**/*",
+        "!node_modules/**/*"
     ],
     "win": {
         "target": [
@@ -36,11 +38,8 @@
         "deleteAppDataOnUninstall": true,
         "installerLanguages": [
             "en_US"
-        ],
-        "compression": "lzma",
-        "solid": true
+        ]
     },
-    "compression": "maximum",
     "mac": {
         "target": [
             {
@@ -57,11 +56,7 @@
             }
         ],
         "identity": null,
-        "icon": "icons/icon.icns",
-        "dmg": {
-            "compressionDist": "uncompressed",
-            "format": "ULFO"
-        }
+        "icon": "icons/icon.icns"
     },
     "linux": {
         "target": [
