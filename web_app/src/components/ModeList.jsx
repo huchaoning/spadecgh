@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Sliders, Plus, Trash2, ListPlus } from "lucide-react";
-import { formatInputValue } from "../utils/formatInput";
+import { Sliders, Trash2, ListPlus } from "lucide-react";
 
 export default function ModeList({
   modes,
@@ -19,7 +18,7 @@ export default function ModeList({
         </div>
         <button
           onClick={onAddMode}
-          className="btn btn-xs btn-primary rounded-full px-2.5 shadow-md flex items-center gap-1 shadow-lg shadow-primary/20 active:scale-95 transition-all"
+          className="btn btn-xs btn-primary rounded-full px-2.5 flex items-center gap-1 shadow-md shadow-primary/20 active:scale-95 transition-all"
         >
           <ListPlus size={12} />
           <span>Add</span>
@@ -53,14 +52,14 @@ export default function ModeList({
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, x: -30 }}
-                className="collapse collapse-arrow bg-base-100 border border-base-200 rounded-xl shadow-sm overflow-hidden"
+                className="collapse collapse-arrow bg-base-100 border border-base-200 rounded-xl shadow-xs overflow-hidden"
               >
                 <input type="checkbox" defaultChecked />
                 <div className="collapse-title flex items-center gap-3 pr-12 min-h-0">
                   <div className="badge badge-sm badge-ghost shrink-0">{index + 1}</div>
                   <div className="text-xs font-bold text-primary">
                     {mode.type === "PM"
-                      ? `PM (${(mode.plusModes?.length || 0) + (mode.minusModes?.length || 0)}); Shift(${mode.sx}, ${mode.sy})`
+                      ? `PM(${(mode.plusModes?.length || 0) + (mode.minusModes?.length || 0)}); Shift(${mode.sx}, ${mode.sy})`
                       : `${mode.type}(${mode.o1}, ${mode.o2}); Shift(${mode.sx}, ${mode.sy})`}
                   </div>
                 </div>
@@ -96,7 +95,7 @@ export default function ModeList({
                                   role="button"
                                   className="btn btn-circle btn-ghost btn-xs text-primary bg-base-200"
                                 >
-                                  <ListPlus size={14} /> {/* 替换纯 Plus 图标 */}
+                                  <ListPlus size={14} />
                                 </div>
                                 <ul
                                   tabIndex={0}

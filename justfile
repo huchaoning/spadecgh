@@ -10,7 +10,7 @@ clean:
     rm -rf build
     rm -rf cpp/build_py cpp/lib
     rm -rf cpp/build_wasm web_app/public/wasm
-    rm -rf web_app/dist
+    rm -rf web_app/dist web_app/out
 
 
 build-wasm:

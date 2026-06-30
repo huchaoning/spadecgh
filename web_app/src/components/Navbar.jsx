@@ -3,16 +3,16 @@ import logo from "../logo.png"
 import pkg from "../../package.json";
 
 export default function Navbar({ showSidebar, setShowSidebar }) {
-    const subTitle = __IS_ELECTRON__ ? 'offline-app' : 'web-app';
+    const subTitle = __IS_ELECTRON__ ? "offline-app" : "web-app";
 
     return (
         <header
-            className={`grid grid-cols-3 items-center navbar bg-base-100 shadow-sm z-30 px-4 border-b border-base-200 ${__IS_ELECTRON__ ? 'pt-10' : ''}`}
-            style={__IS_ELECTRON__ ? { WebkitAppRegion: 'drag' } : {}}
+            className={`grid grid-cols-3 items-center navbar bg-base-100 shadow-sm z-30 px-4 border-b border-base-200 ${__IS_ELECTRON__ ? "pt-10" : ""}`}
+            style={__IS_ELECTRON__ ? { WebkitAppRegion: "drag" } : {}}
         >
             <div
                 className="justify-self-start"
-                style={__IS_ELECTRON__ ? { WebkitAppRegion: 'no-drag' } : {}}
+                style={__IS_ELECTRON__ ? { WebkitAppRegion: "no-drag" } : {}}
             >
                 <button
                     className="btn btn-ghost btn-sm btn-square"
@@ -46,7 +46,7 @@ export default function Navbar({ showSidebar, setShowSidebar }) {
 
             <div
                 className="justify-self-end flex items-center gap-2"
-                style={__IS_ELECTRON__ ? { WebkitAppRegion: 'no-drag' } : {}}
+                style={__IS_ELECTRON__ ? { WebkitAppRegion: "no-drag" } : {}}
             >
                 {!__IS_ELECTRON__ && (
                     <>

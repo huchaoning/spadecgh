@@ -1,19 +1,19 @@
-import { defineConfig } from 'vite'
-import tailwindcss from '@tailwindcss/vite'
-import react from '@vitejs/plugin-react-swc'
+import { defineConfig } from "vite"
+import tailwindcss from "@tailwindcss/vite"
+import react from "@vitejs/plugin-react-swc"
 
 export default defineConfig(({ mode }) => {
-    const isElectron = process.env.BUILD_TARGET === 'electron';
+    const isElectron = process.env.BUILD_TARGET === "electron";
 
     return {
-        base: isElectron ? './' : '/web-app/',
+        base: isElectron ? "./" : "/web-app/",
         plugins: [
             react(),
             tailwindcss(),
         ],
 
         define: {
-            '__IS_ELECTRON__': JSON.stringify(isElectron),
+            "__IS_ELECTRON__": JSON.stringify(isElectron),
         }
     }
 })

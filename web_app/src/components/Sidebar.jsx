@@ -21,8 +21,7 @@ export default function Sidebar({
     onRemoveSubMode,
     onUpdateSubMode,
     onRun,
-    onSave,
-    onClearModes,
+    onSave
 }) {
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
@@ -40,7 +39,7 @@ export default function Sidebar({
             <div className="w-96 flex flex-col h-full shrink-0">
                 <OverlayScrollbarsComponent
                     defer
-                    options={{ scrollbars: { autoHide: 'scroll' } }}
+                    options={{ scrollbars: { autoHide: "scroll" } }}
                     className="flex-1 p-4"
                 >
                     <div className="space-y-8 pb-4">
