@@ -10,7 +10,7 @@ function createWindow() {
         width: 1440,
         height: 810,
         titleBarStyle: 'hidden',
-        title: 'HDU CGH',
+        title: 'hducgh',
         backgroundColor: '#fff',
         show: false,
         autoHideMenuBar: true,
@@ -30,7 +30,7 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
 
     mainWindow.webContents.on('did-finish-load', () => {
-        mainWindow.setTitle('HDU CGH');
+        mainWindow.setTitle('hducgh');
         mainWindow.show();
     });
 }
