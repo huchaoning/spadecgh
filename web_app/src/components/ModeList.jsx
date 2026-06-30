@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Sliders, Plus, Trash2 } from "lucide-react";
+import { Sliders, Plus, Trash2, ListPlus } from "lucide-react";
 import { formatInputValue } from "../utils/formatInput";
 
 export default function ModeList({
@@ -15,13 +15,14 @@ export default function ModeList({
     <section className="w-full">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 text-primary font-bold">
-          <Sliders size={16} /> <div>Target modes</div>
+          <Sliders size={16} /> <div>Target modes ({modes.length})</div>
         </div>
         <button
           onClick={onAddMode}
-          className="btn btn-xs btn-circle btn-primary shadow-md hover:scale-110 active:scale-90 transition-all"
+          className="btn btn-xs btn-primary rounded-full px-2.5 shadow-md flex items-center gap-1 shadow-lg shadow-primary/20 active:scale-95 transition-all"
         >
-          <Plus size={14} />
+          <ListPlus size={12} />
+          <span>Add</span>
         </button>
       </div>
 
@@ -36,8 +37,12 @@ export default function ModeList({
               className="border-2 border-dashed border-base-300 rounded-2xl p-10 text-center flex flex-col items-center gap-3"
             >
               <Sliders size={32} className="opacity-20" />
-              <div className="font-medium text-xs opacity-40">
-                List is empty. Click + to start.
+              <div className="font-medium text-xs opacity-40 flex items-center justify-center gap-1.5 flex-wrap">
+                <span>List is empty. Click</span>
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 font-medium text-[10px] rounded-full border">
+                  <ListPlus size={10} /> Add
+                </span>
+                <span>to start.</span>
               </div>
             </motion.div>
           ) : (
@@ -91,7 +96,7 @@ export default function ModeList({
                                   role="button"
                                   className="btn btn-circle btn-ghost btn-xs text-primary bg-base-200"
                                 >
-                                  <Plus size={14} />
+                                  <ListPlus size={14} /> {/* 替换纯 Plus 图标 */}
                                 </div>
                                 <ul
                                   tabIndex={0}

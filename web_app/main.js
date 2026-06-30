@@ -11,7 +11,7 @@ function createWindow() {
         height: 810,
         titleBarStyle: 'hidden',
         title: 'hducgh',
-        backgroundColor: '#fff',
+        backgroundColor: '#ffffff00',
         show: false,
         autoHideMenuBar: true,
         icon: path.join(__dirname, 'dist/favicon.png'),
@@ -22,7 +22,7 @@ function createWindow() {
         },
         ...(process.platform !== 'darwin' && {
             titleBarOverlay: {
-                color: '#fff',
+                color: '#ffffff00',
             }
         })
     });
