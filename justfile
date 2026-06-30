@@ -19,7 +19,7 @@ build-wasm:
 
 
 build-app:
-    cd web_app && BUILD_TARGET=electron npm run build && npx electron-forge make --arch={{ARCH}}
+    cd web_app && BUILD_TARGET=electron npm run build && npx electron-builder --{{ARCH}}
 
 
 npm-install:

@@ -1,0 +1,77 @@
+{
+    "productName": "hducgh",
+    "asar": true,
+    "directories": {
+        "output": "out"
+    },
+    "files": [
+        "dist/**/*",
+        "main.js",
+        "package.json",
+        "icons/**/*"
+    ],
+    "win": {
+        "target": [
+            {
+                "target": "nsis",
+                "arch": [
+                    "x64"
+                ]
+            },
+            {
+                "target": "zip",
+                "arch": [
+                    "x64"
+                ]
+            }
+        ],
+        "icon": "icons/icon.ico"
+    },
+    "nsis": {
+        "oneClick": false,
+        "allowToChangeInstallationDirectory": true,
+        "createDesktopShortcut": true,
+        "createStartMenuShortcut": true,
+        "runAfterFinish": true,
+        "deleteAppDataOnUninstall": true,
+        "installerLanguages": [
+            "en_US"
+        ],
+        "compression": "lzma",
+        "solid": true
+    },
+    "compression": "maximum",
+    "mac": {
+        "target": [
+            {
+                "target": "dmg",
+                "arch": [
+                    "universal"
+                ]
+            },
+            {
+                "target": "zip",
+                "arch": [
+                    "universal"
+                ]
+            }
+        ],
+        "identity": null,
+        "icon": "icons/icon.icns",
+        "dmg": {
+            "compressionDist": "uncompressed",
+            "format": "ULFO"
+        }
+    },
+    "linux": {
+        "target": [
+            {
+                "target": "AppImage",
+                "arch": [
+                    "x64"
+                ]
+            }
+        ],
+        "icon": "icons/icon.png"
+    }
+}

@@ -25,13 +25,17 @@ jobs:
         include:
           - os: windows-2022
             platform-name: win_x64
-            artifact-path: "web_app/out/make/zip/win32/x64/*.zip"
+            artifact-path: |
+              web_app/out/*.exe
+              web_app/out/*.zip
           - os: ubuntu-22.04
             platform-name: linux_x64
-            artifact-path: "web_app/out/make/AppImage/x64/*.AppImage"
+            artifact-path: "web_app/out/*.AppImage"
           - os: macos-14
             platform-name: macos_universal
-            artifact-path: "web_app/out/make/zip/darwin/universal/*.zip"
+            artifact-path: |
+              web_app/out/*.dmg
+              web_app/out/*.zip
 
     steps:
       - uses: actions/checkout@v4
@@ -96,10 +100,13 @@ jobs:
 
           tree electron-artifacts/
 
-          mv electron-artifacts/electron-app-win_x64/*.zip "final-release/hducgh-offline-app-win-x64-${VERSION}.zip"
-          mv electron-artifacts/electron-app-macos_universal/*.zip "final-release/hducgh-offline-app-macos-universal-${VERSION}.zip"
-          mv electron-artifacts/electron-app-linux_x64/*.AppImage "final-release/hducgh-offline-app-linux-x64-${VERSION}.AppImage"
+          mv electron-artifacts/electron-app-win_x64/*Setup*.exe "final-release/hducgh-offline-app-win-x64-${VERSION}-installer.exe"
+          mv electron-artifacts/electron-app-win_x64/*.zip "final-release/hducgh-offline-app-win-x64-${VERSION}-portable.zip"
 
+          mv electron-artifacts/electron-app-macos_universal/*.dmg "final-release/hducgh-offline-app-macos-universal-${VERSION}-installer.dmg"
+          mv electron-artifacts/electron-app-macos_universal/*.zip "final-release/hducgh-offline-app-macos-universal-${VERSION}-portable.zip"
+
+          mv electron-artifacts/electron-app-linux_x64/*.AppImage "final-release/hducgh-offline-app-linux-x64-${VERSION}.AppImage"
           ls -l final-release/
 
       - name: create release
