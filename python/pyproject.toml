@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hducgh"
 description = "HDU CGH toolkit [Quantum@HDU]"
-version = "v0.1.0a2"
+version = "v0.1.0a3"
 
 readme = "README.md"
 license = { file = "LICENSE" }
