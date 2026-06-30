@@ -11,7 +11,10 @@ clean:
     rm -rf cpp/build_py cpp/lib
     rm -rf cpp/build_wasm web_app/public/wasm
     rm -rf web_app/dist web_app/out
-
+    find . -type f -name "*_backend_*" -exec rm -rf {} +
+    find . -type d -name "__pycache__" -exec rm -rf {} +
+    find . -type d -name "*.egg-info" -exec rm -rf {} +
+    find . -type d -name ".pytest_cache" -exec rm -rf {} +
 
 build-wasm:
     mkdir -p cpp/build_wasm
