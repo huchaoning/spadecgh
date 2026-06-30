@@ -34,6 +34,12 @@ double hybrid_impl(double a, double phi, double zeta) {
     max_val = std::max(max_val, val);                    \
   }
 
+#define TOTAL_SHIFT(CHILD_MODE)              \
+  const double& child_sx = CHILD_MODE["sx"]; \
+  const double& child_sy = CHILD_MODE["sy"]; \
+  double total_sx = sx + child_sx;           \
+  double total_sy = sy + child_sy;
+
 int core(const char* json_str, uint8_t* out_buffer) {
   auto j = nlohmann::json::parse(json_str);
 
@@ -49,9 +55,9 @@ int core(const char* json_str, uint8_t* out_buffer) {
 
   ComplexVector V(total_pixels, Complex(0.0, 0.0));
 
-  for (auto& mode : j["modes"]) {
-    double nx = mode["nx"];
-    double ny = mode["ny"];
+  for (const auto& mode : j["modes"]) {
+    const double& nx = mode["nx"];
+    const double& ny = mode["ny"];
 
     if (mode["type"] == "HG") {
       auto hg = HG{mode["o1"], mode["o2"], w0, mode["sx"], mode["sy"]};
@@ -62,33 +68,37 @@ int core(const char* json_str, uint8_t* out_buffer) {
       lg.broadcast(V, 1.0, nx, ny, res_x, res_y, pixel_size);
 
     } else if (mode["type"] == "PM") {
-      auto& children = mode["children"];
+      const double& sx = mode["sx"];
+      const double& sy = mode["sy"];
+      const auto& children = mode["children"];
       size_t n_modes = children["plus"].size() + children["minus"].size();
       if (n_modes == 0) continue;
 
       double weight = 1.0 / std::sqrt(double(n_modes));
-      for (auto& plus_mode : children["plus"]) {
+      for (const auto& plus_mode : children["plus"]) {
+        TOTAL_SHIFT(plus_mode)
         if (plus_mode["type"] == "HG") {
-          auto hg = HG{plus_mode["o1"], plus_mode["o2"], w0, plus_mode["sx"],
-                       plus_mode["sy"]};
+          auto hg =
+              HG{plus_mode["o1"], plus_mode["o2"], w0, total_sx, total_sy};
           hg.broadcast(V, weight, nx, ny, res_x, res_y, pixel_size);
 
         } else if (plus_mode["type"] == "LG") {
-          auto lg = LG{plus_mode["o1"], plus_mode["o2"], w0, plus_mode["sx"],
-                       plus_mode["sy"]};
+          auto lg =
+              LG{plus_mode["o1"], plus_mode["o2"], w0, total_sx, total_sy};
           lg.broadcast(V, weight, nx, ny, res_x, res_y, pixel_size);
         }
       }
 
-      for (auto& minus_mode : children["minus"]) {
+      for (const auto& minus_mode : children["minus"]) {
+        TOTAL_SHIFT(minus_mode)
         if (minus_mode["type"] == "HG") {
-          auto hg = HG{minus_mode["o1"], minus_mode["o2"], w0, minus_mode["sx"],
-                       minus_mode["sy"]};
+          auto hg =
+              HG{minus_mode["o1"], minus_mode["o2"], w0, total_sx, total_sy};
           hg.broadcast(V, -weight, nx, ny, res_x, res_y, pixel_size);
 
         } else if (minus_mode["type"] == "LG") {
-          auto lg = LG{minus_mode["o1"], minus_mode["o2"], w0, minus_mode["sx"],
-                       minus_mode["sy"]};
+          auto lg =
+              LG{minus_mode["o1"], minus_mode["o2"], w0, total_sx, total_sy};
           lg.broadcast(V, -weight, nx, ny, res_x, res_y, pixel_size);
         }
       }
@@ -131,3 +141,4 @@ int core(const char* json_str, uint8_t* out_buffer) {
 }
 
 #undef ALGO_LOOP
+#undef TOTAL_SHIFT
