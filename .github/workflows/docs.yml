@@ -27,6 +27,7 @@ jobs:
           python-version: "3"
 
       - run: pip install mkdocs
+      - run: pip install pymdown-extensions
       - run: mkdocs build
 
       - name: deploy docs to gh-pages

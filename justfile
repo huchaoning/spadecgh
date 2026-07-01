@@ -59,3 +59,7 @@ push:
 
 test:
     pytest -vv --log-cli-level=INFO
+
+
+serve:
+    mkdocs serve --livereload

@@ -17,6 +17,18 @@ edit_uri: edit/main/docs/
 plugins:
   - search
 
-
 nav:
   - Home: "index.md"
+  - Usage: "usage.md"
+
+
+markdown_extensions:
+  - footnotes
+  - pymdownx.arithmatex:
+      generic: true
+
+
+extra_javascript:
+  - mathjax-config.js
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js
+
