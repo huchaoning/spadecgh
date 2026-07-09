@@ -31,7 +31,7 @@ from spadecgh import *
 cgh = CGH(sigma=100)
 
 # Add a target mode with spatial frequencies (nx, ny)
-cgh.add_modes(LG(l=1, p=0), nx=500, ny=0)
+cgh.add_modes(LG(l=1, p=0), nx_list=500, ny_list=0)
 
 # Calculate and display the hologram image
 cgh.cal(algorithm='arrizon')
