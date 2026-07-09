@@ -93,7 +93,7 @@ cgh = CGH(sigma=100)
 pm_mode = HG(0, 0) + HG(1, 0)
 
 # Add the PM mode to the CGH instance
-cgh.add_modes(pm_mode, nx=500, ny=0)
+cgh.add_modes(pm_mode, nx_list=500, ny_list=0)
 
 cgh.cal()
 cgh.show()
@@ -105,11 +105,11 @@ cgh.show()
 cgh = CGH(sigma=100)
 
 # Add HG mode twice
-cgh.add_modes(HG(0, 0), nx=500, ny=50)
-cgh.add_modes(HG(0, 1), nx=500, ny=-50)
+cgh.add_modes(HG(0, 0), nx_list=500, ny_list=50)
+cgh.add_modes(HG(0, 1), nx_list=500, ny_list=-50)
 </code></pre>
 <p>Or you can call <code>add_modes</code> one time:</p>
-<pre><code class="language-python">cgh.add_modes([HG(0, 0), HG(0, 1)], nx=[500, 500], ny=[50, -50])
+<pre><code class="language-python">cgh.add_modes([HG(0, 0), HG(0, 1)], nx_list=[500, 500], ny_list=[50, -50])
 </code></pre>
 <p>After that, call</p>
 <pre><code class="language-python">cgh.cal()
