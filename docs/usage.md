@@ -1,17 +1,17 @@
 # Usage
 
-This guide covers the key features of the `hducgh` toolkit, showcasing how to combine optical modes, accelerate computations, and use different execution backends.
+This guide covers the key features of the SpadeCGH toolkit, showcasing how to combine optical modes, accelerate computations, and use different execution backends.
 
 
 ## Mode superposition (Plus-and-Minus mode)
 
-One of the key features of `hducgh` is the ability to combine multiple modes using standard mathematical operators (`+`, `-`).
+One of the key features of SpadeCGH is the ability to combine multiple modes using standard mathematical operators (`+`, `-`).
 The toolkit will automatically flattens the mode tree and normalizes the resulting wave function.
 
 Here is how you can generate a superposition mode, we call Plus-and-Minus (PM) mode, of two Hermite-Gaussian (HG) modes :
 
 ```python
-from hducgh import *
+from spadecgh import *
 
 cgh = CGH(sigma=100)
 
@@ -30,7 +30,7 @@ cgh.show()
 Suppose that you want to decompose the optical field into two HG modes, you can add multiple modes into `CGH` instance:
 
 ```python
-from hducgh import *
+from spadecgh import *
 
 cgh = CGH(sigma=100)
 

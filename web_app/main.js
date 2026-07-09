@@ -10,7 +10,7 @@ function createWindow() {
         width: 1440,
         height: 810,
         titleBarStyle: "hidden",
-        title: "hducgh",
+        title: "spadecgh",
         backgroundColor: "#ffffff00",
         show: false,
         autoHideMenuBar: true,
@@ -38,7 +38,7 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, "dist/index.html"));
 
     mainWindow.webContents.on("did-finish-load", () => {
-        mainWindow.setTitle("hducgh");
+        mainWindow.setTitle("spadecgh");
         mainWindow.show();
     });
 }

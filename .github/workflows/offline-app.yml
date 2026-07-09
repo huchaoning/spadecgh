@@ -100,13 +100,13 @@ jobs:
 
           tree electron-artifacts/
 
-          mv electron-artifacts/electron-app-win_x64/*Setup*.exe "final-release/hducgh-offline-app-win-x64-${VERSION}-installer.exe"
-          mv electron-artifacts/electron-app-win_x64/*.zip "final-release/hducgh-offline-app-win-x64-${VERSION}-portable.zip"
+          mv electron-artifacts/electron-app-win_x64/*Setup*.exe "final-release/spadecgh-offline-app-win-x64-${VERSION}-installer.exe"
+          mv electron-artifacts/electron-app-win_x64/*.zip "final-release/spadecgh-offline-app-win-x64-${VERSION}-portable.zip"
 
-          mv electron-artifacts/electron-app-macos_universal/*.dmg "final-release/hducgh-offline-app-macos-universal-${VERSION}-installer.dmg"
-          mv electron-artifacts/electron-app-macos_universal/*.zip "final-release/hducgh-offline-app-macos-universal-${VERSION}-portable.zip"
+          mv electron-artifacts/electron-app-macos_universal/*.dmg "final-release/spadecgh-offline-app-macos-universal-${VERSION}-installer.dmg"
+          mv electron-artifacts/electron-app-macos_universal/*.zip "final-release/spadecgh-offline-app-macos-universal-${VERSION}-portable.zip"
 
-          mv electron-artifacts/electron-app-linux_x64/*.AppImage "final-release/hducgh-offline-app-linux-x64-${VERSION}.AppImage"
+          mv electron-artifacts/electron-app-linux_x64/*.AppImage "final-release/spadecgh-offline-app-linux-x64-${VERSION}.AppImage"
           ls -l final-release/
 
       - name: create release

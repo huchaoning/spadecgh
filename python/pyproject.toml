@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "hducgh"
-description = "HDU CGH toolkit [Quantum@HDU]"
+name = "spadecgh"
+description = "SpadeCGH [Quantum@HDU]"
 version = "v0.1.0a4"
 
 readme = "README.md"
@@ -22,10 +22,10 @@ dependencies = ["numpy", "scipy", "pillow", "cffi"]
 
 
 [tool.setuptools.package-data]
-hducgh = ["**/*.so", "**/*.dll", "**/*.dylib"]
+spadecgh = ["**/*.so", "**/*.dll", "**/*.dylib"]
 
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["hducgh*"]
+include = ["spadecgh*"]
 

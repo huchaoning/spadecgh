@@ -41,7 +41,7 @@ export default function Modals({ onClearModes }) {
                                     className="btn btn-ghost btn-sm w-20"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    href="https://github.com/huchaoning/hducgh"
+                                    href="https://github.com/huchaoning/spadecgh"
                                 >
                                     GitHub
                                 </a>
@@ -69,7 +69,7 @@ export default function Modals({ onClearModes }) {
                                     className="btn btn-ghost btn-sm w-20"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    href="https://github.com/huchaoning/hducgh/issues"
+                                    href="https://github.com/huchaoning/spadecgh/issues"
                                 >
                                     Issues
                                 </a>

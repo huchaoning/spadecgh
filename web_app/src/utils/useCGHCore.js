@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import createModule from "../../public/wasm/hducgh_backend_web.js";
+import createModule from "../../public/wasm/spadecgh_backend_web.js";
 import { DEFAULT_CONFIG } from "./constants.js";
 import { formatInputValue } from "./formatInput.js";
 import { formatConfig } from "./formatConfig.js";

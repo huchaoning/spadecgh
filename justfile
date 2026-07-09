@@ -50,7 +50,7 @@ install:
 
 
 uninstall:
-    pip uninstall hducgh -y
+    pip uninstall spadecgh -y
 
 
 push:

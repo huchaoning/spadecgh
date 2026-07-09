@@ -6,7 +6,7 @@ contextBridge.exposeInMainWorld("wasmLoader", {
     load: () => {
         const fullPath = path.join(
             process.resourcesPath,
-            "wasm/hducgh_backend_web.wasm"
+            "wasm/spadecgh_backend_web.wasm"
         );
         return fs.readFileSync(fullPath);
     }

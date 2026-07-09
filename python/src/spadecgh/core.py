@@ -10,11 +10,11 @@ from PIL import Image
 
 from scipy.interpolate import interp1d
 import importlib.resources as resources
-with resources.files('hducgh.assets').joinpath('fdavis_uint16.npy').open('rb') as f:
+with resources.files('spadecgh.assets').joinpath('fdavis_uint16.npy').open('rb') as f:
     _fdavis = interp1d(np.linspace(0, 1, 801), np.load(f).astype(float) * 1e-4)
-with resources.files('hducgh.assets').joinpath('farrizon_uint16.npy').open('rb') as f:
+with resources.files('spadecgh.assets').joinpath('farrizon_uint16.npy').open('rb') as f:
     _farrizon = interp1d(np.linspace(0, 1, 801), np.load(f).astype(float) * 1e-4)
-with resources.files('hducgh.assets').joinpath('fhybrid_uint16.npy').open('rb') as f:
+with resources.files('spadecgh.assets').joinpath('fhybrid_uint16.npy').open('rb') as f:
     _fhybrid_data = np.load(f).astype(float) * 1e-4
     _fhybrid = [interp1d(np.linspace(0, 1, 801), _fhybrid_data[idx]) for idx in range(101)]
 
@@ -403,7 +403,7 @@ class CGH:
 
     def __repr__(self):
         lines = [ 
-            '\nhducgh.CGH instance\n',
+            '\nspadecgh.CGH instance\n',
             '========================= CGH TASK GRAPH =========================',
             f' Sigma: {self.sigma};    Quiet: {self._is_quiet};    Frozen: {self._is_frozen};    Cached: {self._is_cached}',
             '------------------------------------------------------------------',

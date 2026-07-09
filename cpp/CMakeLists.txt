@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(hducgh_backend LANGUAGES CXX)
+project(spadecgh_backend LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -12,7 +12,7 @@ include_directories(
 
 if(EMSCRIPTEN)
     set(WASM_OUTDIR "${CMAKE_CURRENT_SOURCE_DIR}/../web_app/public/wasm")
-    set(WASM_TARGET_NAME "hducgh_backend_web")
+    set(WASM_TARGET_NAME "spadecgh_backend_web")
 
     add_executable(${WASM_TARGET_NAME} main_wasm.cpp)
 
@@ -30,7 +30,7 @@ if(EMSCRIPTEN)
     )
 
 else()
-    set(PY_OUTDIR "${CMAKE_CURRENT_SOURCE_DIR}/../python/src/hducgh/assets")
+    set(PY_OUTDIR "${CMAKE_CURRENT_SOURCE_DIR}/../python/src/spadecgh/assets")
 
     if(WIN32)
         set(PLATFORM_NAME "win")
@@ -52,7 +52,7 @@ else()
         endif()
     endif()
 
-    set(PY_TARGET_NAME "hducgh_backend_${PLATFORM_NAME}_${ARCH_NAME}")
+    set(PY_TARGET_NAME "spadecgh_backend_${PLATFORM_NAME}_${ARCH_NAME}")
 
     add_library(${PY_TARGET_NAME} SHARED main_py.cpp)
 

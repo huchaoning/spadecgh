@@ -1,6 +1,6 @@
 import numpy as np
 import logging
-from hducgh import *
+from spadecgh import *
 
 def test_backends():
     num_tests = 20

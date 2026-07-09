@@ -22,4 +22,4 @@ val cal(std::string json_str) {
   return val(typed_memory_view(out_buffer.size(), out_buffer.data()));
 }
 
-EMSCRIPTEN_BINDINGS(hducgh_backend_web) { function("cal", &cal); }
+EMSCRIPTEN_BINDINGS(spadecgh_backend_web) { function("cal", &cal); }

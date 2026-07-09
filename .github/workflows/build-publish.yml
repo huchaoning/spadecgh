@@ -3,15 +3,15 @@ name: build-and-publish
 on:
   workflow_dispatch:
 
-  # push:
-  #   branches: [main]
-  #   paths:
-  #     - "python/**"
-  #     - "cpp/**"
-  #     - ".github/workflows/**"
+  push:
+    branches: [main]
+    paths:
+      - "python/**"
+      - "cpp/**"
+      - ".github/workflows/**"
 
-  #   tags:
-  #     - 'v*'
+    tags:
+      - 'v*'
 
 jobs:
   #############################
@@ -50,11 +50,11 @@ jobs:
           mkdir -p cpp-artifact
 
           if [ "$RUNNER_OS" = "Linux" ]; then
-            cp python/src/hducgh/assets/*.so cpp-artifact/
+            cp python/src/spadecgh/assets/*.so cpp-artifact/
           elif [ "$RUNNER_OS" = "Windows" ]; then
-            cp python/src/hducgh/assets/*.dll cpp-artifact/
+            cp python/src/spadecgh/assets/*.dll cpp-artifact/
           elif [ "$RUNNER_OS" = "macOS" ]; then
-            cp python/src/hducgh/assets/*.dylib cpp-artifact/
+            cp python/src/spadecgh/assets/*.dylib cpp-artifact/
           fi
 
       - uses: actions/upload-artifact@v4
@@ -87,15 +87,15 @@ jobs:
 
       - name: copy to assets folder
         run: |
-          cp cpp-assets/*/* python/src/hducgh/assets/
-          ls -l python/src/hducgh/assets/
+          cp cpp-assets/*/* python/src/spadecgh/assets/
+          ls -l python/src/spadecgh/assets/
 
       - name: build wheel
         run: cd python && python -m build --wheel
 
       - uses: actions/upload-artifact@v4
         with:
-          name: hducgh-whl
+          name: spadecgh-whl
           path: python/dist/*.whl
 
 
@@ -113,7 +113,7 @@ jobs:
       - name: download wheel
         uses: actions/download-artifact@v4
         with:
-          name: hducgh-whl
+          name: spadecgh-whl
           path: dist/
 
       - name: publish to pypi

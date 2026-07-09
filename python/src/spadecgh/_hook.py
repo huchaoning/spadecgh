@@ -18,15 +18,15 @@ class _CppBackend:
         system_type = platform.system()
 
         if system_type.lower() == "darwin":
-            lib_name = "hducgh_backend_macos_universal.dylib"
+            lib_name = "spadecgh_backend_macos_universal.dylib"
         elif system_type.lower() == "linux":
-            lib_name = "hducgh_backend_linux_x64.so"
+            lib_name = "spadecgh_backend_linux_x64.so"
         elif system_type.lower() == "windows":
-            lib_name = "hducgh_backend_win_x64.dll"
+            lib_name = "spadecgh_backend_win_x64.dll"
         else:
             return None
 
-        lib_resource = resources.files('hducgh.assets').joinpath(lib_name)
+        lib_resource = resources.files('spadecgh.assets').joinpath(lib_name)
         with resources.as_file(lib_resource) as lib_path:
             if not lib_path.exists():
                 return None
