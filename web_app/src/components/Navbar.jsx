@@ -52,7 +52,7 @@ export default function Navbar({ showSidebar, setShowSidebar }) {
                     <>
                         <button
                             className="btn btn-ghost btn-sm btn-square text-base-content/40 hover:text-primary transition-colors"
-                            onClick={() => window.open("https://spadecgh.researchi.group/", "_blank")}
+                            onClick={() => window.open("https://hducgh.researchi.group/", "_blank")}
                         >
                             <BookIcon size={20} />
                         </button>
