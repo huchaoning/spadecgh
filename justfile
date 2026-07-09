@@ -16,6 +16,7 @@ clean:
     find . -type d -name "*.egg-info" -exec rm -rf {} +
     find . -type d -name ".pytest_cache" -exec rm -rf {} +
 
+
 build-wasm:
     mkdir -p cpp/build_wasm
     cd cpp/build_wasm && emcmake cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build .

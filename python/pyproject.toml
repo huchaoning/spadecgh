@@ -22,7 +22,7 @@ dependencies = ["numpy", "scipy", "pillow", "cffi"]
 
 
 [tool.setuptools.package-data]
-spadecgh = ["**/*.so", "**/*.dll", "**/*.dylib"]
+spadecgh = ["**/*.so", "**/*.dll", "**/*.dylib", "**/*.npy"]
 
 
 [tool.setuptools.packages.find]
