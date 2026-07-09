@@ -43,5 +43,5 @@ cgh.show()
 
 A ready‑to‑use web version is also available, no installation required:
 
-👉 [Open web app](https://spadecgh.researchi.group/web-app)
+👉 [Open web app](https://hducgh.researchi.group/web-app)
 
