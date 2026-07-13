@@ -167,7 +167,7 @@ dist-ssr
 # manually added
 .DS_Store
 .vscode
-spadecgh_backend_*
+*_backend_*
 build_py
 build_wasm
 test.ipynb
