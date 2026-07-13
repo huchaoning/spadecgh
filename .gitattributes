@@ -1,2 +1,5 @@
-third_party/** linguist-vendored
-docs/** linguist-documentation
+cpp/assets/* linguist-generated=true
+python/assets/* linguist-generated=true
+
+third_party/**/* linguist-vendored=true
+docs/**/* linguist-documentation=true
