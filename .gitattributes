@@ -1,5 +1,8 @@
 cpp/assets/* linguist-generated=true
 python/assets/* linguist-generated=true
+web_app/package-lock.json linguist-generated=true
+web_app/package.json linguist-generated=true
+
 
 third_party/**/* linguist-vendored=true
 docs/**/* linguist-documentation=true
